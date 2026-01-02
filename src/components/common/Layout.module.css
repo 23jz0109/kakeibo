@@ -1,0 +1,142 @@
+.container {
+  height: 100vh;
+  background-color: #f9fafb;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 1rem;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+  height: 4rem;
+}
+
+.header-tabs { /* バグってたら消す */
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.back-button {
+  position: absolute;
+  left: 2rem;
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.delete-button {
+  position: absolute;
+  right: 2rem;
+  background: none;
+  border: none;
+  color: red;
+  cursor: pointer;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden; 
+  padding: 1rem;
+  min-width: 0;
+  min-height: 0;
+}
+
+.footer {
+  background-color: white;
+  border-top: 1px solid #e5e7eb;
+  position: sticky;
+  bottom: 0;
+  flex-shrink: 0;
+}
+
+.footer-nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 4rem;
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  color: #6b7280;
+  transition: color 0.2 ease;
+  padding: 0.5rem;
+}
+
+.nav-item.active {
+  color: #2563eb;    
+  font-weight: bold;
+}
+
+.nav-item:hover {
+  color: #2563eb;
+}
+
+.nav-icon {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.nav-label {
+  font-size: 0.8rem;
+} 
+
+.navigate-datainput {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border: none;
+  border-radius: 50%;
+  background-color: #2563eb;
+  color: white;
+  margin: 0 1rem;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navigate-datainput:active {
+  transform: scale(0.85);
+}
+
+/* ナビゲーションバーの「＋」無効化 */
+.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* データ入力画面に遷移させるための共通ボタン
+.navigate-datainput {
+  position: fixed;
+  bottom: 8rem;
+  right: max(2rem, calc(50% - 14rem + 2rem));
+  z-index: 999;
+
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border: none;
+  border-radius: 50%;
+  background-color: #2563eb;
+  color: white;
+  opacity: 1;
+} */
