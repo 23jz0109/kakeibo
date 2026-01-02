@@ -1,0 +1,251 @@
+/* src/pages/Mypage/UserInfo.module.css */
+
+/* コンテナ全体 (MyPageと同じ) */
+.mainContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+}
+
+/* タイトルエリア */
+.pageTitle {
+  width: 100%;
+  max-width: 500px;
+  text-align: left;
+  font-size: 1.1rem;
+  color: #6b7280;
+  margin-bottom: 12px;
+  padding-left: 4px;
+}
+
+/* リストコンテナ (MyPageのmenuListに相当) */
+.infoList {
+  width: 100%;
+  max-width: 500px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* MyPageと同じ間隔 */
+  padding: 0;
+}
+
+/* 各項目のカードスタイル (MyPageのmenuButtonベース) */
+.infoItem {
+  width: 100%;
+  background: white;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ラベルテキスト (MyPageのlabelContentベース) */
+.label {
+  font-size: 1rem;
+  color: #4b5563;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 右側の値とボタンエリア */
+.rightContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.valueText {
+  color: #333;
+  font-size: 1rem;
+}
+
+/* 「変更」などの小さいアクションボタン */
+.actionButton {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #f3f4f6; /* 薄いグレーで控えめに */
+  color: #4b5563;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.actionButton:hover {
+  background: #e5e7eb;
+}
+
+/* 退会ボタン (MyPageのlogoutButtonと同じスタイル) */
+.withdrawButton {
+  width: 100%;
+  background: white;
+  padding: 16px 20px;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  cursor: pointer;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #ef4444; /* 赤色 */
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.withdrawButton:active {
+  transform: scale(0.99);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* --- 以下、モーダル用スタイル (変更なし) --- */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+  cursor: pointer;
+}
+
+.modalContent {
+  background: white;
+  width: 100%;
+  max-width: 400px;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  position: relative;
+  animation: fadeIn 0.2s ease-out;
+  cursor: default;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.closeButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 4px;
+}
+
+.modalTitle {
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inputLarge {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.updateButton {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  border: none;
+  background: #656ac6;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.updateButton:hover {
+  opacity: 0.9;
+}
+
+.errorMessage {
+  color: #d9534f;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.successMessage {
+  color: green;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* モーダル内のセレクトボックス */
+.categorySelectWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.selectedCategory {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: white;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+}
+
+.selectedText { color: #333; }
+.selectedText.unselected { color: #888; }
+.arrow { color: #666; }
+
+.dropdownList {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: white;
+  z-index: 101;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.dropdownItem {
+  padding: 10px 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdownItem:hover {
+  background-color: #f3f4f6;
+}

@@ -5,7 +5,9 @@ import History from './pages/History';
 import Budget from "./pages/Budget";
 import DataInput from "./pages/DataInput";
 import Notification from "./pages/Notification";
-import MyPage from "./pages/MyPage";
+import MyPage from "./pages/MyPage/MyPage";
+import UserInfo from './pages/MyPage/UserInfo';
+import Statistics from "./pages/MyPage/Statistics";
 
 /**
  * 自動ログインチェック
@@ -44,23 +46,6 @@ const PrivateRoute = ({ children }) => {
 };
 
 function App() {
-  // return (
-  //   <Router>
-  //     <Routes>
-  //       {/* ログインページ */}
-  //       <Route path="/" element={<Navigate to="/login" />} />
-  //       <Route path="/login" element={<Login />} />
-        
-  //       {/* ナビゲーションバーの各パーツ */}
-  //       <Route path="/history" element={<History />} />
-  //       <Route path="/budget" element={<Budget />} />
-  //       <Route path="/input" element={<DataInput />} />
-  //       <Route path="/notification" element={<Notification />} />
-  //       <Route path="/mypage" element={<MyPage />} />
-  //     </Routes>
-  //   </Router>
-  // );
-
   return (
     <Router>
       <Routes>
@@ -81,6 +66,8 @@ function App() {
           <Route path="/notification" element={<PrivateRoute><Notification /></PrivateRoute>} />
           {/* マイページ */}
           <Route path="/mypage" element={<PrivateRoute><MyPage /></PrivateRoute>} />
+            <Route path="/userinfo" element={<PrivateRoute><UserInfo /></PrivateRoute>} />
+            <Route path="/statistics" element={<PrivateRoute><Statistics /></PrivateRoute>} />
       </Routes>
     </Router>
   );

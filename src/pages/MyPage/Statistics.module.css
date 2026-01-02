@@ -1,0 +1,175 @@
+/* src/pages/Statistics/Statistics.module.css */
+
+/* 全体レイアウト */
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+}
+
+/* カードデザイン */
+.card {
+  width: 100%;
+  max-width: 400px;
+  background-color: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* タイトルエリア */
+.title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: #e5e7eb;
+  margin-bottom: 1.5rem;
+}
+
+/* 期間指定グリッド */
+.periodGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.periodLabel {
+  font-size: 0.9rem;
+  color: #6b7280;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+/* カレンダーコンポーネント用 */
+.datePickerContainer {
+  position: relative;
+  width: 100%;
+}
+
+.dateDisplayButton {
+  width: 100%;
+  padding: 0.75rem 0.5rem;
+  background-color: #f9fafb;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dateDisplayButton:hover {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+/* カレンダーのドロップダウン */
+.calendarDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  width: 280px;
+}
+
+/* カレンダーヘッダー */
+.calendarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  color: #374151;
+}
+
+.navButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.navButton:hover {
+  background-color: #f3f4f6;
+  color: #3b82f6;
+}
+
+/* カレンダーグリッド */
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.dayButton {
+  background: none;
+  border: none;
+  padding: 8px 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.dayButton:hover {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+
+.dayButton.selected {
+  background-color: #3b82f6;
+  color: white;
+}
+
+/* CSVダウンロードボタン */
+.downloadButton {
+  width: 100%;
+  padding: 0.9rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.downloadButton:hover {
+  background-color: #2563eb;
+}
+
+.downloadButton:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
