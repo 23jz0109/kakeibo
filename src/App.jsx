@@ -1,11 +1,15 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Login from "./pages/Login";
 
 function App() {
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>T08結合テスト</h1>
-      <p>フロントの書き直し</p>
-    </div>
+    <Router>
+      <Routes>
+        {/* ログインページ */}
+        <Route path="/" element={<Login />} />
+      </Routes>
+    </Router>
   );
 }
 

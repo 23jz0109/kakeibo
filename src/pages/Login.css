@@ -1,0 +1,308 @@
+/* src/pages/Login.css */
+
+/* --- 全体のレイアウト --- */
+.login-page-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #ffffff;
+  font-family: sans-serif;
+  padding: 0;
+}
+
+/* --- 1. タブ部分 --- */
+.tab-container {
+  display: flex;
+  width: 100%;
+  background-color: white;
+  border-bottom: 2px solid #e9ecef;
+  margin-bottom: 0;
+  /* タブ自体の高さが崩れないように固定 */
+  flex-shrink: 0;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 1.2rem 0;
+  border: none;
+  background: white;
+  cursor: pointer;
+  color: #6c757d;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.2s;
+  border-bottom: 3px solid transparent;
+  border-radius: 0; 
+}
+
+.tab-button.active {
+  color: #2563eb;
+  border-bottom: 3px solid #2563eb;
+  background-color: rgba(37, 99, 235, 0.05);
+}
+
+/* --- 2. カードを囲むラッパー（修正：完全中央配置） --- */
+.card-wrapper {
+  width: 100%;
+  flex: 1; /* 画面の残りの高さを全て使う */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* ★上下中央揃え */
+  align-items: center;     /* 左右中央揃え */
+  
+  /* パディングは削除（自動中央揃えに任せるため） */
+  padding-top: 0;
+  
+  /* 視覚的なバランスのため、少しだけ底上げ（任意） 
+     完全に数学的な中央が良い場合はこれも0にしてください */
+  padding-bottom: 2rem; 
+  
+  background-color: #f8f9fa;
+}
+
+/* --- カード本体 --- */
+.main-container {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  max-width: 25rem;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+}
+
+.main-inner {
+  width: 100%;
+}
+
+/* --- ヘッダー部分 --- */
+.main-header {
+  background-color: #3b82f6;
+  color: white;
+  text-align: center;
+  padding: 1.5rem 0;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+.main-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* --- 入力フォームエリア --- */
+.input-section {
+  padding: 1.5rem;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+/* 入力欄のデザイン（高さ固定） */
+.input-field {
+  width: 100%;
+  /* ★修正：高さを数値で固定 */
+  height: 3.6rem; 
+  
+  /* paddingは上下中央揃えのために調整 */
+  padding: 0 1rem 0 2.8rem; /* 上下0, 右1, 下0, 左2.8 */
+  
+  /* Flexboxで中の文字を上下中央にするのが確実 */
+  display: flex;
+  align-items: center; 
+  
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  /* line-height: 1.5; ←高さ固定なので削除 */
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+  
+  /* inputタグ用：文字位置の微調整 */
+  line-height: 3.4rem; /* height - border(2px) */
+}
+/* inputタグは display: flex が効かないことがあるので line-height で制御 */
+input.input-field {
+  line-height: normal; /* リセット */
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.input-field:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* 左側のアイコン */
+.icon {
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
+  color: #000;
+  z-index: 10;
+}
+
+/* パスワード表示切替アイコン */
+.eye-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #000;
+  cursor: pointer;
+}
+
+/* --- リンク（高さ合わせの修正：完全版） --- */
+.forgot-password {
+  border: none;
+  background: none;
+  margin-right: auto;
+  margin-left: 0;
+  color: #3b82f6;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0;
+
+  /* ★修正：入力欄と全く同じ高さを指定 */
+  height: 3.6rem;       
+  
+  display: flex;        
+  align-items: center;  /* 文字を上下中央に */
+  margin-bottom: 0;     
+}
+
+/* --- 送信ボタン --- */
+.submit-button {
+  width: 100%;
+  padding: 0.8rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 0; 
+}
+
+.submit-button:hover {
+  background-color: #2563eb;
+}
+
+/* 年選択（入力欄と高さを合わせる） */
+.custom-select-container {
+  position: relative;
+  width: 100%;
+}
+.select-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  width: 100%;
+  
+  /* ★修正：入力欄と同じ高さ設定 */
+  height: 3.6rem;
+  padding: 0 1rem 0 2.8rem;
+  
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background-color: white;
+  box-sizing: border-box;
+}
+.dropdown-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
+  z-index: 100;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+.dropdown-item {
+  padding: 10px 12px;
+  cursor: pointer;
+}
+.dropdown-item:hover { background-color: #f0f0f0; }
+/* --- 追加・修正：ログイン時のオプション（2行・高さ固定版） --- */
+.login-options-row {
+  display: flex;
+  flex-direction: column;  /* ★縦並び（2行）にする */
+  justify-content: center; /* 縦方向の中央に配置 */
+  align-items: flex-start; /* 左揃え */
+  width: 100%;
+  
+  /* ★重要：生まれ年の入力欄(3.6rem)と全く同じ高さにする */
+  /* これによりタブを切り替えてもボタンの位置がズレません */
+  height: 3.6rem; 
+  
+  /* 余計なマージンは削除 */
+  margin-top: 0;
+  margin-bottom: 0;
+  
+  /* 2行の間の隙間調整 */
+  gap: 0.1rem; 
+}
+
+/* --- チェックボックス --- */
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  /* 左端を入力欄のテキスト開始位置(padding部分)と視覚的に揃える */
+  padding-left: 0.5rem; 
+  width: 100%;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.85rem; /* 2行に収めるため少しだけ文字を小さくすると上品です */
+  color: #555;        /* 文字色を少し優しく */
+}
+
+.checkbox-label input {
+  margin-right: 0.4rem;
+  width: 0.9rem;
+  height: 0.9rem;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+/* --- パスワード忘れリンク --- */
+.forgot-password {
+  border: none;
+  background: none;
+  color: #3b82f6;
+  cursor: pointer;
+  font-size: 0.85rem; /* チェックボックスとサイズを合わせる */
+  padding: 0;
+  
+  /* 左端をチェックボックスと揃える */
+  padding-left: 0.5rem; 
+  margin: 0;
+  
+  width: 100%;
+  text-align: left; /* 左寄せ */
+  
+  transition: color 0.2s;
+}
+
+.forgot-password:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
