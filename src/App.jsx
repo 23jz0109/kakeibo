@@ -7,7 +7,9 @@ import DataInput from "./pages/DataInput";
 import Notification from "./pages/Notification";
 import MyPage from "./pages/MyPage/MyPage";
 import UserInfo from './pages/MyPage/UserInfo';
-import Statistics from "./pages/MyPage/Statistics";
+import Statistics from './pages/MyPage/Statistics';
+import Setting from './pages/MyPage/Setting'
+
 
 /**
  * 自動ログインチェック
@@ -47,7 +49,7 @@ const PrivateRoute = ({ children }) => {
 
 function App() {
   return (
-    <Router>
+    <Router basename="/combine_test">
       <Routes>
         {/* ログインページ */}
         <Route path="/" element={<PublicRoute><Login /></PublicRoute>} />
@@ -68,6 +70,7 @@ function App() {
           <Route path="/mypage" element={<PrivateRoute><MyPage /></PrivateRoute>} />
             <Route path="/userinfo" element={<PrivateRoute><UserInfo /></PrivateRoute>} />
             <Route path="/statistics" element={<PrivateRoute><Statistics /></PrivateRoute>} />
+            <Route path='/setting' element={<PrivateRoute><Setting /></PrivateRoute>} />
       </Routes>
     </Router>
   );

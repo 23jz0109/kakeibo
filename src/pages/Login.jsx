@@ -126,7 +126,7 @@ const Login = () => {
       }
 
       // 画面遷移
-      navigate("/history");
+      navigate("/history", { replace: true });
       return true;
     } 
     // ログイン失敗

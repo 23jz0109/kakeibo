@@ -74,7 +74,7 @@ const MyPage = () => {
   // 遷移先
   const goToUserInfo = () => navigate("/userinfo");
   const goToStatistics = () => navigate("/statistics");
-  const goSetting = () => navigate("/settings");
+  const goSetting = () => navigate("/setting");
 
   // ログアウト
   const handleLogout = () => {

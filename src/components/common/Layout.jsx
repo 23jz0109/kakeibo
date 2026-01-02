@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Wallet, List, Bell, User, Plus, ChevronLeft, Trash2 } from "lucide-react";
+import { usePreventBack } from "../../hooks/common/usePreventBack";
 import styles from "./Layout.module.css";
 
 const Layout = ({ 
@@ -11,6 +12,8 @@ const Layout = ({
   state = null, 
   onDeleteButtonClick 
 }) => {
+  usePreventBack();
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -26,7 +29,7 @@ const Layout = ({
 
   return (
     <div className={styles.container}>
-      {/* --- ヘッダー --- */}
+      {/* ヘッダー */}
       <header className={styles.header}>
         {/* 戻るボタン */}
         {redirectPath && (
@@ -50,12 +53,12 @@ const Layout = ({
         )}
       </header>
 
-      {/* --- メインコンテンツ --- */}
+      {/* メインコンテンツ*/}
       <main className={styles.main}>
         {mainContent}
       </main>
 
-      {/* --- フッターナビゲーション --- */}
+      {/* フッターナビゲーション */}
       <footer className={styles.footer}>
         <nav className={styles["footer-nav"]}>
             <Link to="/history" className={`${styles["nav-item"]} ${isActive("/history") ? styles.active : ""}`}>
