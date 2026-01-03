@@ -13,17 +13,23 @@ const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
 
 const IncomeInput = () => {
   const navigate = useNavigate();
-  
-  // データ保存・復元
-  const [date, setDate] = useFormPersist("income_date", new Date());
-  const [amount, setAmount] = useFormPersist("income_amount", "");
-  const [memo, setMemo] = useFormPersist("income_memo", "");
-  const [categoryId, setCategoryId] = useFormPersist("income_category", null);
-
+  const [date, setDate, removeDate] = useFormPersist("income_date", new Date());
+  const [amount, setAmount, removeAmount] = useFormPersist("income_amount", "");
+  const [memo, setMemo, removeMemo] = useFormPersist("income_memo", "");
+  const [categoryId, setCategoryId, removeCategory] = useFormPersist("income_category", null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [complete, setComplete] = useState(false);
-
   const { categories, fetchCategories } = useCategories();
+
+  // 保存データを消す
+  const handleClear = () => {
+    if (window.confirm("入力内容をすべて消去しますか？")) {
+      removeDate();
+      removeAmount();
+      removeMemo();
+      removeCategory();
+    }
+  };
 
   useEffect(() => {
     fetchCategories(1);
@@ -31,7 +37,7 @@ const IncomeInput = () => {
 
   useEffect(() => {
     if (categories.length > 0 && categoryId === null) {
-      setCategoryId(categories[0].ID);
+      setCategoryId(categories[0].ID || categories[0].id);
     }
   }, [categories, categoryId, setCategoryId]);
 
@@ -95,29 +101,35 @@ const IncomeInput = () => {
       console.log("登録成功");
       setComplete(true);
       
-      // 完了後の処理 (1.5秒後にリセット)
+      // 送信成功時にデータを削除
+      removeDate();
+      removeAmount();
+      removeMemo();
+      removeCategory();
+      
+      // 完了後の処理 (1.5秒後に遷移)
       setTimeout(() => {
         setComplete(false);
-
-        // 入力値をクリア
-        setAmount("");
-        setMemo("");
-
-        // 履歴へ遷移
         navigate("/history");
       }, 1500);
 
-    }
-    catch (error) {
+    } catch (error) {
       console.error("通信エラー:", error);
       alert("エラーが発生しました: " + error.message);
-    }
-    finally {
+    } finally {
       setIsSubmitting(false);
     }
   };
 
-  const headerContent = <h1 className={styles.headerTitle}>収入</h1>;
+  // const headerContent = <h1 className={styles.headerTitle}>収入</h1>;
+  const headerContent = (
+    <div className={styles.headerWrapper}>
+      <h1 className={styles.headerTitle}>収入</h1>
+      <button className={styles.clearButton} onClick={handleClear}>
+        クリア
+      </button>
+    </div>
+  );
 
   const mainContent = (
     <div className={styles.container}>
@@ -137,7 +149,10 @@ const IncomeInput = () => {
                   inputMode="numeric"
                   placeholder="0"
                   value={amount}
-                  onChange={(e) => setAmount(Number(e.target.value))}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setAmount(val === "" ? "" : Number(val));
+                  }}
                 />
               </div>
           </div>
@@ -183,7 +198,6 @@ const IncomeInput = () => {
     <Layout
       headerContent={headerContent}
       mainContent={mainContent}
-      // redirectPath="/history"
       disableDataInputButton={false} 
     />
   );

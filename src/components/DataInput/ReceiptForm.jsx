@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { Plus, CircleAlert, X } from "lucide-react";
 import DayPicker from "./DayPicker";
 import DropdownModal from "./DropdownModal";
@@ -100,7 +100,7 @@ const ReceiptItemPreview = ({ item, categories }) => {
 
 const ReceiptItemModal = ({ mode, item, index, categories, priceMode, onSubmit, onDelete, closeModal }) => {
   const [formData, setFormData] = useState({
-    product_name: "", product_price: "", quantity: 1, category_id: "", tax_rate: "10", discount: 0,
+    product_name: "", product_price: "", quantity: 1, category_id: "", tax_rate: "10", discount: "",
   });
 
   useEffect(() => {
@@ -111,9 +111,10 @@ const ReceiptItemModal = ({ mode, item, index, categories, priceMode, onSubmit, 
         quantity: item.quantity,
         category_id: item.category_id,
         tax_rate: String(item.tax_rate),
-        discount: item.discount || 0,
+        discount: item.discount === 0 ? "" : item.discount,
       });
-    } else if (mode === "add" && categories.length > 0) {
+    }
+    else if (mode === "add" && categories.length > 0) {
       setFormData(prev => prev.category_id ? prev : { ...prev, category_id: categories[0].ID || categories[0].id });
     }
   }, [mode, item, categories]);
@@ -130,7 +131,7 @@ const ReceiptItemModal = ({ mode, item, index, categories, priceMode, onSubmit, 
       ...formData,
       product_price: Number(formData.product_price),
       quantity: Number(formData.quantity),
-      discount: Number(formData.discount),
+      discount: formData.discount === "" ? 0 : Number(formData.discount),
       category_id: Number(finalCatId),
       tax_rate: Number(formData.tax_rate),
       category: selectedCat || null,
@@ -162,11 +163,11 @@ const ReceiptItemModal = ({ mode, item, index, categories, priceMode, onSubmit, 
         <div className={styles.modalFlexRow}>
              <div style={{flex:2}} className={styles.modalRow}>
                 <label className={styles.modalLabel}>単価 ({isInclusive ? "税込" : "税抜"})</label>
-                <input className={styles.modalInput} type="number" value={formData.product_price} onChange={e=>setFormData({...formData, product_price:e.target.value})} />
+                <input className={styles.modalInput} type="number" placeholder="0" value={formData.product_price} onChange={e=>setFormData({...formData, product_price:e.target.value})} />
              </div>
              <div style={{flex:1}} className={styles.modalRow}>
                 <label className={styles.modalLabel}>割引</label>
-                <input className={styles.modalInput} type="number" value={formData.discount} onChange={e=>setFormData({...formData, discount:e.target.value})} />
+                <input className={styles.modalInput} type="number" placeholder="0" value={formData.discount} onChange={e=>setFormData({...formData, discount:e.target.value})} />
              </div>
         </div>
       </div>
@@ -181,17 +182,16 @@ const ReceiptItemModal = ({ mode, item, index, categories, priceMode, onSubmit, 
   );
 };
 
-//Main Component
-const ReceiptForm = ({ 
+const ReceiptForm = forwardRef(({ 
   categories, 
   initialData = null,
   onSubmit,
   submitLabel = "登録する",
   isSubmitting = false
-}) => {
+}, ref) => {
+  // 自動保存用のキー
   const persistKey = initialData ? null : "manual_expense_backup";
 
-  // Hooks
   const {
     receipt,
     priceMode,
@@ -205,6 +205,22 @@ const ReceiptForm = ({
   } = useReceiptForm(initialData, persistKey);
 
   const [validationError, setValidationError] = useState(null);
+
+  useImperativeHandle(ref, () => ({
+    clearForm: () => {
+      if (receipt.products.length > 0 || receipt.shop_name) {
+        if (window.confirm("入力中の支出データをすべて消去しますか？")) {
+          resetForm();
+          if (persistKey) localStorage.removeItem(persistKey);
+        }
+      }
+    },
+    // 送信後リセット
+    forceReset: () => {
+      resetForm();
+      if (persistKey) localStorage.removeItem(persistKey);
+    }
+  }));
 
   // 送信ハンドラ
   const handlePressSubmit = async () => {
@@ -221,6 +237,7 @@ const ReceiptForm = ({
 
     if (success) {
       resetForm();
+      if (persistKey) localStorage.removeItem(persistKey);
     }
   };
 
@@ -241,8 +258,7 @@ const ReceiptForm = ({
                 {(close) => (
                   <ReceiptItemModal
                     mode="edit" item={item} index={index} categories={categories}
-                    priceMode={priceMode} onSubmit={updateItem} onDelete={deleteItem} closeModal={close}
-                  />
+                    priceMode={priceMode} onSubmit={updateItem} onDelete={deleteItem} closeModal={close}/>
                 )}
               </DropdownModal>
             ))}
@@ -273,6 +289,6 @@ const ReceiptForm = ({
       </div>
     </>
   );
-};
-
+});
+// ReceiptForm.displayName = "ReceiptForm";
 export default ReceiptForm;

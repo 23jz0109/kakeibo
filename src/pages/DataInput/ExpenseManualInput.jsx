@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../../components/common/Layout";
 import CompleteModal from "../../components/common/CompleteModal";
-import ReceiptForm from "../../components/dataInput/ReceiptForm";
+import ReceiptForm from "../../components/dataInput/ReceiptForm"; 
 import { useCategories } from "../../hooks/common/useCategories";
 import styles from "./ExpenseManualInput.module.css";
 
@@ -13,15 +13,22 @@ const ExpenseManualInput = () => {
   const { categories, fetchCategories } = useCategories();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [complete, setComplete] = useState(false);
+  const formRef = useRef();
 
   // カテゴリ取得
   useEffect(() => {
-    fetchCategories(2);
+    fetchCategories(2); // 支出カテゴリ
   }, [fetchCategories]);
+
+  // クリアボタン
+  const handleHeaderClear = () => {
+    if (formRef.current) {
+      formRef.current.clearForm();
+    }
+  };
 
   // 送信処理
   const handleCreateSubmit = async ({ receipt, calculated }) => {
-    // トークン取得
     const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
     if (!token) {
       alert("ログイン情報がありません。再度ログインしてください。");
@@ -41,6 +48,8 @@ const ExpenseManualInput = () => {
         product_price: Number(p.product_price),
         quantity: Number(p.quantity),
         category_id: Number(p.category_id),
+        discount: Number(p.discount) || 0,
+        tax_rate: Number(p.tax_rate) || 10
       }))
     }];
 
@@ -48,7 +57,6 @@ const ExpenseManualInput = () => {
     setIsSubmitting(true);
 
     try {
-      // サーバーへ送信
       const response = await fetch(`${API_BASE_URL}/receipt`, {
         method: "POST",
         headers: {
@@ -60,40 +68,47 @@ const ExpenseManualInput = () => {
         body: JSON.stringify(payload)
       });
 
-      // エラー判定
       if (!response.ok) {
         throw new Error("登録に失敗しました");
       }
 
-      // 成功時
       console.log("登録成功");
       setComplete(true);
 
-      // 完了後の処理 (1.5秒後にリセット)
+      // 完了後遷移
       setTimeout(() => {
         setComplete(false);
         navigate("/history");
       }, 1500);
 
-      return true; // ★成功
+      return true;
 
-    }
-    catch (error) {
+    } catch (error) {
       console.error(error);
       alert("エラー: " + error.message);
       return false;
-    }
-    finally {
+    } finally {
       setIsSubmitting(false);
     }
   };
 
+  // ヘッダー
+  const headerContent = (
+    <div className={styles.headerWrapper}>
+      <h1 className={styles.headerTitle}>支出</h1>
+      <button className={styles.clearButton} onClick={handleHeaderClear}>
+        クリア
+      </button>
+    </div>
+  );
+
   return (
     <Layout
-      headerContent={<h1 className={styles.headerTitle}>支出</h1>}
+      headerContent={headerContent}
       mainContent={
         <div className={styles.container}>
           <ReceiptForm 
+            ref={formRef}
             categories={categories}
             onSubmit={handleCreateSubmit}
             isSubmitting={isSubmitting}
@@ -102,7 +117,8 @@ const ExpenseManualInput = () => {
           {complete && <CompleteModal />}
         </div>
       }
-      disableDataInputButton={false}/>
+      disableDataInputButton={false}
+    />
   );
 };
 

@@ -1,18 +1,116 @@
-/* ページ全体を囲むコンテナ */
+
+/* src/pages/DataInput/ExpenseManualInput.module.css */
 .container {
   display: flex;
   flex-direction: column;
-  height: 100%; /* Layoutコンポーネントの中で高さを確保するため */
+  height: 100%;
   width: 100%;
   position: relative;
-  overflow: hidden; /* スクロールは内部のscrollAreaに任せる */
+  overflow: hidden;
 }
 
-/* ページタイトルのスタイル */
 .headerTitle {
   font-size: 1.25rem;
   font-weight: bold;
   color: #333;
   margin: 0;
   text-align: center;
+}
+
+.headerWrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.clearButton {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: 1px solid #ff6b6b;
+  color: #ff6b6b;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.clearButton:active {
+  background-color: #ff6b6b;
+  color: white;
+}
+
+.itemsList {
+  margin-bottom: 20px;
+}
+
+.itemRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  background-color: #fff;
+}
+
+.itemInfo {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.deleteButton {
+  background: #ccc;
+  border: none;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.itemName {
+  font-weight: bold;
+  color: #333;
+}
+
+.addButton {
+  width: 100%;
+  padding: 12px;
+  background: white;
+  border: 1px dashed #aaa;
+  color: #666;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.shopInputRow {
+  padding: 10px 15px;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+}
+
+.shopLabel {
+  width: 50px;
+  font-weight: bold;
+  color: #666;
+}
+
+.shopInput {
+  flex: 1;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
 }

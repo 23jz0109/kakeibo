@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 
 /**
- * フォームの内容をsessionStorageに保存・復元するフック
+ * フォームの内容をlocalStorageに保存・復元するフック
  */
 export const useFormPersist = (key, initialValue) => {
   const [value, setValue] = useState(() => {
     try {
-      const stored = sessionStorage.getItem(key);
-      // "undefined" や "null" という文字列、または空の場合は初期値を返す
+      const stored = localStorage.getItem(key);
+      
       if (!stored || stored === "undefined" || stored === "null") {
         return initialValue;
       }
@@ -16,21 +16,27 @@ export const useFormPersist = (key, initialValue) => {
       
       // 日付文字列判定 (簡易版: YYYY-MM-DDTHH...)
       if (typeof parsed === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(parsed)) {
-          return new Date(parsed);
+          const d = new Date(parsed);
+          return isNaN(d.getTime()) ? parsed : d;
       }
       return parsed;
 
-    } catch (error) {
+    }
+    catch (error) {
       console.error(`Storage parse error (${key}):`, error);
       return initialValue;
     }
   });
 
   useEffect(() => {
-    // undefined は保存しない
     if (value === undefined) return;
-    sessionStorage.setItem(key, JSON.stringify(value));
+    localStorage.setItem(key, JSON.stringify(value));
   }, [key, value]);
 
-  return [value, setValue];
+  const removeValue = () => {
+    localStorage.removeItem(key);
+    setValue(initialValue);
+  };
+
+  return [value, setValue, removeValue];
 };
