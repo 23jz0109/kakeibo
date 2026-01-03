@@ -1,0 +1,137 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+}
+
+.headerTitle {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #333;
+}
+
+/* --- 固定エリア（上部） --- */
+.fixedTopArea {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.compactInputSection {
+  background-color: white;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.inputRow {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+}
+
+.divider {
+  height: 1px;
+  background-color: #f3f4f6;
+  margin: 0.25rem 0;
+}
+
+.amountInputWrapper {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.1rem;
+}
+
+.amountInputWrapper:focus-within {
+  border-color: #3b82f6;
+}
+
+.yenMark {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+  margin-right: 0.5rem;
+}
+
+.amountInput {
+  flex: 1;
+  border: none;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  padding: 0;
+}
+
+.memoInput {
+  width: 100%;
+  padding: 0.25rem 0;
+  border: none;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.95rem;
+  outline: none;
+  background: transparent;
+}
+
+.memoInput:focus {
+  border-bottom-color: #3b82f6;
+}
+
+/* --- ★ 変更箇所: スクロール領域と白枠の分離 --- */
+
+/* 1. スクロール領域（透明な入れ物） */
+.scrollArea {
+  flex-grow: 1;    /* 残りの空間を埋める */
+  overflow-y: auto; /* 中身が溢れたらスクロール */
+  scrollbar-width: thin;
+  /* 余白調整: カードの影が見切れないように少しpaddingを持つ */
+  padding: 0 2px; 
+}
+
+/* 2. カテゴリの白枠（中身に合わせて高さが変わる） */
+.categoryCard {
+  background-color: white;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  
+  /* 高さを中身に合わせる */
+  height: fit-content;
+}
+
+/* カテゴリラベル（スクロール時に白枠内で固定させたい場合） */
+.categoryLabel {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  
+  position: sticky;
+  top: 0;
+  background: white; /* 透けないように背景指定 */
+  z-index: 10;
+  padding-bottom: 0.5rem; /* 下の要素との余白確保 */
+}
+
+/* --- 固定エリア（下部） --- */
+.fixedBottomArea {
+  flex-shrink: 0;
+  margin-top: 0;
+}

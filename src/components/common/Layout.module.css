@@ -155,10 +155,15 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-decoration: none;
+  background: none;
+  border: none;
+  outline: none;
+  appearance: none;
   color: #6b7280;
   font-size: 0.75rem;
+  cursor: pointer;
 }
+
 
 .expandItem svg {
   margin-bottom: 2px;
@@ -183,4 +188,19 @@
 /* × のとき */
 .navigate-datainput.close {
   background-color: #ef4444;
+}
+
+.navigate-datainput {
+  /* ...既存の設定... */
+  background-color: #3b82f6; /* 通常時の色 */
+  color: white;
+}
+
+/* ★追加: 無効化時のスタイル */
+.navigate-datainput:disabled {
+  background-color: #d1d5db; /* グレー */
+  color: #9ca3af;            /* 薄い文字色 */
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Wallet, List, Bell, User, Plus, ChevronLeft, Trash2, X, Camera, Edit3, ArrowDownCircle } from "lucide-react";
 import { usePreventBack } from "../../hooks/common/usePreventBack";
@@ -17,16 +17,19 @@ const Layout = ({
   const location = useLocation();
   const navigate = useNavigate();
   const [isPlusOpen, setIsPlusOpen] = useState(false);  // 「＋」ボタンの開閉状態
+  const plusRef = useRef(null);
 
   const isActive = (path) => location.pathname === path;
 
-  // 入力関連ページ
-  const isDataInputPage =
-    location.pathname === "/input" ||
-    location.pathname.startsWith("/input/");
+  // // 入力関連ページ
+  // const isDataInputPage =
+  //   location.pathname === "/input" ||
+  //   location.pathname.startsWith("/input/");
 
-  // 「＋」ボタンを無効化するかどうか
-  const isPlusDisabled = disableDataInputButton || isDataInputPage;
+  // // 「＋」ボタンを無効化するかどうか
+  // const isPlusDisabled = disableDataInputButton || isDataInputPage;
+
+  const isPlusDisabled = disableDataInputButton;
 
   // ナビ以外タップで閉じる
   useEffect(() => {
@@ -79,19 +82,34 @@ const Layout = ({
       {/* 展開部分 */}
       {isPlusOpen && (
         <div className={styles.expandBar} onClick={() => setIsPlusOpen(false)}>
-          <div className={styles.expandInner} onClick={(e) => e.stopPropagation()} >
-            <Link to="/input/income" className={`${styles.expandItem} ${styles.income}`}>
+          <div ref={plusRef} className={styles.expandInner} onClick={(e) => e.stopPropagation()} >
+            {/* 収入 */}
+            <button className={`${styles.expandItem} ${styles.income}`} onClick={() => {
+                setIsPlusOpen(false);
+                navigate("/input/income");
+              }}>
               <ArrowDownCircle size={20} />
               <span>収入</span>
-            </Link>
-            <Link to="/input/ocr" className={`${styles.expandItem} ${styles.expense}`}>
+            </button>
+
+
+            {/* カメラ起動 */}
+            <button className={`${styles.expandItem} ${styles.expense}`} onClick={() => {
+                setIsPlusOpen(false);
+                navigate("/input/ocr", { state: { autoCamera: true } });
+              }}>
               <Camera size={20} />
               <span>OCR</span>
-            </Link>
-            <Link to="/input/manual" className={`${styles.expandItem} ${styles.expense}`}>
+            </button>
+
+            {/* 支出(手動入力) */}
+            <button className={`${styles.expandItem} ${styles.expense}`} onClick={() => {
+                setIsPlusOpen(false);
+                navigate("/input/manual");
+              }}>
               <Edit3 size={20} />
               <span>支出</span>
-            </Link>
+            </button>
           </div>
         </div>
       )}
@@ -112,7 +130,6 @@ const Layout = ({
             </Link>
 
             {/* ＋ボタン */}
-            {/* ＋ 展開ボタン */}
             <button
               className={`${styles["navigate-datainput"]} ${
                 isPlusOpen ? styles.close : ""
@@ -120,21 +137,9 @@ const Layout = ({
               disabled={isPlusDisabled}
               onClick={() => {
                 if (!isPlusDisabled) setIsPlusOpen((prev) => !prev);
-              }}
-            >
+              }}>
               {isPlusOpen ? <X size={20} /> : <Plus size={20} />}
             </button>
-            {/* {isPlusDisabled ? (
-              <button className={`${styles["navigate-datainput"]} ${styles.disabled}`} disabled>
-                <Plus size={16} />
-              </button>
-            ) : (
-              <Link to="/dataInput">
-                <button className={styles["navigate-datainput"]}>
-                  <Plus size={16} />
-                </button>
-              </Link>
-            )} */}
 
             {/* 通知 */}
             <Link to="/notification" className={`${styles["nav-item"]} ${isActive("/notification") ? styles.active : ""}`}>

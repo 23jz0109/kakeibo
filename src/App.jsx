@@ -1,10 +1,17 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from "./pages/Login";
+// 履歴
 import History from './pages/History/History';
+// 予算
 import Budget from "./pages/Budget/Budget";
-import DataInput from "./pages/DataInput/DataInput";
+// データ入力
+import IncomeInput from "./pages/DataInput/IncomeInput"
+import ExpenseManualInput from "./pages/DataInput/ExpenseManualInput"
+import ExpenseOcrInput from "./pages/DataInput/ExpenseOcrInput"
+// 通知
 import Notification from "./pages/Notification/Notification";
+// マイページ
 import MyPage from "./pages/MyPage/MyPage";
 import UserInfo from './pages/MyPage/UserInfo';
 import Statistics from './pages/MyPage/Statistics';
@@ -60,12 +67,18 @@ function App() {
           {/* ナビゲーションバーの各パーツ */}
           {/* 履歴 */}
           <Route path="/history" element={<PrivateRoute><History /></PrivateRoute>} />
+          
           {/* 予算 */}
           <Route path="/budget" element={<PrivateRoute><Budget /></PrivateRoute>} />
+          
           {/* データ入力 */}
-          <Route path="/dataInput" element={<PrivateRoute><DataInput /></PrivateRoute>} />
+          <Route path="/input/income" element={<PrivateRoute><IncomeInput /></PrivateRoute>} />
+          <Route path="/input/manual" element={<PrivateRoute><ExpenseManualInput /></PrivateRoute>} />
+          <Route path="/input/ocr" element={<PrivateRoute><ExpenseOcrInput /></PrivateRoute>} />
+          
           {/* 通知 */}
           <Route path="/notification" element={<PrivateRoute><Notification /></PrivateRoute>} />
+          
           {/* マイページ */}
           <Route path="/mypage" element={<PrivateRoute><MyPage /></PrivateRoute>} />
             <Route path="/userinfo" element={<PrivateRoute><UserInfo /></PrivateRoute>} />

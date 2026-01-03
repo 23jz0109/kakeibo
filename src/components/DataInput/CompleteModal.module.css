@@ -1,0 +1,22 @@
+.complete-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.complete-container {
+  padding: 1rem;
+  border-radius: 0.3rem;
+  background-color: white;
+  transition: all 0.3s ease;
+}
