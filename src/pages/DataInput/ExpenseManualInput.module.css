@@ -1,0 +1,18 @@
+/* ページ全体を囲むコンテナ */
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Layoutコンポーネントの中で高さを確保するため */
+  width: 100%;
+  position: relative;
+  overflow: hidden; /* スクロールは内部のscrollAreaに任せる */
+}
+
+/* ページタイトルのスタイル */
+.headerTitle {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+  text-align: center;
+}

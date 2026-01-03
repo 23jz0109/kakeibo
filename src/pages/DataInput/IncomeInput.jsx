@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../../components/common/Layout";
-import DayPicker from "../../components/DataInput/DayPicker";
-import Categories from "../../components/DataInput/Categories";
-import SubmitButton from "../../components/DataInput/SubmitButton";
-import CompleteModal from "../../components/DataInput/CompleteModal";
+import DayPicker from "../../components/dataInput/DayPicker";
+import Categories from "../../components/dataInput/Categories";
+import SubmitButton from "../../components/common/SubmitButton";
+import CompleteModal from "../../components/common/CompleteModal";
 import styles from "./IncomeInput.module.css";
 import { useCategories } from "../../hooks/common/useCategories";
 import { useFormPersist } from "../../hooks/common/useFormPersist";
@@ -79,7 +79,7 @@ const IncomeInput = () => {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "X-Type-ID": "1" // 収入を表すヘッダー
+          "X-Type-ID": "1"
         },
         body: JSON.stringify(payload)
       });
@@ -107,10 +107,12 @@ const IncomeInput = () => {
         navigate("/history");
       }, 1500);
 
-    } catch (error) {
+    }
+    catch (error) {
       console.error("通信エラー:", error);
       alert("エラーが発生しました: " + error.message);
-    } finally {
+    }
+    finally {
       setIsSubmitting(false);
     }
   };
@@ -170,8 +172,7 @@ const IncomeInput = () => {
         <SubmitButton
           text={isSubmitting ? "送信中..." : "登録する"}
           onClick={handleSubmit}
-          disabled={isSubmitting}
-        />
+          disabled={isSubmitting}/>
       </div>
 
       {complete && <CompleteModal />}
