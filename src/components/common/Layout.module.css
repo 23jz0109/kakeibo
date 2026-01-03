@@ -65,13 +65,18 @@
   flex-shrink: 0;
 }
 
+/* android未検証(高さ、見た目) */
 .footer-nav {
   display: flex;
   justify-content: space-around;
-  align-items: center;
-  height: 4rem;
+  align-items: flex-start;
+  height: 5rem;
   max-width: 28rem;
   margin: 0 auto;
+}
+
+.footer-nav a {
+  text-decoration: none;
 }
 
 .nav-item {
@@ -111,6 +116,7 @@
   background-color: #2563eb;
   color: white;
   margin: 0 1rem;
+  margin-top: 0.4rem;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -124,19 +130,57 @@
   pointer-events: none;
 }
 
-/* データ入力画面に遷移させるための共通ボタン
-.navigate-datainput {
+/* 展開バー（ナビの1段上） */
+.expandBar {
   position: fixed;
-  bottom: 8rem;
-  right: max(2rem, calc(50% - 14rem + 2rem));
-  z-index: 999;
+  bottom: calc(5rem + 1px);
+  left: 0;
+  width: 100%;
+  background-color: white;
+  border-top: 1px solid #e5e7eb;
+  z-index: 20;
+}
 
+.expandInner {
+  max-width: 28rem;
+  margin: 0 auto;
+  height: 56px;
   display: flex;
+}
+
+/* ナビと同じ縦並び */
+.expandItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 1rem;
-  border: none;
-  border-radius: 50%;
-  background-color: #2563eb;
-  color: white;
-  opacity: 1;
+  justify-content: center;
+  text-decoration: none;
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+.expandItem svg {
+  margin-bottom: 2px;
+}
+
+/* 収入（青） */
+/* .expandItem.income {
+  color: #2563eb;
+  font-weight: 600;
 } */
+
+/* 支出（赤） */
+/* .expandItem.expense {
+  color: #dc2626;
+  font-weight: 600;
+} */
+
+.expandItem:hover {
+  background-color: #f3f4f6;
+}
+
+/* × のとき */
+.navigate-datainput.close {
+  background-color: #ef4444;
+}

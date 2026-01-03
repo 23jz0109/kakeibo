@@ -1,10 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from "./pages/Login";
-import History from './pages/History';
-import Budget from "./pages/Budget";
-import DataInput from "./pages/DataInput";
-import Notification from "./pages/Notification";
+import History from './pages/History/History';
+import Budget from "./pages/Budget/Budget";
+import DataInput from "./pages/DataInput/DataInput";
+import Notification from "./pages/Notification/Notification";
 import MyPage from "./pages/MyPage/MyPage";
 import UserInfo from './pages/MyPage/UserInfo';
 import Statistics from './pages/MyPage/Statistics';
