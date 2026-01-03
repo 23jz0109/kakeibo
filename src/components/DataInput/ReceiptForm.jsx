@@ -91,9 +91,20 @@ const ReceiptItemPreview = ({ item, categories }) => {
         <span className={styles.productName} style={{ width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {item.product_name || "名称未定"}
         </span>
-        {discount > 0 && <span style={{ fontSize: '0.75rem', color: '#ef4444' }}>¥{unitPrice * quantity} - ¥{discount}</span>}
+        {quantity >= 2 && (
+          <span style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>
+            ¥{unitPrice.toLocaleString()} × {quantity}
+          </span>
+        )}
       </div>
-      <span className={styles.productPrice}>¥{finalPrice.toLocaleString()}</span>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '80px' }}>
+        <span className={styles.productPrice}>¥{finalPrice.toLocaleString()}</span>
+        {discount > 0 && (
+          <span style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '1px' }}>
+            -¥{discount.toLocaleString()}
+          </span>
+        )}
+      </div>
     </div>
   );
 };
@@ -170,7 +181,27 @@ const ReceiptItemModal = ({ mode, item, index, categories, priceMode, onSubmit, 
                 <input className={styles.modalInput} type="number" placeholder="0" value={formData.discount} onChange={e=>setFormData({...formData, discount:e.target.value})} />
              </div>
         </div>
+        
+        {/* 税率ボタン */}
+        <div className={styles.modalRow}>
+           <label className={styles.modalLabel}>税率</label>
+           <div className={styles.taxSwitchContainer}>
+             <button
+               type="button"
+               className={`${styles.taxButton} ${String(formData.tax_rate) === "10" ? styles.taxActive : ""}`}
+               onClick={() => setFormData({ ...formData, tax_rate: "10" })}>
+               10%
+             </button>
+             <button
+               type="button"
+               className={`${styles.taxButton} ${String(formData.tax_rate) === "8" ? styles.taxActive : ""}`}
+               onClick={() => setFormData({ ...formData, tax_rate: "8" })}>
+               8%
+             </button>
+           </div>
+        </div>
       </div>
+
       <div className={styles.scrollableCategoryArea}>
         <label className={styles.categoryLabel}>カテゴリ</label>
         <Categories categories={categories} selectedCategoryId={Number(formData.category_id)} onSelectedCategory={id=>setFormData({...formData, category_id:id})} />
@@ -186,12 +217,13 @@ const ReceiptForm = forwardRef(({
   categories, 
   initialData = null,
   onSubmit,
+  onUpdate,
   submitLabel = "登録する",
   isSubmitting = false
 }, ref) => {
   // 自動保存用のキー
   const persistKey = initialData ? null : "manual_expense_backup";
-
+  
   const {
     receipt,
     priceMode,
@@ -206,6 +238,13 @@ const ReceiptForm = forwardRef(({
 
   const [validationError, setValidationError] = useState(null);
 
+  // レシート内容変更するたびに保存
+  useEffect(() => {
+    if (onUpdate) {
+      onUpdate(receipt);
+    }
+  }, [receipt, onUpdate]);
+
   useImperativeHandle(ref, () => ({
     clearForm: () => {
       if (receipt.products.length > 0 || receipt.shop_name) {
@@ -215,7 +254,6 @@ const ReceiptForm = forwardRef(({
         }
       }
     },
-    // 送信後リセット
     forceReset: () => {
       resetForm();
       if (persistKey) localStorage.removeItem(persistKey);
@@ -228,7 +266,7 @@ const ReceiptForm = forwardRef(({
       setValidationError("商品が1つもありません。");
       return;
     }
-
+    
     const success = await onSubmit({
       receipt,
       calculated,
