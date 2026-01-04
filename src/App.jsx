@@ -11,6 +11,7 @@ import ExpenseManualInput from "./pages/DataInput/ExpenseManualInput"
 import ExpenseOcrInput from "./pages/DataInput/ExpenseOcrInput"
 // 通知
 import Notification from "./pages/Notification/Notification";
+import PriceInfo from "./pages/Notification/PriceInfo";
 // マイページ
 import MyPage from "./pages/MyPage/MyPage";
 import UserInfo from './pages/MyPage/UserInfo';
@@ -78,6 +79,7 @@ function App() {
           
           {/* 通知 */}
           <Route path="/notification" element={<PrivateRoute><Notification /></PrivateRoute>} />
+            <Route path="/price/:productName" element={<PrivateRoute><PriceInfo /></PrivateRoute>} />
           
           {/* マイページ */}
           <Route path="/mypage" element={<PrivateRoute><MyPage /></PrivateRoute>} />
