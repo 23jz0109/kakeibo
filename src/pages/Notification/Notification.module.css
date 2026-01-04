@@ -1,0 +1,279 @@
+/* --- ヘッダーエリア --- */
+.headerContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  height: 40px;
+}
+
+.headerTitle {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.125rem;
+  font-weight: bold;
+  margin: 0;
+  color: #1f2937;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.headerButtons {
+  display: flex;
+  gap: 12px;
+  z-index: 10;
+}
+
+.iconButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4b5563;
+  transition: opacity 0.2s;
+}
+
+.iconButton:active { opacity: 0.6; }
+
+/* --- メインコンテンツ --- */
+.mainContainer {
+  padding: 1rem;
+  padding-bottom: 40px;
+}
+
+.loadingText, .errorText, .emptyText {
+  text-align: center;
+  margin-top: 2rem;
+  color: #6b7280;
+}
+
+.errorText { color: #ef4444; }
+
+/* --- 通知リスト & カード --- */
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.card {
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.cardActive { border-left: 5px solid #3b82f6; opacity: 1; }
+.cardInactive { border-left: 5px solid #e5e7eb; opacity: 0.8; }
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.toggleButton {
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: #fff;
+}
+.toggleOn { background-color: #3b82f6; }
+.toggleOff { background-color: #d1d5db; }
+
+.productName {
+  font-size: 0.9rem;
+  color: #4b5563;
+  margin-bottom: 0.5rem;
+}
+
+/* カードフッターエリア */
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 0.5rem;
+}
+
+.infoText {
+  font-size: 0.85rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+/* アクションボタン群 */
+.actionButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.cardIcon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  padding: 4px;
+}
+.searchIcon { color: #f59e0b; } /* 価格検索用（黄色系） */
+.deleteIcon { color: #ef4444; }
+
+/* 補充ボタン */
+.refillButton {
+  background-color: #10b981; /* 緑 */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+.refillButton:active { transform: scale(0.98); }
+
+/* --- モーダル --- */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.modalContent {
+  background-color: #fff;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.modalTitle {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 1.25rem;
+  color: #1f2937;
+}
+
+.formGroup { margin-bottom: 1rem; }
+
+.label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+/* --- 時間選択ドロップダウン (旧プロジェクト参考) --- */
+.categorySelectWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.selectedCategory {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background-color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.selectedText { font-size: 1rem; color: #111; }
+.unselected { color: #9ca3af; }
+.arrow { color: #6b7280; font-size: 0.8rem; }
+
+.dropdownList {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  margin-top: 4px;
+}
+
+.dropdownItem {
+  padding: 0.75rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+.dropdownItem:hover { background-color: #f9fafb; }
+.dropdownItem:last-child { border-bottom: none; }
+
+/* --- モーダルボタン --- */
+.modalButtons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.cancelButton {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  background-color: #fff;
+  color: #374151;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.submitButton {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  background-color: #3b82f6;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
