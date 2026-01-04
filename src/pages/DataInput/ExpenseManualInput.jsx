@@ -8,13 +8,13 @@ import { useCategories } from "../../hooks/common/useCategories";
 import styles from "./ExpenseManualInput.module.css";
 
 const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
-const STORAGE_KEY = "ocr_receipt_queue_backup";
+const STORAGE_KEY = "expense_form_data";
 
 const ExpenseManualInput = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { categories, fetchCategories } = useCategories();
-  
+  const [formVersion, setFormVersion] = useState(0);
   const [receiptQueue, setReceiptQueue] = useState(() => {
     const incomingData = location.state?.ocrResult;
     if (incomingData && incomingData.data && incomingData.data.receipts) {
@@ -62,15 +62,17 @@ const ExpenseManualInput = () => {
     fetchCategories(2);
   }, [fetchCategories]);
 
-  // データが変化したら自動保存
+  // データが変化したら自動保存、空の場合はNULL
   useEffect(() => {
-    if (receiptQueue.length > 0 && receiptQueue[0] !== null) {
+    if (receiptQueue.length > 0) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(receiptQueue));
     }
-  }, [receiptQueue]);
+  }, [receiptQueue])
 
+  // レシート内容更新ハンドラ
   const handleReceiptUpdate = (updatedReceipt) => {
     setReceiptQueue(prevQueue => {
+      // フォームの修正なし = 保存しない
       if (JSON.stringify(prevQueue[currentIndex]) === JSON.stringify(updatedReceipt)) {
         return prevQueue;
       }
@@ -107,26 +109,26 @@ const ExpenseManualInput = () => {
     const diffY = touchStartY.current - touchEndY;
 
     if (Math.abs(diffX) > 120 && Math.abs(diffY) < 80) {
-      if (diffX > 0) {
-        handleNext();
-      } 
-      else {
-        handlePrev();
-      }
+      if (diffX > 0) handleNext();
+      else handlePrev();
     }
 
     touchStartX.current = null;
     touchStartY.current = null;
   };
 
+  // 内容を消すボタン
   const handleHeaderClear = () => {
-    if (window.confirm("全てのレシートデータを削除しますか？")) {
-      setReceiptQueue([null]);
-      localStorage.removeItem(STORAGE_KEY);
-      navigate("/history");
+    if (window.confirm("入力中のデータをすべて消去してリセットしますか？")) {
+      // 初期状態にリセット
+      setReceiptQueue([null]); 
+      localStorage.removeItem(STORAGE_KEY); 
+      setCurrentIndex(0);
+      setFormVersion(prev => prev + 1);
     }
   };
 
+  // 送信処理
   const handleCreateSubmit = async ({ receipt, calculated }) => {
     const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
     if (!token) {
@@ -176,12 +178,14 @@ const ExpenseManualInput = () => {
         // 送信したレシートをキューから削除
         const newQueue = receiptQueue.filter((_, idx) => idx !== currentIndex);
 
+        // 送信したレシートを消す
         if (newQueue.length === 0) {
           localStorage.removeItem(STORAGE_KEY);
+          // 履歴に遷移
           navigate("/history");
-        } else {
+        }
+        else {
           setReceiptQueue(newQueue);
-          // インデックス調整（最後を消した場合は一つ前に戻る）
           if (currentIndex >= newQueue.length) {
             setCurrentIndex(newQueue.length - 1);
           }
@@ -190,11 +194,14 @@ const ExpenseManualInput = () => {
 
       return true;
 
-    } catch (error) {
+    } 
+    // 送信失敗
+    catch (error) {
       console.error(error);
       alert("エラー: " + error.message);
       return false;
-    } finally {
+    }
+    finally {
       setIsSubmitting(false);
     }
   };
@@ -205,9 +212,7 @@ const ExpenseManualInput = () => {
       <h1 className={styles.headerTitle}>
         支出 {receiptQueue.length > 1 ? `(${currentIndex + 1}/${receiptQueue.length})` : ""}
       </h1>
-      <button className={styles.clearButton} onClick={handleHeaderClear}>
-        全消去
-      </button>
+      <button className={styles.clearButton} onClick={handleHeaderClear}>クリア</button>
     </div>
   );
 
@@ -237,17 +242,15 @@ const ExpenseManualInput = () => {
 
           {receiptQueue.length > 0 && (
             <ReceiptForm 
-              // keyにcurrentIndexを含めることで、切り替え時に必ず再マウントさせ、initialDataを読み込ませる
-              key={`receipt-${currentIndex}-${receiptQueue.length}`} 
+              key={`receipt-${currentIndex}-${receiptQueue.length}-${formVersion}`}
               ref={formRef}
               initialData={receiptQueue[currentIndex]}
               categories={categories}
               onSubmit={handleCreateSubmit}
-              onUpdate={handleReceiptUpdate} // ★更新用ハンドラを渡す
+              onUpdate={handleReceiptUpdate}
               isSubmitting={isSubmitting}
               submitLabel={isSubmitting ? "送信中..." : (receiptQueue.length > 1 ? "この1枚を登録" : "登録する")}/>
-          )}
-          
+          )}          
           {complete && <CompleteModal />}
         </div>
       }

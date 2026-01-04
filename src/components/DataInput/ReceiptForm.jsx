@@ -7,6 +7,7 @@ import SubmitButton from "../common/SubmitButton";
 import { useReceiptForm } from "../../hooks/dataInput/useReceiptForm";
 import styles from "./ReceiptForm.module.css";
 
+// 店舗名・メモの入力部分
 const ReceiptHeader = ({ receipt, updateReceiptInfo }) => (
   <div className={styles.inputSection}>
     <div className={styles.inputRow}>
@@ -31,11 +32,13 @@ const ReceiptHeader = ({ receipt, updateReceiptInfo }) => (
   </div>
 );
 
+// 小計・消費税・合計表示部分
 const ReceiptSummary = ({ calculated, priceMode, setPriceMode }) => {
   const tax8 = calculated.taxByRate["8"] || 0;
   const tax10 = calculated.taxByRate["10"] || 0;
   const displaySubTotal = calculated.totalAmount - (tax8 + tax10);
 
+  // 表示部分生成
   return (
     <div className={styles.summaryContainer}>
       <div className={styles.summaryRow}>
@@ -69,6 +72,7 @@ const ReceiptSummary = ({ calculated, priceMode, setPriceMode }) => {
   );
 };
 
+// レシート項目表示部分
 const ReceiptItemPreview = ({ item, categories }) => {
   const unitPrice = Number(item.product_price) || 0;
   const quantity = Number(item.quantity) || 1;
@@ -82,6 +86,7 @@ const ReceiptItemPreview = ({ item, categories }) => {
   const catName = categoryData?.CATEGORY_NAME || categoryData?.category_name || "未分類";
   const catColor = categoryData?.CATEGORY_COLOR || categoryData?.category_color || "#9ca3af";
 
+  // 表示部分生成
   return (
     <div className={styles.previewContainer} style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
       <div style={{ backgroundColor: catColor, color: '#fff', fontSize: '0.65rem', fontWeight: 'bold', padding: '3px 8px', borderRadius: '4px', marginRight: '10px', minWidth: '60px', textAlign: 'center' }}>
@@ -109,6 +114,7 @@ const ReceiptItemPreview = ({ item, categories }) => {
   );
 };
 
+// レシート項目入力部分
 const ReceiptItemModal = ({ mode, item, index, categories, priceMode, onSubmit, onDelete, closeModal }) => {
   const [formData, setFormData] = useState({
     product_name: "", product_price: "", quantity: 1, category_id: "", tax_rate: "10", discount: "",
@@ -130,6 +136,7 @@ const ReceiptItemModal = ({ mode, item, index, categories, priceMode, onSubmit, 
     }
   }, [mode, item, categories]);
 
+  // 商品追加・編集確定部分
   const handleSubmit = () => {
     if (!formData.product_name || !formData.product_price) {
       alert("商品名と単価は必須です");
@@ -152,8 +159,10 @@ const ReceiptItemModal = ({ mode, item, index, categories, priceMode, onSubmit, 
     closeModal();
   };
 
+  // デフォルト税率
   const isInclusive = priceMode === "inclusive";
 
+  // 表示部分生成
   return (
     <div className={styles.modalDetail}>
       <div className={styles.modalHeader}>
@@ -221,8 +230,8 @@ const ReceiptForm = forwardRef(({
   submitLabel = "登録する",
   isSubmitting = false
 }, ref) => {
-  // 自動保存用のキー
-  const persistKey = initialData ? null : "manual_expense_backup";
+  
+  const persistKey = null;
   
   const {
     receipt,
@@ -245,20 +254,30 @@ const ReceiptForm = forwardRef(({
     }
   }, [receipt, onUpdate]);
 
+  // クリア
   useImperativeHandle(ref, () => ({
     clearForm: () => {
-      if (receipt.products.length > 0 || receipt.shop_name) {
-        if (window.confirm("入力中の支出データをすべて消去しますか？")) {
-          resetForm();
-          if (persistKey) localStorage.removeItem(persistKey);
-        }
-      }
+      resetForm();
     },
     forceReset: () => {
       resetForm();
-      if (persistKey) localStorage.removeItem(persistKey);
     }
   }));
+
+  // useImperativeHandle(ref, () => ({
+  //   clearForm: () => {
+  //     if (receipt.products.length > 0 || receipt.shop_name) {
+  //       if (window.confirm("入力中の支出データをすべて消去しますか？")) {
+  //         resetForm();
+  //         if (persistKey) localStorage.removeItem(persistKey);
+  //       }
+  //     }
+  //   },
+  //   forceReset: () => {
+  //     resetForm();
+  //     if (persistKey) localStorage.removeItem(persistKey);
+  //   }
+  // }));
 
   // 送信ハンドラ
   const handlePressSubmit = async () => {
@@ -275,7 +294,6 @@ const ReceiptForm = forwardRef(({
 
     if (success) {
       resetForm();
-      if (persistKey) localStorage.removeItem(persistKey);
     }
   };
 
