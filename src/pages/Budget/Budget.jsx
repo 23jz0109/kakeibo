@@ -3,6 +3,8 @@ import { Plus, Edit2, Trash2, X } from "lucide-react";
 import Layout from "../../components/common/Layout";
 import styles from "./Budget.module.css";
 
+const baseUrl = "https://t08.mydns.jp/kakeibo/public/api";
+
 const Budget = () => {
   // --- State管理 ---
   const [activeTab, setActiveTab] = useState('budget');
@@ -51,7 +53,7 @@ const Budget = () => {
             <div className={styles.placeholderBox}>
               {/* ここに将来的にグラフやカレンダーコンポーネントが入ります */}
               <span style={{fontSize: '0.8rem', color: '#999'}}>
-                (ここに{activeTab === 'budget' ? '予算管理' : '固定費'}が表示されます)
+                (ここに{activeTab === 'budget' ? '予算管理' : '固定費'}が描画されます)
               </span>
             </div>
           )}
