@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../../components/common/Layout";
-import TabButton from "../../components/common/TabButton";
 import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import styles from "./Statistics.module.css";
 
@@ -86,8 +85,7 @@ const Statistics = () => {
       <div ref={pickerRef} className={styles.datePickerContainer}>
         <button
           className={styles.dateDisplayButton}
-          onClick={() => setShowCalendar(!showCalendar)}
-        >
+          onClick={() => setShowCalendar(!showCalendar)}>
           {displayDate(dateObj)}
         </button>
 
@@ -177,39 +175,20 @@ const Statistics = () => {
     }
   };
 
-  // タブ設定
-  // マイページに戻れるようにタブを設定（またはStatistics単独でもOK）
-  const handleTabChange = (tabId) => {
-    if (tabId === "mypage") {
-      navigate("/mypage");
-    } else {
-      setActiveTab(tabId);
-    }
-  };
-
-  // タブの詳細
-  const tabs = [
-    { 
-      id: "mypage", 
-      label: "マイページ",
-      icon: <ChevronLeft size={18} /> 
-    },
-    { 
-      id: "statistics", 
-      label: "統計データ" 
-    }
-  ];
+  // ヘッダー
+  const headerContent = (
+    <div className={styles.headerContainer}>
+      <button className={styles.backButton} onClick={() => navigate("/mypage")}>
+        <ChevronLeft size={24} />
+      </button>
+      <h1 className={styles.headerTitle}>統計データ</h1>
+    </div>
+  );
 
   // 画面生成
   return (
     <Layout
-      headerContent={
-        <TabButton
-          tabs={tabs}
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-        />
-      }
+      headerContent={headerContent}
       mainContent={
         <div className={styles.container}>
           <div className={styles.card}>

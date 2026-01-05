@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, Bell, Smartphone, Trash2 } from "lucide-react";
 import Layout from "../../components/common/Layout";
-import TabButton from "../../components/common/TabButton";
 import styles from "./Setting.module.css";
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken } from "firebase/messaging";
@@ -30,28 +29,6 @@ function Setting() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-
-  // タブ設定
-  const tabs = [
-    { 
-      id: "mypage", 
-      label: "マイページ",
-      icon: <ChevronLeft size={18} /> 
-    },
-    { 
-      id: "setting", 
-      label: "通知設定" 
-    },
-  ];
-
-  const handleTabChange = (id) => {
-    if (id === "mypage") navigate("/mypage");
-  };
-
-  // ヘッダー
-  const headerContent = (
-    <TabButton tabs={tabs} activeTab="setting" onTabChange={handleTabChange} />
-  );
 
   // デバイス判定
   const getDeviceName = () => {
@@ -273,6 +250,16 @@ function Setting() {
       setErrorMessage("通信エラーが発生しました");
     }
   };
+
+  // ヘッダー
+  const headerContent = (
+    <div className={styles.headerContainer}>
+      <button className={styles.backButton} onClick={() => navigate("/mypage")}>
+        <ChevronLeft size={24} />
+      </button>
+      <h1 className={styles.headerTitle}>受信端末設定</h1>
+    </div>
+  );
 
   // 画面生成
   return (

@@ -1,0 +1,249 @@
+/* --- Notificationのデザインに合わせたヘッダー --- */
+.headerContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  height: 40px;
+}
+
+.headerTitle {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.125rem;
+  font-weight: bold;
+  margin: 0;
+  color: #1f2937;
+  white-space: nowrap;
+  pointer-events: none; /* クリックを透過させる */
+}
+
+.headerButtons {
+  display: flex;
+  gap: 12px;
+  z-index: 10;
+}
+
+.iconButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4b5563;
+  transition: opacity 0.2s;
+  margin-right: 1rem;
+}
+
+.iconButton:active {
+  opacity: 0.6;
+}
+
+/* --- メインコンテンツエリア --- */
+.container {
+  padding: 16px;
+  padding-bottom: 80px; /* フッターと被らないように */
+  position: relative;
+  min-height: 80vh;
+}
+
+/* タブデザイン */
+.tabContainer {
+  display: flex;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 20px;
+}
+
+.tabButton {
+  flex: 1;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  color: #888;
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.tabButton.active {
+  background-color: #fff;
+  color: #333;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* リストエリア */
+.listArea {
+  margin-bottom: 20px;
+}
+
+.loading, .error, .empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.itemList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.itemCard {
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  padding: 12px 8px;
+  margin-bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.itemCard:last-child {
+  border-bottom: none;
+}
+
+.itemInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.categoryName {
+  font-weight: 500;
+  font-size: 1rem;
+  color: #333;
+}
+
+.itemMemo {
+  font-size: 0.8rem;
+  color: #999;
+  margin-top: 2px;
+}
+
+.itemAmount {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin: 0 15px;
+  color: #333;
+}
+
+.itemActions {
+  display: flex;
+  gap: 10px;
+}
+
+/* リスト内の編集・削除ボタン用クラス */
+.listIconBtn, .listIconBtnDanger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+}
+.listIconBtn { color: #888; }
+.listIconBtnDanger { color: #ff6b6b; }
+
+/* モーダル */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  width: 85%;
+  max-width: 400px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.formGroup input, .formGroup select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.radioGroup {
+  display: flex;
+  gap: 20px;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.saveBtn, .cancelBtn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.saveBtn {
+  background-color: #3b82f6; /* 保存ボタンも青系に統一 */
+  color: #fff;
+}
+
+.cancelBtn {
+  background-color: #f0f0f0;
+  color: #333;
+}

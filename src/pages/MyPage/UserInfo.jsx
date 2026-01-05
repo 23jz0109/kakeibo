@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, X, Lock, Calendar, LogOut } from "lucide-react";
 import Layout from "../../components/common/Layout";
-import TabButton from "../../components/common/TabButton";
 import styles from "./UserInfo.module.css";
 
 // 年選択
@@ -121,27 +120,6 @@ function UserInfo() {
 
     fetchUserInfo();
   }, [authToken]);
-
-  // タブ設定
-  const tabs = [
-    { 
-        id: "mypage", 
-        label: "マイページ",
-        icon: <ChevronLeft size={18} /> 
-    },
-    { 
-        id: "userinfo", 
-        label: "登録情報" 
-    },
-  ];
-
-  const handleTabChange = (tabId) => {
-    if (tabId === "mypage") navigate("/mypage");
-  };
-
-  const headerContent = (
-    <TabButton tabs={tabs} activeTab="userinfo" onTabChange={handleTabChange} />
-  );
 
   // ポップアップを閉じる処理
   const closeModals = () => {
@@ -272,6 +250,16 @@ function UserInfo() {
       alert("エラーが発生しました。");
     }
   };
+  
+  // ヘッダー
+  const headerContent = (
+    <div className={styles.headerContainer}>
+      <button className={styles.backButton} onClick={() => navigate("/mypage")}>
+        <ChevronLeft size={24} />
+      </button>
+      <h1 className={styles.headerTitle}>登録情報</h1>
+    </div>
+  );
 
   // メインコンテンツ
   return (

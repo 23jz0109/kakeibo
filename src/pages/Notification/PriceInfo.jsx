@@ -105,7 +105,7 @@ const PriceInfo = () => {
         <ChevronLeft size={24} />
       </button>
       
-      <h2 className={styles.headerTitle}>価格比較</h2>
+      <h2 className={styles.headerTitle}>相場価格</h2>
     </div>
   );
 

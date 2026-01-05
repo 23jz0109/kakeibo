@@ -1,0 +1,78 @@
+/* --- ヘッダー (Notification/Budgetと統一) --- */
+.headerContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* 右寄せにしておくが、右要素がない場合もタイトルは絶対配置で中央へ */
+  width: 100%;
+  height: 40px;
+}
+
+.headerTitle {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.125rem;
+  font-weight: bold;
+  margin: 0;
+  color: #1f2937;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* --- メインコンテンツ --- */
+.container {
+  padding: 16px;
+  padding-bottom: 80px;
+  min-height: 80vh;
+}
+
+/* タブデザイン */
+.tabContainer {
+  display: flex;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 20px;
+}
+
+.tabButton {
+  flex: 1;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  color: #888;
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.tabButton.active {
+  background-color: #fff;
+  color: #333;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* 表示エリア */
+.contentArea {
+  margin-bottom: 20px;
+}
+
+.loading, .error {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+/* プレースホルダー（中身がない時の仮表示用） */
+.placeholderBox {
+  background: #fff;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  color: #666;
+}
