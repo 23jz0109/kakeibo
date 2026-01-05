@@ -545,7 +545,7 @@ const Notification = () => {
                       className={styles.rowInput}
                       value={formData.notification_period}
                       onChange={(e) => setFormData({...formData, notification_period: e.target.value.replace(/\D/g, "")})}
-                      placeholder={suggestedPeriod ? `${suggestedPeriod}日` : "購買間隔を入力してください"}/>
+                      placeholder={suggestedPeriod ? `${suggestedPeriod}` : ""}/>
                   </div>
 
                   {/* 時間 */}
