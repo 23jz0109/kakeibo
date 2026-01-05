@@ -15,7 +15,7 @@ const ExpenseOcrInput = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const streamRef = useRef(null);
 
-  // カメラ起動処理
+  // カメラ起動
   const startCamera = useCallback(async () => {
     try {
       if (streamRef.current) return;
@@ -32,16 +32,14 @@ const ExpenseOcrInput = () => {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
-      setError(null);
-    }
-    // 起動失敗 
+    } 
     catch (e) {
       console.error(e);
-      setError("カメラを起動できませんでした。");
+      setError("カメラを起動できませんでした。権限設定等を確認してください。");
     }
   }, []);
 
-  // カメラ停止処理
+  // カメラ停止
   const stopCamera = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
@@ -49,25 +47,31 @@ const ExpenseOcrInput = () => {
     }
   };
 
-  // 初回マウント
+  // ライフサイクル管理 
   useEffect(() => {
-    let isMounted = true;
-    startCamera();
-
+    // 解析中+エラーも出ていない場合のみカメラを起動
+    if (!isProcessing && !error) {
+      startCamera();
+    }
+    // エラー発生時に停止
     return () => {
-      isMounted = false;
       stopCamera();
     };
-  }, [startCamera]);
+  }, [startCamera, isProcessing, error]);
 
-  // 写真圧縮 + 解析処理
+  // ビデオ参照の更新
+  useEffect(() => {
+    if (!isProcessing && !error && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+    }
+  }, [isProcessing, error]);
+
+
+  // 写真圧縮 + 解析
   const processImageFile = async (imageFile) => {
     try {
-      // 解析中画面に切り替え
       setIsProcessing(true);
       setError(null);
-
-      // カメラは停止
       stopCamera();
 
       // UI切り替え待ち
@@ -77,42 +81,46 @@ const ExpenseOcrInput = () => {
       const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true };
       const compressedFile = await imageCompression(imageFile, options);
 
-      // アクセストークン確認
+      // トークン確認
       const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
       if (!token) throw new Error("ログインセッションが切れました。再度ログインしてください。");
 
-      // 送信データ準備
       const formData = new FormData();
       formData.append("image", compressedFile);
 
-      // サーバーに送る
+      // API送信
       const response = await fetch(`${API_BASE_URL}/analyze-receipt`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
         body: formData,
       });
 
-      // 失敗
-      if (!response.ok) throw new Error("レシート解析に失敗しました。");
+      if (!response.ok) throw new Error("通信エラーが発生しました。");
       
-      // 結果待ち + 遷移
       const result = await response.json();
+
+      // データ検証
+      if (result.status === 'failure') {
+         throw new Error(result.message || "解析に失敗しました。");
+      }
+      if (!result.data || !result.data.is_receipt || !result.data.receipts || result.data.receipts.length === 0) {
+         throw new Error("レシートを認識できませんでした。\nもう一度撮影してください。");
+      }
+
+      // 成功時遷移
       navigate("/input/manual", { state: { ocrResult: result } });
-    } 
-    // 通信失敗
-    catch (err) {
+
+    } catch (err) {
       console.error(err);
       setError(err.message);
-      setIsProcessing(false);
-      // startCamera();
+      setIsProcessing(false); 
     }
   };
 
-  // 撮影ボタン動作
+  // 撮影ハンドラ
   const handleCapture = async () => {
     if (!videoRef.current) return;
     
-    // キャプチャ→ファイル生成
     const video = videoRef.current;
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
@@ -120,34 +128,29 @@ const ExpenseOcrInput = () => {
     const ctx = canvas.getContext("2d");
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    const imageFile = await new Promise((resolve) => {
-      canvas.toBlob((blob) => {
-        resolve(new File([blob], "captured_receipt.jpg", { type: "image/jpeg" }));
-      }, "image/jpeg", 0.9);
-    });
-
-    // 共通処理へ
-    processImageFile(imageFile);
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const imageFile = new File([blob], "captured_receipt.jpg", { type: "image/jpeg" });
+        processImageFile(imageFile);
+      }
+    }, "image/jpeg", 0.9);
   };
 
-
-  // アップロードボタン動作
   const handleUploadClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
+    if (fileInputRef.current) fileInputRef.current.click();
   };
 
-  // ファイル選択時
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      processImageFile(file);
-    }
+    if (file) processImageFile(file);
     e.target.value = "";
   };
 
-  // ヘッダー(CSSに移動)
+  // 再試行
+  const handleRetry = () => {
+    setError(null); 
+  };
+
   const headerStyle = {
     fontSize: "1.125rem",
     fontWeight: "600",
@@ -160,24 +163,16 @@ const ExpenseOcrInput = () => {
       headerContent={<h1 style={headerStyle}>カメラ</h1>}
       mainContent={
         <div className={styles.container}>
-          
-          {/* エラーメッセージ */}
-          {error && (
+          {error ? (
             <div className={styles.errorMessage}>
-              <p>{error}</p>
+              <p style={{ whiteSpace: "pre-wrap" }}>{error}</p>
               <button
                 className={styles.retryButton}
-                onClick={() => {
-                  setError(null);
-                  startCamera();
-                }}>
+                onClick={handleRetry}>
                 再試行
               </button>
             </div>
-          )}
-
-          {/* ローディング / カメラ */}
-          {isProcessing ? (
+          ) : isProcessing ? (
             <div className={styles.analyzingOverlay}>
               <div className={styles.spinnerWrapper}>
                 <Loader2 size={64} color="#3b82f6" />
@@ -185,38 +180,29 @@ const ExpenseOcrInput = () => {
               <p className={styles.analyzingText}>解析中...</p>
               <p className={styles.warningText}>※ページを移動しないでください</p>
             </div>
-          ) : 
-          (
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className={styles.videoElement}
-            />
-          )}
-
-          {/* コントロールエリア */}
-          {!isProcessing && (
-            <div className={styles.controls}>
-              
-              {/* 撮影ボタン */}
-              <button onClick={handleCapture} className={styles.captureButton}>
-                <Camera size={32} color="#374151" />
-              </button>
-
-              {/* アップロードボタン */}
-              <button onClick={handleUploadClick} className={styles.uploadButton}>
-                <ImageIcon size={24} />
-              </button>
-              <input
-                type="file"
-                accept="image/*"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                className={styles.hiddenInput}
-              />
-            </div>
+          ) : (
+            <>
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className={styles.videoElement}/>
+              <div className={styles.controls}>
+                <button onClick={handleCapture} className={styles.captureButton}>
+                  <Camera size={32} color="#374151" />
+                </button>
+                <button onClick={handleUploadClick} className={styles.uploadButton}>
+                  <ImageIcon size={24} />
+                </button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className={styles.hiddenInput}/>
+              </div>
+            </>
           )}
         </div>
       }
