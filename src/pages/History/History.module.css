@@ -1,9 +1,9 @@
-/* --- ヘッダー (Notification/Budgetと統一) --- */
+/* ヘッダー */
 .headerContainer {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: flex-end; /* 右寄せにしておくが、右要素がない場合もタイトルは絶対配置で中央へ */
+  justify-content: flex-end;
   width: 100%;
   height: 40px;
 }
@@ -20,10 +20,11 @@
   pointer-events: none;
 }
 
-/* --- メインコンテンツ --- */
+/* メインコンテンツ */
 .container {
   padding: 16px;
   padding-bottom: 80px;
+  position: relative;
   min-height: 80vh;
 }
 
@@ -67,7 +68,7 @@
   font-size: 0.9rem;
 }
 
-/* プレースホルダー（中身がない時の仮表示用） */
+/* プレースホルダー */
 .placeholderBox {
   background: #fff;
   border: 1px dashed #ccc;
