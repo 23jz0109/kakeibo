@@ -7,6 +7,8 @@ import SubmitButton from "../common/SubmitButton";
 import { useReceiptForm } from "../../hooks/dataInput/useReceiptForm";
 import styles from "./ReceiptForm.module.css";
 
+const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
+
 // 店舗名・メモの入力部分
 const ReceiptHeader = ({ receipt, updateReceiptInfo }) => (
   <div className={styles.inputSection}>
@@ -115,7 +117,8 @@ const ReceiptItemPreview = ({ item, categories }) => {
 };
 
 // レシート項目入力部分
-const ReceiptItemModal = ({ mode, item, index, categories, priceMode, onSubmit, onDelete, closeModal }) => {
+const ReceiptItemModal = ({ mode, item, index, categories, productList = [],priceMode, onSubmit, onDelete, closeModal }) => {
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [formData, setFormData] = useState({
     product_name: "", product_price: "", quantity: 1, category_id: "", tax_rate: "10", discount: "",
   });
@@ -135,6 +138,31 @@ const ReceiptItemModal = ({ mode, item, index, categories, priceMode, onSubmit, 
       setFormData(prev => prev.category_id ? prev : { ...prev, category_id: categories[0].ID || categories[0].id });
     }
   }, [mode, item, categories]);
+
+  // 商品名変更ハンドラ
+  const handleNameChange = (e) => {
+    setFormData({ ...formData, product_name: e.target.value });
+    setShowSuggestions(true);
+  };
+
+  // 候補選択ハンドラ
+  const selectProduct = (product) => {
+    const pCatId = product.category_id || product.CATEGORY_ID;
+    const matchedCategory = categories.find(c => String(c.ID || c.id) === String(pCatId));
+    const validCategoryId = matchedCategory ? (matchedCategory.ID || matchedCategory.id) : (formData.category_id || categories[0]?.ID);
+
+    setFormData({
+      ...formData,
+      product_name: product.product_name || product.PRODUCT_NAME,
+      // product_price: product.product_price || product.price || formData.product_price,
+      category_id: validCategoryId
+    });
+    setShowSuggestions(false);
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => setShowSuggestions(false), 200);
+  };
 
   // 商品追加・編集確定部分
   const handleSubmit = () => {
@@ -162,6 +190,11 @@ const ReceiptItemModal = ({ mode, item, index, categories, priceMode, onSubmit, 
   // デフォルト税率
   const isInclusive = priceMode === "inclusive";
 
+  // 候補リストのフィルタリング
+  const filteredProducts = productList.filter(p => 
+    p.product_name && p.product_name.toLowerCase().includes(formData.product_name.toLowerCase())
+  );
+
   // 表示部分生成
   return (
     <div className={styles.modalDetail}>
@@ -171,9 +204,29 @@ const ReceiptItemModal = ({ mode, item, index, categories, priceMode, onSubmit, 
       </div>
       <div className={styles.staticInputArea}>
         <div className={styles.modalFlexRow}>
-             <div style={{flex:2}} className={styles.modalRow}>
+             <div style={{flex:2}} className={`${styles.modalRow} ${styles.inputGroup}`}>
                 <label className={styles.modalLabel}>商品名</label>
-                <input className={styles.modalInput} value={formData.product_name} onChange={e=>setFormData({...formData, product_name:e.target.value})} />
+                <input 
+                  className={styles.modalInput} 
+                  value={formData.product_name} 
+                  onChange={handleNameChange}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={handleBlur}
+                  autoComplete="off"
+                />
+                {/* 候補リスト */}
+                {showSuggestions && formData.product_name && filteredProducts.length > 0 && (
+                  <ul className={styles.suggestionList}>
+                    {filteredProducts.map((p) => (
+                      <li key={p.id || p.ID} className={styles.suggestionItem} onClick={() => selectProduct(p)}>
+                        <span>{p.product_name}</span>
+                        {/* {(p.product_price || p.price) && (
+                           <span className={styles.suggestionPrice}>¥{Number(p.product_price || p.price).toLocaleString()}</span>
+                        )} */}
+                      </li>
+                    ))}
+                  </ul>
+                )}
              </div>
              <div style={{flex:1}} className={styles.modalRow}>
                 <label className={styles.modalLabel}>個数</label>
@@ -232,6 +285,31 @@ const ReceiptForm = forwardRef(({
 }, ref) => {
   
   const persistKey = null;
+  const authToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+  const [productList, setProductList] = useState([]);
+
+  useEffect(() => {
+    const fetchProductCandidates = async () => {
+      if (!authToken) return;
+      try {
+        const response = await fetch(`${API_BASE_URL}/product`, {
+          method: "GET",
+          headers: { "Authorization": `Bearer ${authToken}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.status === 'success' && Array.isArray(data.products)) {
+            setProductList(data.products);
+          }
+        }
+      } catch (err) {
+        console.error("候補取得エラー", err);
+      }
+    };
+
+    fetchProductCandidates();
+  }, [authToken]);
+
   
   const {
     receipt,
@@ -314,6 +392,7 @@ const ReceiptForm = forwardRef(({
                 {(close) => (
                   <ReceiptItemModal
                     mode="edit" item={item} index={index} categories={categories}
+                    productList={productList}
                     priceMode={priceMode} onSubmit={updateItem} onDelete={deleteItem} closeModal={close}/>
                 )}
               </DropdownModal>
@@ -325,7 +404,7 @@ const ReceiptForm = forwardRef(({
               </div>
             }>
               {(close) => (
-                <ReceiptItemModal mode="add" categories={categories} priceMode={priceMode} onSubmit={addItem} closeModal={close} />
+                <ReceiptItemModal mode="add" categories={categories} productList={productList} priceMode={priceMode} onSubmit={addItem} closeModal={close} />
               )}
             </DropdownModal>
           </div>

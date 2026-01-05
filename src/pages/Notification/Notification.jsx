@@ -175,14 +175,14 @@ const Notification = () => {
     setEditTargetId(null);
     setOriginalItem(null);
     setSuggestedPeriod(null);
-    setFormData({ title: '', notification_period: '', notification_hour: 9, notification_min: 0 });
+    setFormData({ title: '', notification_period: '', notification_hour: 9, notification_min: 0 }); // デフォルトで0900
     setShowModal(true);
   };
 
   const openEditModal = (item, e) => {
     e.stopPropagation(); 
     setEditTargetId(item._id);
-    setOriginalItem(item); // 日付計算用に保持
+    setOriginalItem(item);
     setSuggestedPeriod(null);
 
     // 編集時は UTC -> Local に戻してフォームにセット
@@ -408,11 +408,16 @@ const Notification = () => {
     }
   };
 
-  // 価格検索
+  // 相場価格検索
   const handleSearchPrice = (name, e) => {
     e.stopPropagation();
     navigate(`/price/${encodeURIComponent(name)}`);
   };
+
+  // 商品名候補検索
+  const filteredProducts = productList.filter(p => 
+    p.product_name.toLowerCase().includes(formData.title.toLowerCase())
+  );
 
   return (
     <Layout
@@ -518,18 +523,16 @@ const Notification = () => {
                         onFocus={() => setShowSuggestions(true)}
                         required
                         placeholder="商品名を入力"/>
-                      {showSuggestions && productList.length > 0 && (
-                        <ul className={styles.suggestionList}>
-                          {productList
-                            .filter(p => p.product_name.toLowerCase().includes(formData.title.toLowerCase()))
-                            .map(p => (
-                              <li key={p.id} onClick={() => selectProduct(p)} className={styles.suggestionItem}>
-                                {p.product_name}
-                              </li>
-                            ))
-                          }
-                        </ul>
-                      )}
+                        {showSuggestions && formData.title && filteredProducts.length > 0 && (
+                          <ul className={styles.suggestionList}>
+                            {filteredProducts.map(p => (
+                                <li key={p.id} onClick={() => selectProduct(p)} className={styles.suggestionItem}>
+                                  {p.product_name}
+                                </li>
+                              ))
+                            }
+                          </ul>
+                        )}
                     </div>
                   </div>
 

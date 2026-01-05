@@ -381,3 +381,48 @@
   background-color: #ff6b6b;
   color: white;
 }
+
+/* 商品候補リスト */
+.inputGroup {
+  position: relative;
+}
+
+.suggestionList {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 1000;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.suggestionItem {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+  color: #333;
+  display: flex;
+  justify-content: space-between;
+}
+
+.suggestionItem:last-child {
+  border-bottom: none;
+}
+
+.suggestionItem:hover {
+  background-color: #f0f9ff;
+}
+
+.suggestionPrice {
+  color: #888;
+  font-size: 0.8rem;
+}
