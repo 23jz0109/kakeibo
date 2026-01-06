@@ -138,43 +138,6 @@ export const useReceiptForm = (initialData = null, persistKey = null) => {
     };
   }, [receipt.products, priceMode]);
 
-  // const calculated = useMemo(() => {
-  //   let subTotal = 0; 
-  //   let totalTax = 0;
-  //   let taxByRate = { 8: 0, 10: 0 }; 
-
-  //   receipt.products.forEach((item) => {
-  //     const price = Number(item.product_price) || 0;
-  //     const qty = Number(item.quantity) || 1;
-  //     const discount = Number(item.discount) || 0;
-  //     const rate = Number(item.tax_rate) || 10;
-
-  //     const lineTotal = (price * qty) - discount;
-
-  //     if (priceMode === "exclusive") {
-  //       subTotal += lineTotal;
-  //       const tax = Math.floor(lineTotal * (rate / 100));
-  //       taxByRate[rate] = (taxByRate[rate] || 0) + tax;
-  //       totalTax += tax;
-  //     }
-  //     else {
-  //       subTotal += lineTotal;
-  //       const tax = Math.floor(lineTotal * rate / (100 + rate));
-  //       taxByRate[rate] = (taxByRate[rate] || 0) + tax;
-  //     }
-  //   });
-
-  //   const totalAmount = priceMode === "exclusive" 
-  //     ? subTotal + totalTax 
-  //     : subTotal;
-
-  //   return {
-  //     subTotal,      
-  //     taxByRate,     
-  //     totalAmount,   
-  //   };
-  // }, [receipt.products, priceMode]);
-
   // 送信用のデータ整形
   const getPayload = () => {
     return {
