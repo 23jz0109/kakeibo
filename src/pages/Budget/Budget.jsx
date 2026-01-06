@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Edit2, Trash2, X, CheckCircle, Calendar } from "lucide-react";
+import { Plus, Edit2, Trash2, X, CheckCircle, Calendar, AlertCircle } from "lucide-react";
 import Layout from "../../components/common/Layout";
 import styles from "./Budget.module.css";
 import { useBudgetApi } from "../../hooks/budget/useBudget";
 import { useFixedCostApi } from "../../hooks/budget/useFixedCost";
+import { useCategories } from "../../hooks/common/useCategories";
 
 const Budget = () => {
   const [activeTab, setActiveTab] = useState('budget');
-  const [data, setData] = useState([]);
- 
+  const [data, setData] = useState([]); 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
-  const [formData, setFormData] = useState({ name: "", amount: "", date: "" });
+  const [formData, setFormData] = useState({ name: "", amount: "", date: "" });  
+  const [transactionType, setTransactionType] = useState(2);
 
+  // APIフック
   const { 
     fetchBudgets, 
     createBudget, 
@@ -31,6 +33,8 @@ const Budget = () => {
     error: fixedCostError 
   } = useFixedCostApi();
 
+  const { categories, fetchCategories, loading: categoryLoading } = useCategories();
+
   const isLoading = activeTab === 'budget' ? budgetLoading : fixedCostLoading;
   const error = activeTab === 'budget' ? budgetError : fixedCostError;
 
@@ -40,7 +44,8 @@ const Budget = () => {
       if (activeTab === 'budget') {
         const result = await fetchBudgets();
         setData(result);
-      } else {
+      }
+      else {
         const result = await fetchFixedCosts();
         setData(result);
       }
@@ -54,18 +59,44 @@ const Budget = () => {
     loadData();
   }, [activeTab]);
 
+  // 予算・固定費切り替え時のカテゴリ再取得
+  useEffect(() => {
+    if (isModalOpen) {
+        fetchCategories(transactionType);
+    }
+  }, [transactionType, fetchCategories, isModalOpen]);
+
   // モーダル操作
   const handleOpenModal = (type, item = null) => {
     if (type === 'edit' && item) {
       setEditItem(item);
-      setFormData({
-        name: item.name,
-        amount: item.amount,
-        date: item.date || "",
-      });
-    } else {
+      
+      // 予算
+      if (activeTab === 'budget') {
+        setTransactionType(2);
+        setFormData({
+          categoryId: item.category_id || "", 
+          amount: item.budget_limit || "", 
+          date: "" 
+        });
+      }
+      // 固定費(収支)
+      else {        
+        const typeId = item.type_id ? Number(item.type_id) : 2;
+        setTransactionType(typeId);
+
+        setFormData({
+          categoryId: item.category_id || "",
+          amount: item.amount || "",
+          date: item.fixed_day || ""
+        });
+      }
+    }
+    else {
       setEditItem(null);
-      setFormData({ name: "", amount: "", date: "" });
+      setFormData({ categoryId: "", amount: "", date: "" });
+      
+      setTransactionType(2); 
     }
     setIsModalOpen(true);
   };
@@ -84,32 +115,26 @@ const Budget = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     
-    // Aデータ整形
     const payload = {
-      name: formData.name,
+      category_id: Number(formData.categoryId),
       amount: Number(formData.amount),
-      ...(activeTab === 'fixed' && formData.date ? { date: Number(formData.date) } : {})
+      ...(activeTab === 'fixed' ? { 
+          fixed_day: Number(formData.date),
+          type_id: transactionType
+      } : {})
     };
 
     try {
       if (activeTab === 'budget') {
-        if (editItem) {
-          await updateBudget(editItem.id, payload);
-        }
-        else {
-          await createBudget(payload);
-        }
+        if (editItem) await updateBudget(editItem.id, payload);
+        else await createBudget(payload);
       }
       else {
-        if (editItem) {
-          await updateFixedCost(editItem.id, payload);
-        }
-        else {
-          await createFixedCost(payload);
-        }
-      }renderBudgetItem
+        if (editItem) await updateFixedCost(editItem.id, payload);
+        else await createFixedCost(payload);
+      }
       handleCloseModal();
-      loadData(); // リストを更新
+      loadData();
     }
     catch (err) {
       alert("保存に失敗しました: " + err.message);
@@ -153,14 +178,12 @@ const Budget = () => {
         <div className={styles.tabContainer}>
           <button 
             className={`${styles.tabButton} ${activeTab === 'budget' ? styles.active : ''}`}
-            onClick={() => setActiveTab('budget')}
-          >
+            onClick={() => setActiveTab('budget')}>
             予算管理
           </button>
           <button 
             className={`${styles.tabButton} ${activeTab === 'fixed' ? styles.active : ''}`}
-            onClick={() => setActiveTab('fixed')}
-          >
+            onClick={() => setActiveTab('fixed')}>
             固定費
           </button>
         </div>
@@ -192,7 +215,7 @@ const Budget = () => {
     );
   };
 
-  // 予算アイテムのレンダリング
+  // 予算
   const renderBudgetItem = (item) => {
     const limit = Number(item.budget_limit) || 0; 
     const spent = Number(item.current_usage) || 0;
@@ -233,16 +256,23 @@ const Budget = () => {
     );
   };
 
-  // 固定費アイテムのレンダリング
+  // 固定費
   const renderFixedItem = (item) => {
+    const amount = Number(item.amount);
+    const color = item.category_color || "#ec4899";
+
     return (
-      <div key={item.id} className={styles.card}>
+      <div key={item.id} className={styles.card} style={{ borderLeft: `4px solid ${color}` }}>
         <div className={styles.cardHeader}>
           <div className={styles.cardTitleGroup}>
-            <span className={`${styles.cardIconBox} ${styles.fixedIconBox}`}><Calendar size={16} /></span>
+            <span className={`${styles.cardIconBox}`} style={{ backgroundColor: color }}>
+              <Calendar size={16} color="#fff" />
+            </span>
             <div>
-              <span className={styles.cardTitle}>{item.name}</span>
-              <div className={styles.fixedDate}>毎月 {item.date}日 支払い</div>
+              <span className={styles.cardTitle}>{item.category_name}</span>
+              <div className={styles.fixedDate}>
+                {item.next_payment_date} ({item.rule_name_jp})
+              </div>
             </div>
           </div>
           <div className={styles.cardActions}>
@@ -250,8 +280,14 @@ const Budget = () => {
             <button onClick={() => handleDelete(item.id)}><Trash2 size={16} /></button>
           </div>
         </div>
-        <div className={styles.fixedAmount}>
-          ¥{item.amount?.toLocaleString()}
+        <div className={styles.fixedFooter}>
+          <div className={styles.fixedAmount}>
+            ¥{amount.toLocaleString()}
+          </div>
+          <div className={styles.periodMessage} style={{ color: color }}>
+            <AlertCircle size={14} style={{ marginRight: 4 }}/>
+            {item.period_message}
+          </div>
         </div>
       </div>
     );
@@ -262,21 +298,53 @@ const Budget = () => {
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
         <div className={styles.modalHeader}>
-          <h2>{activeTab === 'budget' ? '予算' : '固定費'}を{editItem ? '編集' : '追加'}</h2>
+          <h2>
+            {activeTab === 'budget' ? '予算' : '固定費'}を
+            {editItem ? '編集' : '追加'}
+          </h2>
           <button onClick={handleCloseModal} className={styles.closeButton}><X size={24} /></button>
         </div>
+
         <form onSubmit={handleSave}>
+          
+          {/* 固定費タブのときだけ「収入/支出」切り替えを表示 */}
+          {activeTab === 'fixed' && (
+            <div className={styles.typeToggleContainer}>
+              <button
+                type="button"
+                className={`${styles.typeButton} ${transactionType === 1 ? styles.typeActiveIncome : ''}`}
+                onClick={() => setTransactionType(1)}>
+                収入
+              </button>
+              <button
+                type="button"
+                className={`${styles.typeButton} ${transactionType === 2 ? styles.typeActiveExpense : ''}`}
+                onClick={() => setTransactionType(2)}>
+                支出
+              </button>
+            </div>
+          )}
+
           <div className={styles.formGroup}>
-            <label>名称</label>
-            <input 
-              type="text" 
-              name="name" 
-              value={formData.name} 
-              onChange={handleInputChange} 
-              placeholder={activeTab === 'budget' ? "例: 食費" : "例: 家賃"}
-              required 
-            />
+            <label>カテゴリ</label>
+            {/* 名前入力(input)ではなく、カテゴリ選択(select)に変更 */}
+            <select
+              name="categoryId"
+              value={formData.categoryId}
+              onChange={handleInputChange}
+              required
+              disabled={categoryLoading}>
+              <option value="">
+                {categoryLoading ? "読み込み中..." : "カテゴリを選択"}
+              </option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.category_name}
+                </option>
+              ))}
+            </select>
           </div>
+
           <div className={styles.formGroup}>
             <label>金額</label>
             <input 
@@ -284,27 +352,33 @@ const Budget = () => {
               name="amount" 
               value={formData.amount} 
               onChange={handleInputChange} 
-              placeholder="例: 30000"
               required 
             />
           </div>
+          
           {activeTab === 'fixed' && (
             <div className={styles.formGroup}>
-              <label>支払日 (毎月)</label>
-              <input 
-                type="number" 
-                name="date" 
-                value={formData.date} 
-                onChange={handleInputChange} 
-                placeholder="例: 25"
-                min="1" max="31"
-              />
-              <span className={styles.inputSuffix}>日</span>
+              <label>支払日/入金日 (1-31)</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input 
+                  type="number" 
+                  name="date" 
+                  value={formData.date} 
+                  onChange={handleInputChange} 
+                  // placeholder="例: 25"
+                  min="1" max="31"
+                  style={{ flex: 1 }}
+                />
+                <span className={styles.inputSuffix}>日</span>
+              </div>
             </div>
           )}
+
           <div className={styles.modalActions}>
             <button type="button" onClick={handleCloseModal} className={styles.cancelBtn}>キャンセル</button>
-            <button type="submit" className={styles.saveBtn}>保存</button>
+            <button type="submit" className={styles.saveBtn} disabled={isLoading}>
+              {isLoading ? '保存中...' : '保存'}
+            </button>
           </div>
         </form>
       </div>

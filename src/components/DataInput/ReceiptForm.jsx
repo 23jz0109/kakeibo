@@ -27,7 +27,7 @@ const ReceiptHeader = ({ receipt, updateReceiptInfo }) => (
       <input
         type="text"
         className={styles.cleanInput}
-        placeholder="備考 (任意)"
+        placeholder="備考"
         value={receipt.memo}
         onChange={(e) => updateReceiptInfo("memo", e.target.value)}/>
     </div>
