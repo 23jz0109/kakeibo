@@ -15,14 +15,13 @@ const GraphView = ({ summary }) => {
     }
   }, [summary]);
 
-  // ★修正: 新APIのキー名に対応
   // API: { CATEGORY_NAME, CATEGORY_COLOR, total_amount, ... }
   const chartData = {
-    labels: summary.map((item) => item.CATEGORY_NAME),
+    labels: summary.map((item) => item.category_name),
     datasets: [{
       label: "合計金額",
       data: summary.map((item) => Number(item.total_amount)),
-      backgroundColor: summary.map((item) => item.CATEGORY_COLOR),
+      backgroundColor: summary.map((item) => item.category_color),
       borderWidth: 0,
     }],
   };

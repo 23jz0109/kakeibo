@@ -20,7 +20,7 @@ export const useGetRecord = (year, month) => {
       setIsLoading(true);
       setError(null);
 
-      // 1. キャッシュ確認
+      // キャッシュ確認
       if (recordCache[targetYearMonth]) {
         setData(recordCache[targetYearMonth]);
         setIsLoading(false);
@@ -28,7 +28,7 @@ export const useGetRecord = (year, month) => {
       }
 
       try {
-        const token = localStorage.getItem("authToken"); // トークン取得場所はプロジェクトに合わせて変更してください
+        const token = localStorage.getItem("authToken");
         if (!token) throw new Error("認証トークンがありません");
 
         const response = await fetch("https://t08.mydns.jp/kakeibo/public/api/records", {
