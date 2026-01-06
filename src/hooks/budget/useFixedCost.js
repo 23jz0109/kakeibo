@@ -7,7 +7,7 @@ export const useFixedCostApi = () => {
   const [error, setError] = useState(null);
 
   const getHeaders = () => {
-    const token = localStorage.getItem("authToken");
+    localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
     if (!token) throw new Error("認証トークンがありません");
 
     return {

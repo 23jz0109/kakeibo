@@ -7,7 +7,7 @@ export const useBudgetApi = () => {
   const [error, setError] = useState(null);
 
   const getHeaders = () => {
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
     if (!token) throw new Error("認証トークンがありません");
 
     return {
