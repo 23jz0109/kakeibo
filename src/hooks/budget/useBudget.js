@@ -36,10 +36,12 @@ export const useBudgetApi = () => {
       });
       const json = await handleResponse(res);
       return json.data || [];
-    } catch (err) {
+    }
+    catch (err) {
       setError(err.message);
       throw err;
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   }, []);
@@ -53,7 +55,8 @@ export const useBudgetApi = () => {
       });
       const json = await handleResponse(res);
       return json.data || [];
-    } catch (err) {
+    }
+    catch (err) {
       console.error("Rules fetch error", err);
       return [];
     }
@@ -70,15 +73,17 @@ export const useBudgetApi = () => {
         body: JSON.stringify(data),
       });
       await handleResponse(res);
-    } catch (err) {
+    }
+    catch (err) {
       setError(err.message);
       throw err;
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   }, []);
 
-  // 更新（HeaderにIDを含める特殊仕様）
+  // 更新
   const updateBudget = useCallback(async (id, data) => {
     setLoading(true);
     setError(null);
@@ -88,20 +93,22 @@ export const useBudgetApi = () => {
         "X-Budget-ID": id,
       };
       const res = await fetch(`${BASE_URL}/budget`, {
-        method: "PUT",
+        method: "PATCH",
         headers,
         body: JSON.stringify(data),
       });
       await handleResponse(res);
-    } catch (err) {
+    }
+    catch (err) {
       setError(err.message);
       throw err;
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   }, []);
 
-  // 削除（HeaderにIDを含める特殊仕様）
+  // 削除
   const deleteBudget = useCallback(async (id) => {
     setLoading(true);
     setError(null);
@@ -115,10 +122,12 @@ export const useBudgetApi = () => {
         headers,
       });
       await handleResponse(res);
-    } catch (err) {
+    }
+    catch (err) {
       setError(err.message);
       throw err;
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   }, []);

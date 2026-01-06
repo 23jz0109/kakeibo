@@ -25,6 +25,7 @@ export const useFixedCostApi = () => {
     return json;
   };
 
+  // 固定費一覧取得
   const fetchFixedCosts = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -35,14 +36,17 @@ export const useFixedCostApi = () => {
       });
       const json = await handleResponse(res);
       return json.data || [];
-    } catch (err) {
+    }
+    catch (err) {
       setError(err.message);
       throw err;
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   }, []);
 
+  // ルール一覧取得
   const fetchRules = useCallback(async () => {
     try {
       const res = await fetch(`${BASE_URL}/fixedcost/rules`, {
@@ -51,12 +55,14 @@ export const useFixedCostApi = () => {
       });
       const json = await handleResponse(res);
       return json.data || [];
-    } catch (err) {
+    }
+    catch (err) {
       console.error(err);
       return [];
     }
   }, []);
 
+  // 作成
   const createFixedCost = useCallback(async (data) => {
     setLoading(true);
     setError(null);
@@ -67,14 +73,17 @@ export const useFixedCostApi = () => {
         body: JSON.stringify(data),
       });
       await handleResponse(res);
-    } catch (err) {
+    }
+    catch (err) {
       setError(err.message);
       throw err;
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   }, []);
 
+  // 更新
   const updateFixedCost = useCallback(async (id, data) => {
     setLoading(true);
     setError(null);
@@ -84,19 +93,22 @@ export const useFixedCostApi = () => {
         "X-Fixed-Cost-ID": id,
       };
       const res = await fetch(`${BASE_URL}/fixedcost`, {
-        method: "PUT",
+        method: "PATCH",
         headers,
         body: JSON.stringify(data),
       });
       await handleResponse(res);
-    } catch (err) {
+    }
+    catch (err) {
       setError(err.message);
       throw err;
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   }, []);
 
+  // 削除
   const deleteFixedCost = useCallback(async (id) => {
     setLoading(true);
     setError(null);
@@ -110,10 +122,12 @@ export const useFixedCostApi = () => {
         headers,
       });
       await handleResponse(res);
-    } catch (err) {
+    }
+    catch (err) {
       setError(err.message);
       throw err;
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   }, []);
