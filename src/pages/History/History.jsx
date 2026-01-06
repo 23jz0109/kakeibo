@@ -234,13 +234,14 @@ const History = () => {
                              return (
                               <div key={r.record_id} className={styles.listItem}>
                                 <div className={styles.listItemLeft}>
-                                  <span 
+                                  {/* カテゴリ混合の場合があるかもしれません、一旦コメントアウト */}
+                                  {/* <span 
                                     className={styles.categoryIcon}
                                     style={{ backgroundColor: r.category_color || "#ccc" }}>
                                     <Icon size={18} color="#fff" />
-                                  </span>
+                                  </span> */}
                                   <div className={styles.recordInfo}>
-                                    <span className={styles.productNames}>レシート{index + 1}</span>
+                                    <span className={styles.record}>履歴{index + 1}</span>
                                     <span className={styles.shopName}>{r.shop_name}</span>
                                     <span className={styles.productNames}>{r.product_names}</span>
                                   </div>

@@ -188,14 +188,19 @@
   overflow: hidden;
 }
 
+.record {
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
 .shopName {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   color: #9ca3af;
 }
 
 .productNames {
-  font-size: 0.85rem;
-  color: #4b5563;
+  font-size: 0.75rem;
+  color: #9da5af;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
