@@ -32,7 +32,8 @@ export const useReceiptForm = (initialData = null, persistKey = null) => {
             parsed.purchase_day = new Date(parsed.purchase_day);
           }
           return parsed;
-        } catch (e) {
+        }
+        catch (e) {
           console.error("Failed to parse saved receipt:", e);
         }
       }
@@ -94,40 +95,85 @@ export const useReceiptForm = (initialData = null, persistKey = null) => {
 
   // 税率別の計算ロジック
   const calculated = useMemo(() => {
-    let subTotal = 0; 
+    let subTotal = 0;
     let totalTax = 0;
-    let taxByRate = { 8: 0, 10: 0 }; 
+    let taxByRate = { 8: 0, 10: 0 };
+
+    // 税率ごとの税抜小計
+    let baseByRate = { 8: 0, 10: 0 };
 
     receipt.products.forEach((item) => {
       const price = Number(item.product_price) || 0;
       const qty = Number(item.quantity) || 1;
       const discount = Number(item.discount) || 0;
       const rate = Number(item.tax_rate) || 10;
-
       const lineTotal = (price * qty) - discount;
 
+      subTotal += lineTotal;
+
       if (priceMode === "exclusive") {
-        subTotal += lineTotal;
-        const tax = Math.floor(lineTotal * (rate / 100));
-        taxByRate[rate] = (taxByRate[rate] || 0) + tax;
-        totalTax += tax;
-      } else {
-        subTotal += lineTotal;
+        baseByRate[rate] = (baseByRate[rate] || 0) + lineTotal;
+      }
+      else {
         const tax = Math.floor(lineTotal * rate / (100 + rate));
-        taxByRate[rate] = (taxByRate[rate] || 0) + tax;
+        taxByRate[rate] += tax;
       }
     });
 
-    const totalAmount = priceMode === "exclusive" 
-      ? subTotal + totalTax 
-      : subTotal;
+    if (priceMode === "exclusive") {
+      Object.keys(baseByRate).forEach((rate) => {
+        const tax = Math.floor(baseByRate[rate] * rate / 100);
+        taxByRate[rate] = tax;
+        totalTax += tax;
+      });
+    }
+
+    const totalAmount =
+      priceMode === "exclusive" ? subTotal + totalTax : subTotal;
 
     return {
-      subTotal,      
-      taxByRate,     
-      totalAmount,   
+      subTotal,
+      taxByRate,
+      totalAmount,
     };
   }, [receipt.products, priceMode]);
+
+  // const calculated = useMemo(() => {
+  //   let subTotal = 0; 
+  //   let totalTax = 0;
+  //   let taxByRate = { 8: 0, 10: 0 }; 
+
+  //   receipt.products.forEach((item) => {
+  //     const price = Number(item.product_price) || 0;
+  //     const qty = Number(item.quantity) || 1;
+  //     const discount = Number(item.discount) || 0;
+  //     const rate = Number(item.tax_rate) || 10;
+
+  //     const lineTotal = (price * qty) - discount;
+
+  //     if (priceMode === "exclusive") {
+  //       subTotal += lineTotal;
+  //       const tax = Math.floor(lineTotal * (rate / 100));
+  //       taxByRate[rate] = (taxByRate[rate] || 0) + tax;
+  //       totalTax += tax;
+  //     }
+  //     else {
+  //       subTotal += lineTotal;
+  //       const tax = Math.floor(lineTotal * rate / (100 + rate));
+  //       taxByRate[rate] = (taxByRate[rate] || 0) + tax;
+  //     }
+  //   });
+
+  //   const totalAmount = priceMode === "exclusive" 
+  //     ? subTotal + totalTax 
+  //     : subTotal;
+
+  //   return {
+  //     subTotal,      
+  //     taxByRate,     
+  //     totalAmount,   
+  //   };
+  // }, [receipt.products, priceMode]);
 
   // 送信用のデータ整形
   const getPayload = () => {

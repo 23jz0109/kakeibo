@@ -1,49 +1,47 @@
+/* ==============================================
+   右側デザインのベーススタイル
+   ============================================== */
+
 /* ヘッダー */
 .headerContainer {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center; /* タイトル中央寄せ */
   width: 100%;
   height: 40px;
 }
 
 .headerTitle {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
   font-size: 1.125rem;
   font-weight: bold;
   margin: 0;
   color: #1f2937;
-  white-space: nowrap;
-  pointer-events: none;
 }
 
-/* メインコンテンツ */
-.container {
+/* メインコンテンツ枠 */
+.mainContainer {
   padding: 16px;
   padding-bottom: 80px;
-  position: relative;
   min-height: 80vh;
 }
 
-/* タブデザイン */
+/* --- 1. タブデザイン (セグメンテッドコントロール) --- */
 .tabContainer {
   display: flex;
-  background-color: #f0f0f0;
+  background-color: #f3f4f6; /* 薄いグレー背景 */
   border-radius: 8px;
   padding: 4px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .tabButton {
   flex: 1;
-  padding: 8px 10px;
+  padding: 8px 0;
   border: none;
   background: transparent;
-  color: #888;
-  font-weight: bold;
+  color: #6b7280; /* 非アクティブ文字色 */
+  font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
   border-radius: 6px;
@@ -52,28 +50,196 @@
 
 .tabButton.active {
   background-color: #fff;
-  color: #333;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  color: #1f2937; /* アクティブ文字色 */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
-/* 表示エリア */
-.contentArea {
+/* --- 2. 収支サマリー --- */
+.financeSummary {
+  display: flex;
+  justify-content: space-between;
+  background-color: #f9fafb;
+  padding: 16px;
+  border-radius: 12px;
+  margin: 16px 0 24px 0;
+  border: 1px solid #e5e7eb;
+}
+
+.financeItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.financeItem:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 15%;
+  height: 70%;
+  width: 1px;
+  background-color: #e5e7eb;
+}
+
+.financeLabel {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.financeValue {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #1f2937;
+  font-feature-settings: "palt";
+}
+
+.itemIncome .financeValue { color: #10b981; } /* 緑 */
+.itemExpense .financeValue { color: #ef4444; } /* 赤 */
+.itemBalance .financeValue { color: #1f2937; }
+
+
+/* --- 3. コンテンツ表示エリア --- */
+.viewContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.graphWrapper,
+.calendarWrapper {
+  animation: fadeIn 0.3s ease;
+}
+
+/* グラフモード用: 支出/収入 切り替えスイッチ */
+.switchContainer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
   margin-bottom: 20px;
 }
 
-.loading, .error {
-  text-align: center;
-  padding: 40px 20px;
-  color: #999;
-  font-size: 0.9rem;
+.switchButton {
+  padding: 6px 20px;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #6b7280;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 80px;
 }
 
-/* プレースホルダー */
-.placeholderBox {
+.switchButton:hover {
+  background-color: #f9fafb;
+}
+
+.switchButton.active {
+  background: #374151;
+  color: #fff;
+  border-color: #374151;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* --- 詳細リスト (共通) --- */
+.detailList {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.listItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
   background: #fff;
-  border: 1px dashed #ccc;
-  border-radius: 8px;
-  padding: 40px;
+  border-radius: 12px;
+  border: 1px solid #f3f4f6;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.listItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+  flex: 1;
+}
+
+.categoryIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.categoryName {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.recordInfo {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.shopName {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.productNames {
+  font-size: 0.85rem;
+  color: #4b5563;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.categoryPrice, .recordPrice {
+  font-weight: bold;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  margin-left: 12px;
+  font-family: monospace, sans-serif;
+}
+
+.textIncome { color: #10b981; }
+.textExpense { color: #ef4444; }
+
+/* カレンダーモード: 日付ごとのグループ */
+.dailyGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.dateHeader {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 12px 0 4px 8px;
+  font-weight: 600;
+}
+
+.emptyText {
   text-align: center;
-  color: #666;
+  color: #9ca3af;
+  font-size: 0.9rem;
+  margin-top: 32px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
 }

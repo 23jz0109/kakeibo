@@ -1,0 +1,137 @@
+.month-picker-container {
+  position: relative;
+  width: 100%;
+  z-index: 10;
+}
+
+.month-picker-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  background-color: white;
+}
+
+/* .month-picker-display.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+} */
+
+.btn-navigate {
+  padding: 0.25rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #6b7280;
+}
+
+.month-picker-button {
+  flex: 1;
+  padding: 0.25rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #374151;
+  text-align: center;
+}
+
+.modal-container {
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, 25%); /* ここを-50%に変更 */
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.modal-container.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal-header {
+  padding: 0 1rem 1rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 1rem;
+}
+
+.modal-year-navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem ;
+}
+
+.modal-month-navigate {
+  padding: 0.5rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #6b7280;
+}
+
+.modal-year {
+  font-size: 1.125rem;
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  border: none;
+  background: none;
+  color: #374151;;
+}
+
+.modal-close-button {
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  border: none;
+  background: none;
+  color: #ED1A3D;
+  transition: all 0.3s ease;
+}
+
+.modal-close-button:hover {
+  transform: rotate3d(0, 0, 1, 90deg);
+  color: rgba(237, 26, 61, 0.8);
+}
+
+.modal-month-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.month-button {
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background: none;
+  color: #374151;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.month-button:hover {
+  background-color: #f3f4f6;
+}
+
+.month-button.current-month {
+  background-color: #efeeee;
+  font-weight: 600;
+}

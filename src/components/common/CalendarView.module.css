@@ -1,0 +1,71 @@
+.calendar-container {
+  flex: 1;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background-color: #42A5F5;
+  color: white;
+  text-align: center;
+}
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: 1fr;
+  flex: 1;
+  min-height: 0;
+}
+
+.calendar-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.25rem;
+  min-height: 0;
+}
+
+.calendar-cell-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.calendar-cell-day {
+  border: 1px solid #e5e7eb;
+  background-color: #f3f4f6; /* 淡いグレー */
+}
+
+.current-month-day {
+  background-color: white;
+}
+
+.day {
+  color: #374151;
+  font-size: 0.625rem;
+}
+
+.expense {
+  color: #ef4444;
+  font-size: 0.5rem;
+}
+
+.income {
+  color: #42A5F5;
+  font-size: 0.5rem;
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  margin: 0 auto;
+  color: #333333;
+}

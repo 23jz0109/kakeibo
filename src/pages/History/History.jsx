@@ -1,66 +1,257 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import Layout from "../../components/common/Layout";
+import MonthPicker from "../../components/common/MonthPicker";
+import CalendarView from "../../components/common/CalendarView";
+import GraphView from "../../components/common/GraphView";
+import Loader from "../../components/common/Loader";
+import * as Icons from "lucide-react"; 
+import { useGetRecord } from "../../hooks/history/useGetRecord";
 import styles from "./History.module.css";
 
-const baseUrl = "https://t08.mydns.jp/kakeibo/public/api";
+// アイコン
+const getIconComponent = (iconName) => {
+  const Icon = Icons[iconName] || Icons.HelpCircle;
+  return Icon;
+};
 
 const History = () => {
-  // --- State管理 ---
-  const [activeTab, setActiveTab] = useState('graph');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [data, setData] = useState(null);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [activeTab, setActiveTab] = useState("graph");
+  const [transactionType, setTransactionType] = useState("expense");
 
-  // ヘッダー: タイトル中央、右側ボタンなし
+  const { 
+    isLoading, 
+    calendarDailySum, 
+    monthlyRecordList, 
+    graphCategorySum 
+  } = useGetRecord(currentDate.getFullYear(), currentDate.getMonth());
+
+  // 集計ロジック
+  const { totalIncome, totalExpense } = useMemo(() => {
+    return monthlyRecordList.reduce(
+      (acc, record) => {
+        const amount = Number(record.TOTAL_AMOUNT);
+        if (Number(record.TYPE_ID) === 1) {
+          acc.totalIncome += amount;
+        }
+        else if (Number(record.TYPE_ID) === 2) {
+          acc.totalExpense += amount;
+        }
+        return acc;
+      },
+      { totalIncome: 0, totalExpense: 0 }
+    );
+  }, [monthlyRecordList]);
+
+  const filteredGraphData = useMemo(() => {
+    const categoryTypeMap = {};
+    monthlyRecordList.forEach(r => {
+      if (r.MAIN_CATEGORY) {
+        categoryTypeMap[r.MAIN_CATEGORY] = Number(r.TYPE_ID);
+      }
+    });
+    const targetTypeId = transactionType === "income" ? 1 : 2;
+
+    return graphCategorySum.filter(item => {
+      const typeId = categoryTypeMap[item.CATEGORY_NAME];
+      return typeId === targetTypeId;
+    });
+  }, [graphCategorySum, monthlyRecordList, transactionType]);
+
+  const groupedDailyRecords = useMemo(() => {
+    return monthlyRecordList.reduce((acc, record) => {
+      const date = record.record_date;
+      if (!acc[date]) {
+        acc[date] = [];
+      }
+      acc[date].push(record);
+      return acc;
+    }, {});
+  }, [monthlyRecordList]);
+
+  const sortedDates = Object.keys(groupedDailyRecords).sort((a, b) => b.localeCompare(a));
+
+  const handleMonthChange = (offset) => {
+    const newDate = new Date(currentDate);
+    newDate.setMonth(newDate.getMonth() + offset);
+    setCurrentDate(newDate);
+  };
+
+  const handleMonthSelect = (year, monthIndex) => {
+    const newDate = new Date(year, monthIndex, 1);
+    setCurrentDate(newDate);
+  };
+
+  // ヘッダー
   const headerContent = (
     <div className={styles.headerContainer}>
       <h1 className={styles.headerTitle}>履歴</h1>
-      {/* 追加ボタンは不要なので配置しない */}
     </div>
   );
 
-  const renderMainContent = () => {
-    return (
-      <div className={styles.container}>
-        {/* タブ切り替えエリア */}
-        <div className={styles.tabContainer}>
-          <button 
-            className={`${styles.tabButton} ${activeTab === 'graph' ? styles.active : ''}`}
-            onClick={() => setActiveTab('graph')}
-          >
-            グラフ
-          </button>
-          <button 
-            className={`${styles.tabButton} ${activeTab === 'calendar' ? styles.active : ''}`}
-            onClick={() => setActiveTab('calendar')}
-          >
-            カレンダー
-          </button>
-        </div>
-
-        {/* コンテンツ表示エリア */}
-        <div className={styles.contentArea}>
-          {isLoading ? (
-            <div className={styles.loading}>読み込み中...</div>
-          ) : error ? (
-            <div className={styles.error}>{error}</div>
-          ) : (
-            <div className={styles.placeholderBox}>
-              {/* ここに将来的にグラフやカレンダーコンポーネントが入ります */}
-              <span style={{fontSize: '0.8rem', color: '#999'}}>
-                (ここに{activeTab === 'graph' ? '推移グラフ' : '月間カレンダー'}が描画されます)
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
+  // メインコンテンツ生成
   return (
     <Layout
       headerContent={headerContent}
-      mainContent={renderMainContent()}
+      mainContent={
+        <div className={styles.mainContainer}>
+          
+          {/* タブ切り替えエリア */}
+          <div className={styles.tabContainer}>
+            <button 
+              className={`${styles.tabButton} ${activeTab === 'graph' ? styles.active : ''}`}
+              onClick={() => setActiveTab('graph')}
+            >
+              グラフ
+            </button>
+            <button 
+              className={`${styles.tabButton} ${activeTab === 'calendar' ? styles.active : ''}`}
+              onClick={() => setActiveTab('calendar')}
+            >
+              カレンダー
+            </button>
+          </div>
+
+          {/* 月選択 */}
+          <MonthPicker
+            selectedMonth={currentDate}
+            onMonthChange={handleMonthChange}
+            onMonthSelect={handleMonthSelect}
+            isDisabled={isLoading}
+          />
+
+          {/* 収支サマリー */}
+          <div className={styles.financeSummary}>
+            <div className={`${styles.financeItem} ${styles.itemExpense}`}>
+              <span className={styles.financeLabel}>支出</span>
+              <span className={styles.financeValue}>¥{totalExpense.toLocaleString()}</span>
+            </div>
+            <div className={`${styles.financeItem} ${styles.itemIncome}`}>
+              <span className={styles.financeLabel}>収入</span>
+              <span className={styles.financeValue}>¥{totalIncome.toLocaleString()}</span>
+            </div>
+            <div className={`${styles.financeItem} ${styles.itemBalance}`}>
+              <span className={styles.financeLabel}>収支</span>
+              <span className={styles.financeValue}>
+                {totalIncome - totalExpense >= 0 ? "+" : ""}
+                {(totalIncome - totalExpense).toLocaleString()}
+              </span>
+            </div>
+          </div>
+
+          {/* グラフ/カレンダービュー */}
+          {isLoading ? (
+            <Loader text="データを読み込み中..." />
+          ) : (
+            <div className={styles.viewContainer}>
+              
+              {/* グラフ */}
+              {activeTab === "graph" && (
+                <div className={styles.graphWrapper}>
+                  {/* 収入/支出 切り替えスイッチ */}
+                  <div className={styles.switchContainer}>
+                    <button
+                      className={`${styles.switchButton} ${transactionType === "expense" ? styles.active : ""}`}
+                      onClick={() => setTransactionType("expense")}
+                    >
+                      支出
+                    </button>
+                    <button
+                      className={`${styles.switchButton} ${transactionType === "income" ? styles.active : ""}`}
+                      onClick={() => setTransactionType("income")}
+                    >
+                      収入
+                    </button>
+                  </div>
+
+                  <GraphView summary={filteredGraphData} />
+
+                  {/* カテゴリ別リスト */}
+                  <div className={styles.detailList}>
+                    {filteredGraphData.map((cat, idx) => {
+                      const Icon = getIconComponent(cat.ICON_NAME);
+                      return (
+                        <div key={idx} className={styles.listItem}>
+                          <div className={styles.listItemLeft}>
+                            <span 
+                              className={styles.categoryIcon} 
+                              style={{ backgroundColor: cat.CATEGORY_COLOR || "#ccc" }}
+                            >
+                              <Icon size={18} color="#fff" />
+                            </span>
+                            <span className={styles.categoryName}>{cat.CATEGORY_NAME}</span>
+                          </div>
+                          <span className={styles.categoryPrice}>
+                            ¥{Number(cat.total_amount).toLocaleString()}
+                          </span>
+                        </div>
+                      );
+                    })}
+                    {filteredGraphData.length === 0 && (
+                      <p className={styles.emptyText}>データがありません</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* カレンダー */}
+              {activeTab === "calendar" && (
+                <div className={styles.calendarWrapper}>
+                  <CalendarView 
+                    dailySummary={calendarDailySum} 
+                    currentMonth={currentDate} 
+                  />
+
+                  {/* 日付別詳細リスト */}
+                  <div className={styles.detailList}>
+                    {sortedDates.map((dateStr) => {
+                      const records = groupedDailyRecords[dateStr];
+                      const dateObj = new Date(dateStr);
+                      const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+                      
+                      return (
+                        <div key={dateStr} className={styles.dailyGroup}>
+                          <div className={styles.dateHeader}>
+                            {dateObj.getDate()}日 ({weekdays[dateObj.getDay()]})
+                          </div>
+                          
+                          {records.map((r) => {
+                             const Icon = getIconComponent(r.ICON_NAME);
+                             const isIncome = Number(r.TYPE_ID) === 1;
+                             return (
+                              <div key={r.RECORD_ID} className={styles.listItem}>
+                                <div className={styles.listItemLeft}>
+                                  <span 
+                                    className={styles.categoryIcon}
+                                    style={{ backgroundColor: r.CATEGORY_COLOR || "#ccc" }}
+                                  >
+                                    <Icon size={18} color="#fff" />
+                                  </span>
+                                  <div className={styles.recordInfo}>
+                                    <span className={styles.shopName}>{r.SHOP_NAME}</span>
+                                    <span className={styles.productNames}>{r.product_names}</span>
+                                  </div>
+                                </div>
+                                <span className={`${styles.recordPrice} ${isIncome ? styles.textIncome : styles.textExpense}`}>
+                                  {isIncome ? "+" : "-"}¥{Number(r.TOTAL_AMOUNT).toLocaleString()}
+                                </span>
+                              </div>
+                             );
+                          })}
+                        </div>
+                      );
+                    })}
+                     {sortedDates.length === 0 && (
+                      <p className={styles.emptyText}>データがありません</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+            </div>
+          )}
+        </div>
+      }
     />
   );
 };
