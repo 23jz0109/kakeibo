@@ -57,7 +57,7 @@ const PrivateRoute = ({ children }) => {
 
 function App() {
   return (
-    <Router>
+    <Router basename="/combine_test">
       <Routes>
         {/* ログインページ */}
         <Route path="/" element={<PublicRoute><Login /></PublicRoute>} />
