@@ -1,4 +1,5 @@
-/* src/pages/Statistics/Statistics.module.css */
+/* src/pages/MyPage/Statistics.module.css */
+
 
 /* 全体レイアウト */
 .container {
@@ -20,6 +21,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  box-sizing: border-box;
 }
 
 /* タイトルエリア */
@@ -45,6 +47,7 @@
   gap: 1rem;
   width: 100%;
   margin-bottom: 2rem;
+  position: relative; 
 }
 
 .periodLabel {
@@ -57,8 +60,8 @@
 
 /* カレンダーコンポーネント用 */
 .datePickerContainer {
-  position: relative;
   width: 100%;
+  position: static;
 }
 
 .dateDisplayButton {
@@ -80,18 +83,22 @@
 
 /* カレンダー(ポップアップ) */
 .calendarDropdown {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1000;  
+  position: absolute;
+  /* グリッドの下端(100%)から少し空けて表示 */
+  top: calc(100% + 10px); 
+  left: 0;
+  right: 0;
+  z-index: 1000;
+
+  width: 100%; 
   background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.75rem;
+  border-radius: 12px;
   padding: 1rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  width: 300px;
-  max-width: 90vw;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1),
+              0 10px 10px -5px rgba(0,0,0,0.04);
+  
+  /* スマホなどで少しはみ出るのを防ぐための念の為のボックスサイズ指定 */
+  box-sizing: border-box; 
 }
 
 /* カレンダーヘッダー */
@@ -102,6 +109,37 @@
   margin-bottom: 1rem;
   font-weight: bold;
   color: #374151;
+}
+
+/* 曜日ヘッダー */
+.weekHeader {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+/* 土日 */
+.dayButton.weekend {
+  color: #2563eb; /* blue-600 */
+}
+
+/* 選択中は最優先 */
+.dayButton.selected {
+  background-color: #3b82f6;
+  color: white;
+}
+
+/* 無効日は最優先でグレー */
+.dayButton.disabled {
+  color: #d1d5db;
+  cursor: not-allowed;
+}
+
+.dayButton.disabled:hover {
+  background: none;
 }
 
 .navButton {
@@ -208,4 +246,18 @@
   color: #1f2937;
   white-space: nowrap;
   pointer-events: none;
+}
+
+/* スマホサイズ（幅480px以下）の時の調整 */
+@media (max-width: 480px) {
+  /* 外側の余白を少し狭くする */
+  .container {
+    padding: 0.5rem; 
+  }
+
+  /* カード内の余白も少し狭くする */
+  .card {
+    padding: 1rem;
+    width: 100%; 
+  }
 }

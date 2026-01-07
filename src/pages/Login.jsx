@@ -325,7 +325,7 @@ const Login = () => {
 
                   {/* パスワード忘れ */}
                   <button type="button" className="forgot-password">
-                    パスワードを忘れた方
+                    パスワードを忘れた方ko
                   </button>
                 </div>
               )}
