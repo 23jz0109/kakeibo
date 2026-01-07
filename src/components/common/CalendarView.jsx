@@ -22,13 +22,13 @@ const CalendarView = ({ dailySummary = [], currentMonth }) => {
     days.push({ days: d, isCurrentMonth: true });
   }
   // 来月分 (マス埋め)
-  const nextDaysCount = 7 - (days.length % 7);
-  if (nextDaysCount < 7) {
-    for (let d = 1; d <= nextDaysCount; d++) {
-      days.push({ days: d, isCurrentMonth: false });
-    }
-  }
+  const TOTAL_SLOTS = 42; 
+  const currentCount = days.length;
+  const remainingSlots = TOTAL_SLOTS - currentCount;
 
+  for (let d = 1; d <= remainingSlots; d++) {
+    days.push({ days: d, isCurrentMonth: false });
+  }
   // ★修正: APIデータ(calendar_daily_sum)をマッピング
   // API: { record_date: "2025-01-01", type_id: 1, daily_total: "1000" }
   const dailyDataMap = dailySummary.reduce((acc, item) => {

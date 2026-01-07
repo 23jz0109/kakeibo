@@ -1,8 +1,10 @@
 .container {
-  height: 100vh;
+  height: 100dvh;    /* アドレスバーを考慮した動的な高さ */
+  width: 100%;       /* 横幅も明示 */
   background-color: #f9fafb;
   display: flex;
   flex-direction: column;
+  overflow: hidden;  /*外枠自体のスクロールを防ぐ */
 }
 
 .header {
@@ -16,6 +18,8 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
   height: 4rem;
+  position: relative; /* 重なり順を有効にするため */
+  z-index: 50;        /* メインコンテンツより上に表示させる */
 }
 
 .header-tabs { /* バグってたら消す */

@@ -6,6 +6,57 @@ import styles from './Notification.module.css';
 
 const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
 
+// 時間選択用の汎用プルダウンコンポーネント
+const TimeDropdown = ({ value, options, onChange }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const wrapperRef = React.useRef(null);
+
+  // 外側クリックで閉じる処理
+  React.useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className={styles.dropdownWrapper} ref={wrapperRef}>
+      <div
+        className={`${styles.dropdownDisplay} ${isOpen ? styles.open : ''}`}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {/* 0埋め表示 */}
+        <span>{String(value).padStart(2, '0')}</span>
+        <span className={styles.arrow}>▾</span>
+      </div>
+
+      {isOpen && (
+        <div className={styles.dropdownList}>
+          {options.map((opt) => (
+            <div
+              key={opt}
+              className={`${styles.dropdownItem} ${opt === value ? styles.selected : ''}`}
+              onClick={() => {
+                onChange(opt);
+                setIsOpen(false);
+              }}
+            >
+              {String(opt).padStart(2, '0')}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* 時間選択のオプション定義 */
+const hourOptions = Array.from({ length: 24 }, (_, i) => i);
+const minOptions = [0, 15, 30, 45];
+
 const Notification = () => {
   const navigate = useNavigate();
   const authToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
@@ -16,7 +67,7 @@ const Notification = () => {
   const [editTargetId, setEditTargetId] = useState(null);
   const [originalItem, setOriginalItem] = useState(null);
   const [formData, setFormData] = useState({
-    title: '', 
+    title: '',
     notification_period: '',
     notification_hour: 9,
     notification_min: 0
@@ -24,7 +75,7 @@ const Notification = () => {
   const [productList, setProductList] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestedPeriod, setSuggestedPeriod] = useState(null);
-  
+
   // UTC -> Local
   const getLocalTimeFromUtc = (utcHour, utcMin) => {
     const date = new Date();
@@ -62,7 +113,7 @@ const Notification = () => {
       });
 
       if (!response.ok) throw new Error("データの取得に失敗しました");
-      
+
       const data = await response.json();
       const list = data.notification || data.notifications || data || [];
 
@@ -70,12 +121,12 @@ const Notification = () => {
         const normalized = list.map(n => {
           const timestamp = n.notification_timestamp || n.NOTIFICATION_TIMESTAMP;
           const scheduledDate = timestamp
-             ? new Date(timestamp.replace(" ", "T") + "Z") 
-             : new Date();
-          
+            ? new Date(timestamp.replace(" ", "T") + "Z")
+            : new Date();
+
           const dbUtcHour = Number(n.notification_hour || n.NOTIFICATION_HOUR || 0);
           const dbUtcMin = Number(n.notification_min || n.NOTIFICATION_MIN || 0);
-          
+
           // ローカル時間に変換
           const localTime = getLocalTimeFromUtc(dbUtcHour, dbUtcMin);
 
@@ -84,7 +135,7 @@ const Notification = () => {
             _id: n.id || n.ID,
             _utcHour: dbUtcHour,
             _utcMin: dbUtcMin,
-            _localHour: localTime.hour, 
+            _localHour: localTime.hour,
             _localMin: localTime.min,
             _scheduledDate: scheduledDate
           };
@@ -92,9 +143,9 @@ const Notification = () => {
 
         // 日付順 -> 時間順でソート
         normalized.sort((a, b) => {
-            const dateDiff = a._scheduledDate - b._scheduledDate;
-            if (dateDiff !== 0) return dateDiff;
-            return a._localHour - b._localHour;
+          const dateDiff = a._scheduledDate - b._scheduledDate;
+          if (dateDiff !== 0) return dateDiff;
+          return a._localHour - b._localHour;
         });
 
         setNotifications(normalized);
@@ -185,13 +236,29 @@ const Notification = () => {
     setOriginalItem(item);
     setSuggestedPeriod(null);
 
-    // 編集時は UTC -> Local に戻してフォームにセット
+    //  時間の抽出ロジック
+    let initHour = 9;
+    let initMin = 0;
+
+    // データの日付元を取得
+    const dateSource = item.notification_time || item._scheduledDate;
+
+    if (dateSource) {
+      const d = new Date(dateSource);
+      if (!isNaN(d.getTime())) {
+        initHour = d.getHours();
+        initMin = d.getMinutes();
+      }
+    }
+
     setFormData({
       title: item.product_name || item.PRODUCT_NAME || item.title,
       notification_period: String(item.notification_period || item.NOTIFICATION_PERIOD),
-      notification_hour: item._localHour,
-      notification_min: item._localMin
+      // 計算した時・分をセット
+      notification_hour: initHour,
+      notification_min: initMin
     });
+    
     setShowModal(true);
   };
 
@@ -209,7 +276,7 @@ const Notification = () => {
   const selectProduct = (product) => {
     setFormData({ ...formData, title: product.product_name });
     setShowSuggestions(false);
-    
+
     // 商品IDがあれば推奨間隔を取得
     const pid = product.id || product.ID;
     if (pid) fetchSuggestedInterval(pid);
@@ -219,7 +286,7 @@ const Notification = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!formData.title) return alert("商品名を入力してください");
-    
+
     // 期間の決定
     let periodVal = formData.notification_period;
     if (!periodVal && suggestedPeriod) {
@@ -231,24 +298,24 @@ const Notification = () => {
     // Local -> UTC
     let targetDate;
     if (editTargetId && originalItem && originalItem._scheduledDate) {
-        targetDate = new Date(originalItem._scheduledDate);
-        if (isNaN(targetDate.getTime())) {
-             targetDate = new Date();
-             targetDate.setDate(targetDate.getDate() + periodNum);
-        }
-    }
-    else {
-        // 新規
+      targetDate = new Date(originalItem._scheduledDate);
+      if (isNaN(targetDate.getTime())) {
         targetDate = new Date();
         targetDate.setDate(targetDate.getDate() + periodNum);
+      }
+    }
+    else {
+      // 新規
+      targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() + periodNum);
     }
 
     targetDate.setHours(Number(formData.notification_hour), Number(formData.notification_min), 0, 0);
     const yyyy = targetDate.getUTCFullYear();
-    const mm   = String(targetDate.getUTCMonth() + 1).padStart(2, "0");
-    const dd   = String(targetDate.getUTCDate()).padStart(2, "0");
-    const hh   = String(targetDate.getUTCHours()).padStart(2, "0");
-    const mi   = String(targetDate.getUTCMinutes()).padStart(2, "0");
+    const mm = String(targetDate.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(targetDate.getUTCDate()).padStart(2, "0");
+    const hh = String(targetDate.getUTCHours()).padStart(2, "0");
+    const mi = String(targetDate.getUTCMinutes()).padStart(2, "0");
     const formattedTimestamp = `${yyyy}-${mm}-${dd} ${hh}:${mi}:00`;
 
     const bodyData = {
@@ -275,7 +342,7 @@ const Notification = () => {
         headers,
         body: JSON.stringify(bodyData)
       });
-      
+
       const resData = await response.json();
 
       if (response.ok) {
@@ -312,7 +379,7 @@ const Notification = () => {
         },
         body: JSON.stringify({ enable: nextVal })
       });
-      fetchNotifications(true); 
+      fetchNotifications(true);
     }
     catch {
       setNotifications(originalList);
@@ -322,38 +389,38 @@ const Notification = () => {
 
   // 補充
   const handleRefill = async (item, e) => {
-    e.stopPropagation(); 
-    
+    e.stopPropagation();
+
     if (!window.confirm(`「${item.product_name || item.title}」を補充しましたか？\n次の通知日を更新します。`)) {
-        return;
+      return;
     }
 
     try {
       const period = Number(item.notification_period) || 30;
-      
+
       // 期間分進む
       let targetDate = new Date();
       targetDate.setDate(targetDate.getDate() + period);
-      
+
       // ローカル時間をセット
       const localHour = item._localHour ?? 9;
-      const localMin  = item._localMin  ?? 0;
+      const localMin = item._localMin ?? 0;
       targetDate.setHours(localHour, localMin, 0, 0);
-      
+
       // UTC文字列を作成
       const yyyy = targetDate.getUTCFullYear();
-      const mm   = String(targetDate.getUTCMonth() + 1).padStart(2, "0");
-      const dd   = String(targetDate.getUTCDate()).padStart(2, "0");
-      const hh   = String(targetDate.getUTCHours()).padStart(2, "0");
-      const mi   = String(targetDate.getUTCMinutes()).padStart(2, "0");      
+      const mm = String(targetDate.getUTCMonth() + 1).padStart(2, "0");
+      const dd = String(targetDate.getUTCDate()).padStart(2, "0");
+      const hh = String(targetDate.getUTCHours()).padStart(2, "0");
+      const mi = String(targetDate.getUTCMinutes()).padStart(2, "0");
       const formattedTimestamp = `${yyyy}-${mm}-${dd} ${hh}:${mi}:00`;
-      
+
       // 送信データ
       const payload = {
         product_name: item.product_name || item.title,
         notification_period: period,
         notification_hour: Number(hh), // UTC時間を送る
-        notification_min: Number(mi),  
+        notification_min: Number(mi),
         notification_timestamp: formattedTimestamp
       };
 
@@ -380,19 +447,19 @@ const Notification = () => {
       alert(`エラー: ${err.message}`);
     }
   };
-  
+
   // 削除
   const handleDelete = async (item, e) => {
     e.stopPropagation();
     const targetId = item._id;
-    if(!window.confirm("この通知設定を削除しますか？")) return;
+    if (!window.confirm("この通知設定を削除しますか？")) return;
 
     try {
       const res = await fetch(`${API_BASE_URL}/notification`, {
         method: "DELETE",
-        headers: { 
-            "Authorization": `Bearer ${authToken}`, 
-            "X-Notification-ID": String(targetId) 
+        headers: {
+          "Authorization": `Bearer ${authToken}`,
+          "X-Notification-ID": String(targetId)
         }
       });
       if (res.ok) {
@@ -402,9 +469,9 @@ const Notification = () => {
         alert("削除に失敗しました");
       }
     }
-    catch (err) { 
-        console.error(err);
-        alert("通信エラーが発生しました");
+    catch (err) {
+      console.error(err);
+      alert("通信エラーが発生しました");
     }
   };
 
@@ -415,7 +482,7 @@ const Notification = () => {
   };
 
   // 商品名候補検索
-  const filteredProducts = productList.filter(p => 
+  const filteredProducts = productList.filter(p =>
     p.product_name.toLowerCase().includes(formData.title.toLowerCase())
   );
 
@@ -442,8 +509,8 @@ const Notification = () => {
               const isExpanded = expandedId === item._id;
 
               return (
-                <div 
-                  key={item._id} 
+                <div
+                  key={item._id}
                   className={`${styles.card} ${isEnabled ? styles.cardActive : styles.cardInactive}`}
                   onClick={() => handleCardClick(item._id)}>
                   <div className={styles.cardHeader}>
@@ -452,39 +519,39 @@ const Notification = () => {
                         {item.product_name || item.title}
                       </h3>
                       <div className={styles.infoText} style={{ color: isEnabled ? '#444' : '#999' }}>
-                          次回: {formatDate(item._scheduledDate)} ({item.notification_period}日/1回)
+                        次回: {formatDate(item._scheduledDate)} ({item.notification_period}日/1回)
                       </div>
                     </div>
-                    
+
                     <div className={styles.cardActions}>
-                        <button
-                          onClick={(e) => handleToggle(item, e)}
-                          className={`${styles.toggleButton} ${isEnabled ? styles.toggleOn : styles.toggleOff}`}>
-                          {isEnabled ? "ON" : "OFF"}
-                        </button>
-                        <button 
-                          onClick={(e) => openEditModal(item, e)}
-                          className={styles.settingButton}>
-                          <Settings size={20} color="#888" />
-                        </button>
+                      <button
+                        onClick={(e) => handleToggle(item, e)}
+                        className={`${styles.toggleButton} ${isEnabled ? styles.toggleOn : styles.toggleOff}`}>
+                        {isEnabled ? "ON" : "OFF"}
+                      </button>
+                      <button
+                        onClick={(e) => openEditModal(item, e)}
+                        className={styles.settingButton}>
+                        <Settings size={20} color="#888" />
+                      </button>
                     </div>
                   </div>
 
                   {isExpanded && (
                     <div className={styles.cardFooter}>
                       <div className={styles.footerGrid}>
-                        <button 
-                          onClick={(e) => handleRefill(item, e)} 
+                        <button
+                          onClick={(e) => handleRefill(item, e)}
                           className={styles.actionBtnBlue}>
                           <CheckCircle size={18} /><span>補充</span>
                         </button>
-                        <button 
-                          onClick={(e) => handleSearchPrice(item.product_name, e)} 
+                        <button
+                          onClick={(e) => handleSearchPrice(item.product_name, e)}
                           className={styles.actionBtnGray}>
                           <Search size={18} /><span>価格</span>
                         </button>
-                        <button 
-                          onClick={(e) => handleDelete(item, e)} 
+                        <button
+                          onClick={(e) => handleDelete(item, e)}
                           className={styles.actionBtnRed}>
                           <Trash2 size={18} /><span>削除</span>
                         </button>
@@ -500,7 +567,7 @@ const Notification = () => {
           {showModal && (
             <div className={styles.modalOverlay} onClick={closeModal}>
               <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                
+
                 <div className={styles.modalHeader}>
                   <h2 className={styles.modalTitle}>
                     {editTargetId ? "設定を編集" : "通知を追加"}
@@ -515,60 +582,56 @@ const Notification = () => {
                   <div className={styles.formRow}>
                     <label className={styles.rowLabel}>商品名</label>
                     <div style={{ flex: 1, position: 'relative' }}>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         className={styles.rowInput}
                         value={formData.title}
                         onChange={handleTitleChange}
                         onFocus={() => setShowSuggestions(true)}
                         required
-                        placeholder="商品名を入力"/>
-                        {showSuggestions && formData.title && filteredProducts.length > 0 && (
-                          <ul className={styles.suggestionList}>
-                            {filteredProducts.map(p => (
-                                <li key={p.id} onClick={() => selectProduct(p)} className={styles.suggestionItem}>
-                                  {p.product_name}
-                                </li>
-                              ))
-                            }
-                          </ul>
-                        )}
+                        placeholder="商品名を入力" />
+                      {showSuggestions && formData.title && filteredProducts.length > 0 && (
+                        <ul className={styles.suggestionList}>
+                          {filteredProducts.map(p => (
+                            <li key={p.id} onClick={() => selectProduct(p)} className={styles.suggestionItem}>
+                              {p.product_name}
+                            </li>
+                          ))
+                          }
+                        </ul>
+                      )}
                     </div>
                   </div>
 
                   {/* 間隔 */}
                   <div className={styles.formRow}>
                     <label className={styles.rowLabel}>間隔(日)</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       pattern="\d*"
                       className={styles.rowInput}
                       value={formData.notification_period}
-                      onChange={(e) => setFormData({...formData, notification_period: e.target.value.replace(/\D/g, "")})}
-                      placeholder={suggestedPeriod ? `${suggestedPeriod}` : ""}/>
+                      onChange={(e) => setFormData({ ...formData, notification_period: e.target.value.replace(/\D/g, "") })}
+                      placeholder={suggestedPeriod ? `${suggestedPeriod}` : ""} />
                   </div>
 
                   {/* 時間 */}
                   <div className={styles.formRow}>
                     <label className={styles.rowLabel}>通知時間</label>
                     <div className={styles.timeSelectContainer}>
-                      <select 
-                        className={styles.timeSelect}
+                      {/* 「時」のプルダウン */}
+                      <TimeDropdown
                         value={formData.notification_hour}
-                        onChange={(e) => setFormData({...formData, notification_hour: Number(e.target.value)})}>
-                        {Array.from({length: 24}, (_, i) => (
-                          <option key={i} value={i}>{String(i).padStart(2, '0')}</option>
-                        ))}
-                      </select>
-                      <span>:</span>
-                      <select 
-                        className={styles.timeSelect}
+                        options={hourOptions}
+                        onChange={(val) => setFormData({ ...formData, notification_hour: val })}
+                      />
+                      <span style={{ fontWeight: 'bold', color: '#666' }}>:</span>
+                      {/* 「分」のプルダウン */}
+                      <TimeDropdown
                         value={formData.notification_min}
-                        onChange={(e) => setFormData({...formData, notification_min: Number(e.target.value)})}>
-                        {[0, 15, 30, 45].map(m => (
-                          <option key={m} value={m}>{String(m).padStart(2, '0')}</option>
-                        ))}
-                      </select>
+                        options={minOptions}
+                        onChange={(val) => setFormData({ ...formData, notification_min: val })}
+                      />
                     </div>
                   </div>
 

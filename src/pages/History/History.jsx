@@ -4,7 +4,7 @@ import MonthPicker from "../../components/common/MonthPicker";
 import CalendarView from "../../components/common/CalendarView";
 import GraphView from "../../components/common/GraphView";
 import Loader from "../../components/common/Loader";
-import * as Icons from "lucide-react"; 
+import * as Icons from "lucide-react";
 import { useGetRecord } from "../../hooks/history/useGetRecord";
 import styles from "./History.module.css";
 
@@ -20,11 +20,11 @@ const History = () => {
   const [activeTab, setActiveTab] = useState("graph");
   const [transactionType, setTransactionType] = useState("expense");
 
-  const { 
-    isLoading, 
-    calendarDailySum, 
-    monthlyRecordList, 
-    graphCategorySum 
+  const {
+    isLoading,
+    calendarDailySum,
+    monthlyRecordList,
+    graphCategorySum
   } = useGetRecord(currentDate.getFullYear(), currentDate.getMonth());
 
   // 集計ロジック
@@ -32,16 +32,16 @@ const History = () => {
     if (!monthlyRecordList) return { totalIncome: 0, totalExpense: 0 };
 
     return monthlyRecordList.reduce((acc, record) => {
-        const amount = Number(record.total_amount);
-        // type_id: 1=収入, 2=支出
-        if (Number(record.type_id) === 1) {
-          acc.totalIncome += amount;
-        }
-        else if (Number(record.type_id) === 2) {
-          acc.totalExpense += amount;
-        }
-        return acc;
-      }, { totalIncome: 0, totalExpense: 0 }
+      const amount = Number(record.total_amount);
+      // type_id: 1=収入, 2=支出
+      if (Number(record.type_id) === 1) {
+        acc.totalIncome += amount;
+      }
+      else if (Number(record.type_id) === 2) {
+        acc.totalExpense += amount;
+      }
+      return acc;
+    }, { totalIncome: 0, totalExpense: 0 }
     );
   }, [monthlyRecordList]);
 
@@ -90,7 +90,7 @@ const History = () => {
     const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
 
     if (currentMonthStart > thisMonthStart) {
-        return;
+      return;
     }
     setCurrentDate(newDate);
   };
@@ -116,15 +116,15 @@ const History = () => {
       headerContent={headerContent}
       mainContent={
         <div className={styles.mainContainer}>
-          
+
           {/* タブ切り替えエリア */}
           <div className={styles.tabContainer}>
-            <button 
+            <button
               className={`${styles.tabButton} ${activeTab === 'graph' ? styles.active : ''}`}
               onClick={() => setActiveTab('graph')}>
               グラフ
             </button>
-            <button 
+            <button
               className={`${styles.tabButton} ${activeTab === 'calendar' ? styles.active : ''}`}
               onClick={() => setActiveTab('calendar')}>
               カレンダー
@@ -136,7 +136,7 @@ const History = () => {
             selectedMonth={currentDate}
             onMonthChange={handleMonthChange}
             onMonthSelect={handleMonthSelect}
-            isDisabled={isLoading}/>
+            isDisabled={isLoading} />
 
           {/* 収支サマリー */}
           <div className={styles.financeSummary}>
@@ -162,7 +162,7 @@ const History = () => {
             <Loader text="データを読み込み中..." />
           ) : (
             <div className={styles.viewContainer}>
-              
+
               {/* グラフ */}
               {activeTab === "graph" && (
                 <div className={styles.graphWrapper}>
@@ -189,8 +189,8 @@ const History = () => {
                       return (
                         <div key={idx} className={styles.listItem}>
                           <div className={styles.listItemLeft}>
-                            <span 
-                              className={styles.categoryIcon} 
+                            <span
+                              className={styles.categoryIcon}
                               style={{ backgroundColor: cat.category_color || "#ccc" }}>
                               <Icon size={18} color="#fff" />
                             </span>
@@ -210,28 +210,31 @@ const History = () => {
               {/* カレンダー */}
               {activeTab === "calendar" && (
                 <div className={styles.calendarWrapper}>
-                  <CalendarView 
-                    dailySummary={calendarDailySum} 
-                    currentMonth={currentDate} 
-                  />
+                  <div className={styles.calendarContainer}>
+                    <CalendarView
+                      dailySummary={calendarDailySum}
+                      currentMonth={currentDate}
+                    />
+                  </div>
 
                   {/* 日付別詳細リスト */}
                   <div className={styles.detailList}>
+
                     {sortedDates.map((dateStr) => {
                       const records = groupedDailyRecords[dateStr];
                       const dateObj = new Date(dateStr);
                       const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
-                      
+
                       return (
                         <div key={dateStr} className={styles.dailyGroup}>
                           <div className={styles.dateHeader}>
                             {dateObj.getDate()}日 ({weekdays[dateObj.getDay()]})
                           </div>
-                          
+
                           {records.map((r, index) => {
-                             const Icon = getIconComponent(r.icon_name);
-                             const isIncome = Number(r.type_id) === 1;
-                             return (
+                            const Icon = getIconComponent(r.icon_name);
+                            const isIncome = Number(r.type_id) === 1;
+                            return (
                               <div key={r.record_id} className={styles.listItem}>
                                 <div className={styles.listItemLeft}>
                                   {/* カテゴリ混合の場合があるかもしれません、一旦コメントアウト */}
@@ -250,12 +253,12 @@ const History = () => {
                                   ¥{Number(r.total_amount).toLocaleString()}
                                 </span>
                               </div>
-                             );
+                            );
                           })}
                         </div>
                       );
                     })}
-                     {sortedDates.length === 0 && (
+                    {sortedDates.length === 0 && (
                       <p className={styles.emptyText}>データがありません</p>
                     )}
                   </div>

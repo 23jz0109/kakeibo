@@ -257,6 +257,8 @@
   font-weight: bold;
   color: #374151;
   font-size: 0.95rem;
+  flex-shrink: 0;      /* 幅を縮めないようにする */
+  white-space: nowrap; /* 文字の折り返しを禁止する */
 }
 
 .rowInput {
@@ -291,6 +293,89 @@
   font-size: 1rem;
   background-color: white;
   text-align: center;
+}
+
+.dropdownWrapper {
+  position: relative;
+  width: 90px; /* お好みの幅に調整してください */
+  font-family: inherit;
+}
+
+/* 選択中の表示部分（ボタンのような見た目） */
+.dropdownDisplay {
+  background-color: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.dropdownDisplay:hover {
+  border-color: #3b82f6;
+}
+
+/* 開いている時のスタイル */
+.dropdownDisplay.open {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* 矢印アイコン */
+.arrow {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-left: 8px;
+}
+
+/* 選択肢リスト（絶対配置で浮かる） */
+.dropdownList {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  
+  max-height: 95px;     /* 高さを95pxに制限（これ以上伸びない） */
+  overflow-y: auto;      /* 中身が溢れたらリストの中だけでスクロールする */
+
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;         /* 他の要素（保存ボタンなど）の上に浮いて表示 */
+  display: block; 
+  padding: 0;
+}
+
+/* リスト内の各項目 */
+.dropdownItem {
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6; /* 区切り線 */
+}
+
+/* 一番下の線の除去 */
+.dropdownItem:last-child {
+  border-bottom: none;
+}
+
+.dropdownItem:hover {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+
+.dropdownItem.selected {
+  background-color: #eff6ff;
+  color: #2563eb;
+  font-weight: bold;
 }
 
 /* 商品候補リスト */
@@ -338,4 +423,24 @@
 
 .submitButton:hover {
   background-color: #2563eb;
+}
+
+/* スマホサイズ（幅480px以下）の時のレイアウト調整 */
+@media (max-width: 480px) {
+  .formRow {
+    flex-direction: column; /* 横並びをやめて縦積みにする */
+    align-items: flex-start; /* 左寄せにする */
+    gap: 0.5rem; /* ラベルと入力欄の間隔 */
+  }
+
+  .rowLabel {
+    width: 100%; /* ラベルを横幅いっぱいに */
+    margin-bottom: 4px; /* 入力欄との隙間 */
+  }
+
+  /* 入力欄や時間選択も幅いっぱいに広げる */
+  .rowInput,
+  .timeSelectContainer {
+    width: 100%;
+  }
 }
