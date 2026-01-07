@@ -181,14 +181,10 @@
     pointer-events: none;
   }
   
-  /* =========================================
-     6. 展開バー（ExpandBar）
-     ========================================= */
+  /* 6. 展開バー（ExpandBar）*/
   .expandBar {
     position: fixed;
     
-    /* フッターの高さ(4rem) + 線(1px) + iPhone下の余白 */
-    /* ここを合わせないとフッターと重なったり隙間が空いたりします */
     bottom: calc(4rem + 1px + env(safe-area-inset-bottom));
     
     left: 0;
@@ -228,21 +224,8 @@
     background-color: #f3f4f6;
   }
 
-  /* =========================================
-   iOS対策: 入力時の勝手なズームを防ぐ
-   ========================================= */
-input,
-textarea,
-select {
-  /* 16px以上にすると、iOSはズームしなくなります */
-  font-size: 16px !important; 
-}
-
-/* 念のための追加対策（iOS Safari/Chrome用） */
-@media screen and (-webkit-min-device-pixel-ratio:0) { 
-  select:focus,
-  textarea:focus,
-  input:focus {
-    font-size: 16px !important;
-  }
+  
+.pb-safe{
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
 }
