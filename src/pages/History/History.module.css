@@ -47,7 +47,7 @@
 .tabButton.active {
   background-color: #fff;
   color: #1f2937;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* 収支サマリー */
@@ -92,9 +92,17 @@
   font-feature-settings: "palt";
 }
 
-.itemIncome .financeValue { color: #10b981; }
-.itemExpense .financeValue { color: #ef4444; }
-.itemBalance .financeValue { color: #1f2937; }
+.itemIncome .financeValue {
+  color: #10b981;
+}
+
+.itemExpense .financeValue {
+  color: #ef4444;
+}
+
+.itemBalance .financeValue {
+  color: #1f2937;
+}
 
 /* コンテンツ表示エリア */
 .viewContainer {
@@ -106,6 +114,15 @@
 .graphWrapper,
 .calendarWrapper {
   animation: fadeIn 0.3s ease;
+}
+
+/* カレンダーの表示領域を固定するクラス */
+.calendarContainer {
+  min-height: 400px;
+  width: 100%;
+
+  display: flex;
+  justify-content: center;
 }
 
 /* グラフ 切り替えスイッチ */
@@ -136,7 +153,7 @@
   background: #374151;
   color: #fff;
   border-color: #374151;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* 詳細リスト */
@@ -155,7 +172,7 @@
   background: #fff;
   border-radius: 12px;
   border: 1px solid #f3f4f6;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .listItemLeft {
@@ -206,7 +223,8 @@
   text-overflow: ellipsis;
 }
 
-.categoryPrice, .recordPrice {
+.categoryPrice,
+.recordPrice {
   font-weight: bold;
   font-size: 0.95rem;
   flex-shrink: 0;
@@ -214,8 +232,13 @@
   font-family: monospace, sans-serif;
 }
 
-.textIncome { color: #10b981; }
-.textExpense { color: #ef4444; }
+.textIncome {
+  color: #10b981;
+}
+
+.textExpense {
+  color: #ef4444;
+}
 
 /* カレンダー 日のグループ */
 .dailyGroup {
@@ -240,6 +263,13 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

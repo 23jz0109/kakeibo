@@ -20,7 +20,7 @@
 .days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-auto-rows: 1fr;
+  grid-template-rows: repeat(6, 1fr); 
   flex: 1;
   min-height: 0;
 }
@@ -55,12 +55,12 @@
 
 .expense {
   color: #ef4444;
-  font-size: 0.5rem;
+  font-size: 0.8rem;
 }
 
 .income {
   color: #42A5F5;
-  font-size: 0.5rem;
+  font-size: 0.8rem;
 }
 
 .empty-state {
