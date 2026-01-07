@@ -28,7 +28,7 @@ export const useGetRecord = (year, month) => {
       }
 
       try {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
         if (!token) throw new Error("認証トークンがありません");
 
         const response = await fetch("https://t08.mydns.jp/kakeibo/public/api/records", {
