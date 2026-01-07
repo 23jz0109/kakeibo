@@ -4,13 +4,13 @@ import { Wallet, List, Bell, User, Plus, ChevronLeft, Trash2, X, Camera, Edit3, 
 import { usePreventBack } from "../../hooks/common/usePreventBack";
 import styles from "./Layout.module.css";
 
-const Layout = ({ 
-  headerContent, 
+const Layout = ({
+  headerContent,
   mainContent,
-  disableDataInputButton = false, 
-  redirectPath, 
-  state = null, 
-  onDeleteButtonClick 
+  disableDataInputButton = false,
+  redirectPath,
+  state = null,
+  onDeleteButtonClick
 }) => {
   usePreventBack();
 
@@ -59,13 +59,13 @@ const Layout = ({
             <ChevronLeft size={24}
               className={styles["icon"]}
               onClick={() => navigate(redirectPath, { state })}
-              style={{ cursor: "pointer" }}/>
+              style={{ cursor: "pointer" }} />
           </div>
         )}
-        
+
         {/* ヘッダーの中身（タイトルなど） */}
         {headerContent}
-        
+
         {/* 削除ボタン */}
         {onDeleteButtonClick && (
           <button className={styles["delete-button"]} onClick={() => onDeleteButtonClick()}>
@@ -85,9 +85,9 @@ const Layout = ({
           <div ref={plusRef} className={styles.expandInner} onClick={(e) => e.stopPropagation()} >
             {/* 収入 */}
             <button className={`${styles.expandItem} ${styles.income}`} onClick={() => {
-                setIsPlusOpen(false);
-                navigate("/input/income");
-              }}>
+              setIsPlusOpen(false);
+              navigate("/input/income");
+            }}>
               <ArrowDownCircle size={20} />
               <span>収入</span>
             </button>
@@ -95,18 +95,18 @@ const Layout = ({
 
             {/* カメラ起動 */}
             <button className={`${styles.expandItem} ${styles.expense}`} onClick={() => {
-                setIsPlusOpen(false);
-                navigate("/input/ocr", { state: { autoCamera: true } });
-              }}>
+              setIsPlusOpen(false);
+              navigate("/input/ocr", { state: { autoCamera: true } });
+            }}>
               <Camera size={20} />
               <span>OCR</span>
             </button>
 
             {/* 支出(手動入力) */}
             <button className={`${styles.expandItem} ${styles.expense}`} onClick={() => {
-                setIsPlusOpen(false);
-                navigate("/input/manual");
-              }}>
+              setIsPlusOpen(false);
+              navigate("/input/manual");
+            }}>
               <Edit3 size={20} />
               <span>支出</span>
             </button>
@@ -115,8 +115,9 @@ const Layout = ({
       )}
 
       {/* フッターナビゲーション */}
-      <footer className={styles.footer}>
-        <nav className={styles["footer-nav"]}>
+      <footer className={`${styles.footer} pb-safe`}>
+
+          <nav className={styles["footer-nav"]}>
             {/* 履歴 */}
             <Link to="/history" className={`${styles["nav-item"]} ${isActive("/history") ? styles.active : ""}`}>
               <List className={styles["nav-icon"]} size={20} />
@@ -131,9 +132,8 @@ const Layout = ({
 
             {/* ＋ボタン */}
             <button
-              className={`${styles["navigate-datainput"]} ${
-                isPlusOpen ? styles.close : ""
-              }`}
+              className={`${styles["navigate-datainput"]} ${isPlusOpen ? styles.close : ""
+                }`}
               disabled={isPlusDisabled}
               onClick={() => {
                 if (!isPlusDisabled) setIsPlusOpen((prev) => !prev);
@@ -152,9 +152,9 @@ const Layout = ({
               <User className={styles["nav-icon"]} size={24} />
               <span className={styles["nav-label"]}>マイページ</span>
             </Link>
-        </nav>
-      </footer>
-    </div>
+          </nav>
+        </footer>
+      </div>
   );
 };
 
