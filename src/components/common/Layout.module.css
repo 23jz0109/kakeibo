@@ -8,6 +8,10 @@
 }
 
 .header {
+  /* 縮まないようにする */
+  flex-shrink: 0; 
+  height: 4rem;
+
   display: flex;
   justify-content: center;
   align-items: center;
@@ -53,28 +57,41 @@
 }
 
 .main {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden; 
+  /* ヘッダーとフッターの間の空間を全部埋める */
+  flex: 1; 
+  
+  /* 中身が溢れたら、このエリア内だけでスクロールする */
+  overflow-y: auto; 
+  overflow-x: hidden;
+  
+  /* iOSでスクロールを滑らかにする */
+  -webkit-overflow-scrolling: touch; 
+  
   padding: 1rem;
-  min-width: 0;
-  min-height: 0;
+  min-height: 0; /* Flexboxのバグ防止 */
 }
 
 .footer {
+  /* 縮まないようにする */
+  flex-shrink: 0; 
+  
   background-color: white;
   border-top: 1px solid #e5e7eb;
-  position: sticky;
-  bottom: 0;
-  flex-shrink: 0;
+  
+  /* 重なり順の制御（展開バーより下、メインより上） */
+  position: relative;
+  z-index: 40;
+  
+  /* iPhone X以降の下部バー（ホームインジケータ）対策 */
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* android未検証(高さ、見た目) */
+/* フッター内のナビゲーション調整 */
 .footer-nav {
   display: flex;
   justify-content: space-around;
-  align-items: flex-start;
-  height: 5rem;
+  align-items: flex-start; /* アイコン位置調整 */
+  height: 4rem; 
   max-width: 28rem;
   margin: 0 auto;
 }
