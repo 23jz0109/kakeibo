@@ -1,0 +1,489 @@
+/* --- ヘッダー --- */
+.headerContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  height: 40px;
+}
+
+.headerTitle {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.125rem;
+  font-weight: bold;
+  margin: 0;
+  color: #1f2937;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.headerButtons {
+  display: flex;
+  gap: 12px;
+  z-index: 10;
+}
+
+.iconButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4b5563;
+  transition: opacity 0.2s;
+  margin-right: 1rem;
+}
+
+.iconButton:active {
+  opacity: 0.6;
+}
+
+/* --- メインコンテンツ --- */
+.container {
+  padding: 16px;
+  padding-bottom: 80px;
+  position: relative;
+  min-height: 80vh;
+}
+
+/* --- タブデザイン --- */
+.tabContainer {
+  display: flex;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 20px;
+}
+
+.tabButton {
+  flex: 1;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  color: #888;
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.tabButton.active {
+  background-color: #fff;
+  color: #333;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* --- 表示エリア --- */
+.contentArea {
+  margin-bottom: 20px;
+}
+
+.loading, .error {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.placeholderBox {
+  background: #fff;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  color: #666;
+}
+
+/* --- カードデザイン --- */
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: transform 0.1s;
+}
+
+.card:active {
+  transform: scale(0.99);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.cardTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cardIconBox {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+  display: block;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #e5e7eb;
+  font-size: 0.85rem;
+}
+
+.cardActions {
+  display: flex;
+  gap: 8px;
+}
+
+.cardActions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #9ca3af;
+  transition: color 0.2s;
+}
+
+.cardActions button:hover {
+  color: #4b5563;
+}
+
+/* --- 予算アイテム --- */
+.budgetAmounts, .fixedFooter {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.amountSpent, .fixedAmount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.amountLimit {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-left: 4px;
+}
+
+.progressContainer {
+  height: 8px;
+  background-color: #f3f4f6;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.progressBar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease-out;
+}
+
+.progressOver {
+  background-color: #ef4444 !important;
+}
+
+.progressText {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.percentText {
+  font-weight: 600;
+}
+
+.textDanger {
+  color: #ef4444;
+  font-weight: bold;
+}
+
+/* --- 固定費アイテム --- */
+.fixedDate {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.periodMessage {
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  margin-left: auto; /* 右寄せ */
+}
+
+/* --- モーダル --- */
+.modalOverlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modalContent {
+  background-color: #f3f4f6;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  border-radius: 16px;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalHeader h2 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin: 0;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+/* --- フォーム全般 --- */
+.formGroup {
+  background-color: white;
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+/* カテゴリカード */
+.categoryCard {
+  background-color: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.categoryLabel {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+/* 金額入力 */
+.amountInputWrapper {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 2px;
+}
+
+.amountInputWrapper:focus-within {
+  border-color: #3b82f6;
+}
+
+.yenMark {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+  margin-right: 8px;
+}
+
+.amountInput {
+  flex: 1;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  padding: 4px 0;
+}
+
+/* セレクトボックス & テキスト入力 */
+.selectInput {
+  width: 100%;
+  padding: 8px 0;
+  border: none;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: transparent;
+  font-size: 1rem;
+  color: #1f2937;
+  outline: none;
+  cursor: pointer;
+}
+
+.selectInput:focus {
+  border-color: #3b82f6;
+}
+
+.inputField {
+  width: 100%;
+  padding: 8px 0;
+  border: none;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: transparent;
+  font-size: 1rem;
+  outline: none;
+}
+
+.inputField:focus {
+  border-color: #3b82f6;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #374151;
+  cursor: pointer;
+  padding-top: 4px;
+}
+
+/* 収入・支出切り替えボタン */
+.typeToggleContainer {
+  display: flex;
+  background-color: #e5e7eb;
+  padding: 4px;
+  border-radius: 10px;
+}
+
+.typeButton {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #6b7280;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.typeActiveIncome {
+  background-color: white;
+  color: #3b82f6;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.typeActiveExpense {
+  background-color: white;
+  color: #ef4444;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* モーダルアクション */
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.saveBtn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.saveBtn:disabled {
+  background-color: #93c5fd;
+  cursor: not-allowed;
+}
+
+/* 横並びレイアウト用 */
+.flexRow {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.flexItem {
+  flex: 1;
+}
+
+.flexItemSmall {
+  flex: 0 0 80px;
+}
+
+/* フッター情報 (追加) */
+.footerInfoLeft {
+  color: #6b7280;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.footerInfoRight {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 12px;
+  color: #4b5563;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.iconSmall {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.5;
+}

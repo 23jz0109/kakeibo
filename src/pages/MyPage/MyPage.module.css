@@ -1,0 +1,93 @@
+/* src/pages/MyPage/MyPage.module.css */
+
+/* コンテナ全体 */
+.mainContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+}
+
+/* 挨拶エリア */
+.greetingSection {
+  width: 100%;
+  max-width: 500px;
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  text-align: center;
+}
+
+.greetingText {
+  font-size: 1.1rem;
+  color: #333;
+  line-height: 1.6;
+}
+
+.emailText {
+  font-weight: bold;
+  color: #3b82f6;
+}
+
+/* メニューリスト */
+.menuList {
+  width: 100%;
+  max-width: 500px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0;
+}
+
+.menuItem {
+  width: 100%;
+}
+
+/* ボタン */
+.menuButton {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 16px 20px;
+  border: none;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.menuButton:active {
+  transform: scale(0.99);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* アイコンとテキストのラッパー */
+.labelContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1rem;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+/* 右側の矢印 */
+.menuButton::after {
+  content: "›";
+  font-size: 1.5rem;
+  color: #9ca3af;
+  line-height: 0;
+  position: relative;
+  top: -2px;
+}
+
+/* ログアウトボタン */
+.logoutButton .labelContent {
+  color: #ef4444;
+}

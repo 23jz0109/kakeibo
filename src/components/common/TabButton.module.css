@@ -1,0 +1,28 @@
+.header-tabs {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.tab-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  font-weight: 600;
+  font-size: 1rem;
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+  gap: 0.5rem;
+}
+
+.tab-active {
+  font-weight: 700;
+  color: #2563eb;
+  background-color: #eff6ff;
+  border-bottom-color: #2563eb;
+}

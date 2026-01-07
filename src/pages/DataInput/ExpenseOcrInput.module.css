@@ -1,0 +1,147 @@
+/* 全体のコンテナ */
+.container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  /* background-color: #000; */
+  overflow: hidden;
+  border-radius: 0;
+}
+
+/* カメラ */
+.videoElement {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* エラーメッセージ */
+.errorMessage {
+  position: absolute;
+  bottom: 20px;
+  left: 10px;
+  right: 10px;
+  background-color: rgba(239, 68, 68, 0.9);
+  color: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  z-index: 40;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* オーバーレイ */
+.analyzingOverlay {
+  position: absolute;
+  /* position: fixed; */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #f9fafb;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.analyzingText {
+  margin-top: 1.5rem;
+  color: #4b5563;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.warningText {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-top: 0.5rem;
+}
+
+/* ローディング */
+.spinnerWrapper {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 撮影ボタン */
+.controls {
+  position: absolute;
+  bottom: 30px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  position: absolute; 
+}
+
+.captureButton {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background-color: #fff;
+  border: 4px solid #e5e7eb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.1s;
+  z-index: 2;
+}
+
+.captureButton:active {
+  transform: scale(0.95);
+}
+
+/* アップロードボタン */
+.uploadButton {
+  position: absolute;
+  right: 20%;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  color: #4b5563;
+  z-index: 2;
+}
+
+.uploadButton:active {
+  background-color: #e5e7eb;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+@media (max-width: 400px) {
+  .uploadButton {
+    right: 15%;
+  }
+}
+
+.retryButton {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  background-color: white;
+  color: #ef4444;
+  font-weight: 600;
+  cursor: pointer;
+}

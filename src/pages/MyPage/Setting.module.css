@@ -1,0 +1,204 @@
+.mainContainer {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.pageTitle {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 24px;
+  color: #333;
+}
+
+/* カードスタイル */
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #444;
+}
+
+.description {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+/* メインボタン */
+.primaryBtn {
+  width: 100%;
+  background-color: #3b82f6;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.primaryBtn:hover {
+  background-color: #2563eb;
+}
+
+.primaryBtn:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* メッセージ */
+.error {
+  color: #ef4444;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.success {
+  color: #10b981;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* テーブルスタイル */
+.deviceTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 0.9rem;
+}
+
+.deviceTable th {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 2px solid #f3f4f6;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.deviceTable td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+}
+
+.deviceName {
+  font-weight: 500;
+  color: #374151;
+}
+
+.deviceDate {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+/* 削除ボタン */
+.deleteBtn {
+  background: #fee2e2;
+  color: #ef4444;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.2s;
+}
+
+.deleteBtn:hover {
+  background: #fecaca;
+}
+
+/* トグルスイッチ */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #3b82f6;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* ヘッダー共通デザイン */
+.headerContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 40px;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1f2937;
+  z-index: 10;
+  margin-left: 1rem;
+}
+
+.headerTitle {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.125rem;
+  font-weight: bold;
+  margin: 0;
+  color: #1f2937;
+  white-space: nowrap;
+  pointer-events: none;
+}
