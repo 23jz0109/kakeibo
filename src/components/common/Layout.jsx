@@ -30,22 +30,39 @@ const Layout = ({
   // const isPlusDisabled = disableDataInputButton || isDataInputPage;
 
   const isPlusDisabled = disableDataInputButton;
+  const plusButtonRef = useRef(null);
 
   // ナビ以外タップで閉じる
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (plusRef.current && !plusRef.current.contains(e.target)) {
-        setIsPlusOpen(false);
+  useEffect(() => { 
+    const handleMouseDown = (e) => {
+      // expandInner の中 → outside ではない
+      if (plusRef.current && plusRef.current.contains(e.target)) {
+        mouseDownOutsideRef.current = false;
+        return;
       }
+      // ＋ボタン自身 → outside ではない
+      if (plusButtonRef.current && plusButtonRef.current.contains(e.target)) {
+        mouseDownOutsideRef.current = false;
+        return;
+      }
+      // それ以外 → outside
+      mouseDownOutsideRef.current = true;
     };
 
-    if (isPlusOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+    const handleClick = () => { 
+      if (mouseDownOutsideRef.current) 
+        { setIsPlusOpen(false); mouseDownOutsideRef.current = false; } 
     };
+    
+    if (isPlusOpen) { 
+      document.addEventListener("mousedown", handleMouseDown); 
+      document.addEventListener("click", handleClick); 
+    } 
+    
+    return () => { 
+      document.removeEventListener("mousedown", handleMouseDown); 
+      document.removeEventListener("click", handleClick); 
+    }; 
   }, [isPlusOpen]);
 
   // 画面生成(枠)
@@ -132,12 +149,10 @@ const Layout = ({
 
             {/* ＋ボタン */}
             <button
-              className={`${styles["navigate-datainput"]} ${isPlusOpen ? styles.close : ""
-                }`}
+              ref={plusButtonRef}
+              className={`${styles["navigate-datainput"]} ${ isPlusOpen ? styles.close : "" }`}
               disabled={isPlusDisabled}
-              onClick={() => {
-                if (!isPlusDisabled) setIsPlusOpen((prev) => !prev);
-              }}>
+              onClick={() => { if (!isPlusDisabled) setIsPlusOpen((prev) => !prev); }}>
               {isPlusOpen ? <X size={20} /> : <Plus size={20} />}
             </button>
 
