@@ -1,23 +1,26 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Wallet, List, Bell, User, Plus, ChevronLeft, Trash2, X, Camera, Edit3, ArrowDownCircle } from "lucide-react";
+import { Wallet, Calendar, Bell, User, Plus, ChevronLeft, Trash2, X, Camera, Edit3, ArrowDownCircle } from "lucide-react";
 import { usePreventBack } from "../../hooks/common/usePreventBack";
 import styles from "./Layout.module.css";
 
-const Layout = ({ 
-  headerContent, 
+const Layout = ({
+  headerContent,
   mainContent,
-  disableDataInputButton = false, 
-  redirectPath, 
-  state = null, 
-  onDeleteButtonClick 
+  disableDataInputButton = false,
+  redirectPath,
+  state = null,
+  onDeleteButtonClick
 }) => {
   usePreventBack();
 
   const location = useLocation();
   const navigate = useNavigate();
   const [isPlusOpen, setIsPlusOpen] = useState(false);  // 「＋」ボタンの開閉状態
+  
   const plusRef = useRef(null);
+  const plusButtonRef = useRef(null);
+  const mouseDownOutsideRef = useRef(false);
 
   const isActive = (path) => location.pathname === path;
 
@@ -32,20 +35,36 @@ const Layout = ({
   const isPlusDisabled = disableDataInputButton;
 
   // ナビ以外タップで閉じる
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (plusRef.current && !plusRef.current.contains(e.target)) {
-        setIsPlusOpen(false);
+  useEffect(() => { 
+    const handleMouseDown = (e) => {
+      // expandInner の中 → outside ではない
+      if (plusRef.current && plusRef.current.contains(e.target)) {
+        mouseDownOutsideRef.current = false;
+        return;
       }
+      // ＋ボタン自身 → outside ではない
+      if (plusButtonRef.current && plusButtonRef.current.contains(e.target)) {
+        mouseDownOutsideRef.current = false;
+        return;
+      }
+      // それ以外 → outside
+      mouseDownOutsideRef.current = true;
     };
 
-    if (isPlusOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+    const handleClick = () => { 
+      if (mouseDownOutsideRef.current) 
+        { setIsPlusOpen(false); mouseDownOutsideRef.current = false; } 
     };
+    
+    if (isPlusOpen) { 
+      document.addEventListener("mousedown", handleMouseDown); 
+      document.addEventListener("click", handleClick); 
+    } 
+    
+    return () => { 
+      document.removeEventListener("mousedown", handleMouseDown); 
+      document.removeEventListener("click", handleClick); 
+    }; 
   }, [isPlusOpen]);
 
   // 画面生成(枠)
@@ -59,13 +78,13 @@ const Layout = ({
             <ChevronLeft size={24}
               className={styles["icon"]}
               onClick={() => navigate(redirectPath, { state })}
-              style={{ cursor: "pointer" }}/>
+              style={{ cursor: "pointer" }} />
           </div>
         )}
-        
+
         {/* ヘッダーの中身（タイトルなど） */}
         {headerContent}
-        
+
         {/* 削除ボタン */}
         {onDeleteButtonClick && (
           <button className={styles["delete-button"]} onClick={() => onDeleteButtonClick()}>
@@ -85,9 +104,9 @@ const Layout = ({
           <div ref={plusRef} className={styles.expandInner} onClick={(e) => e.stopPropagation()} >
             {/* 収入 */}
             <button className={`${styles.expandItem} ${styles.income}`} onClick={() => {
-                setIsPlusOpen(false);
-                navigate("/input/income");
-              }}>
+              setIsPlusOpen(false);
+              navigate("/input/income");
+            }}>
               <ArrowDownCircle size={20} />
               <span>収入</span>
             </button>
@@ -95,18 +114,18 @@ const Layout = ({
 
             {/* カメラ起動 */}
             <button className={`${styles.expandItem} ${styles.expense}`} onClick={() => {
-                setIsPlusOpen(false);
-                navigate("/input/ocr", { state: { autoCamera: true } });
-              }}>
+              setIsPlusOpen(false);
+              navigate("/input/ocr", { state: { autoCamera: true } });
+            }}>
               <Camera size={20} />
               <span>OCR</span>
             </button>
 
             {/* 支出(手動入力) */}
             <button className={`${styles.expandItem} ${styles.expense}`} onClick={() => {
-                setIsPlusOpen(false);
-                navigate("/input/manual");
-              }}>
+              setIsPlusOpen(false);
+              navigate("/input/manual");
+            }}>
               <Edit3 size={20} />
               <span>支出</span>
             </button>
@@ -115,11 +134,12 @@ const Layout = ({
       )}
 
       {/* フッターナビゲーション */}
-      <footer className={styles.footer}>
-        <nav className={styles["footer-nav"]}>
+      <footer className={`${styles.footer} pb-safe`}>
+
+          <nav className={styles["footer-nav"]}>
             {/* 履歴 */}
             <Link to="/history" className={`${styles["nav-item"]} ${isActive("/history") ? styles.active : ""}`}>
-              <List className={styles["nav-icon"]} size={20} />
+              <Calendar className={styles["nav-icon"]} size={20} />
               <span className={styles["nav-label"]}>履歴</span>
             </Link>
 
@@ -131,13 +151,10 @@ const Layout = ({
 
             {/* ＋ボタン */}
             <button
-              className={`${styles["navigate-datainput"]} ${
-                isPlusOpen ? styles.close : ""
-              }`}
+              ref={plusButtonRef}
+              className={`${styles["navigate-datainput"]} ${ isPlusOpen ? styles.close : "" }`}
               disabled={isPlusDisabled}
-              onClick={() => {
-                if (!isPlusDisabled) setIsPlusOpen((prev) => !prev);
-              }}>
+              onClick={() => { if (!isPlusDisabled) setIsPlusOpen((prev) => !prev); }}>
               {isPlusOpen ? <X size={20} /> : <Plus size={20} />}
             </button>
 
@@ -152,9 +169,9 @@ const Layout = ({
               <User className={styles["nav-icon"]} size={24} />
               <span className={styles["nav-label"]}>マイページ</span>
             </Link>
-        </nav>
-      </footer>
-    </div>
+          </nav>
+        </footer>
+      </div>
   );
 };
 

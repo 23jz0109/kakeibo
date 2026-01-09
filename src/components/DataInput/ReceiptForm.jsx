@@ -99,7 +99,7 @@ const ReceiptItemPreview = ({ item, categories }) => {
           {item.product_name || "名称未定"}
         </span>
         {quantity >= 2 && (
-          <span style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>
+          <span className={styles.productQuantity}>
             ¥{unitPrice.toLocaleString()} × {quantity}
           </span>
         )}

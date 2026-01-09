@@ -54,6 +54,7 @@
 }
 
 .scrollArea {
+  margin-top: 1rem;
   flex-grow: 1;
   overflow-y: auto;
   padding: 0 4px; 
@@ -66,10 +67,10 @@
 .summaryContainer {
   background-color: #f0f9ff;
   border-radius: 0.75rem;
-  padding: 1rem;
+  padding: 0.5rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.2rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
@@ -101,8 +102,6 @@
   background-color: #f1f5f9;
   border-radius: 0.5rem;
   padding: 0.25rem;
-  gap: 0.25rem;
-  margin-top: 0.5rem;
 }
 
 .modeButton {
@@ -135,7 +134,7 @@
   background-color: #ffffff;
   border-radius: 0.75rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  padding: 0 0.5rem;
+  padding: 0 1rem;
 }
 
 .itemList > * {
@@ -150,7 +149,6 @@
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 0.75rem 0.25rem;
 }
 
 .categoryIcon {
@@ -166,7 +164,6 @@
 
 .productName {
   flex: 1;
-  margin-left: 0.75rem;
   text-align: left;
   color: #1f2937;
   font-weight: 500;
@@ -177,6 +174,12 @@
   font-weight: 600;
   color: #111827;
   font-size: 0.95rem;
+}
+
+.productQuantity {
+  font-size: 0.75rem; 
+  color: #6b7280; 
+  margin-top: 2px;
 }
 
 /* 追加ボタン */
