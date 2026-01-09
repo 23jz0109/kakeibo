@@ -1,4 +1,4 @@
-/* --- 全体レイアウト --- */
+/* 全体レイアウト */
 .headerContainer {
   position: relative;
   display: flex;
@@ -28,15 +28,17 @@
 
 .iconButton {
   background: none;
-  border: none;
+  border: 2px solid #2563eb;
   cursor: pointer;
-  padding: 4px;
+  padding: 4px 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #4b5563;
-  transition: opacity 0.2s;
+  color: #2563eb;
+  transition: opacity .2s;
   margin-right: 1rem;
+  border-radius: 4px;
+  font-weight: bold;
 }
 
 .iconButton:active {
@@ -48,7 +50,7 @@
   padding-bottom: 80px; /* スクロール余白 */
 }
 
-/* --- 読み込み・エラー表示 --- */
+/* 読み込み・エラー */
 .loadingText,
 .emptyText {
   text-align: center;
@@ -56,7 +58,7 @@
   color: #6b7280;
 }
 
-/* --- リスト・カード --- */
+/* リスト・カード */
 .listContainer {
   display: flex;
   flex-direction: column;
@@ -105,7 +107,7 @@
   line-height: 1.4;
 }
 
-/* カード右上のアクションエリア (ON/OFF, 設定) */
+/* カード右上 (ON/OFF, 設定) */
 .cardActions {
   display: flex;
   flex-direction: column;
@@ -145,7 +147,7 @@
   justify-content: center;
 }
 
-/* --- カード展開エリア (ボタン3つ) --- */
+/* カード展開 */
 .cardFooter {
   margin-top: 15px;
   padding-top: 15px;
@@ -158,7 +160,7 @@
   gap: 10px;
 }
 
-/* アクションボタン (青・灰・赤) */
+/* アクションボタン(青・灰・赤) */
 .actionBtnBlue,
 .actionBtnGray,
 .actionBtnRed {
@@ -196,7 +198,7 @@
   opacity: 0.7;
 }
 
-/* --- モーダル --- */
+/* モーダル */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -245,7 +247,7 @@
   align-items: center;
 }
 
-/* --- フォーム --- */
+/* フォーム */
 .formRow {
   display: flex;
   align-items: center;
@@ -277,7 +279,7 @@
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
-/* 時間選択 (HH : MM) */
+/* 時間選択(HH : MM) */
 .timeSelectContainer {
   display: flex;
   align-items: center;
@@ -297,11 +299,11 @@
 
 .dropdownWrapper {
   position: relative;
-  width: 90px; /* お好みの幅に調整してください */
+  width: 90px;
   font-family: inherit;
 }
 
-/* 選択中の表示部分（ボタンのような見た目） */
+/* 選択中の表示部分 */
 .dropdownDisplay {
   background-color: #fff;
   border: 1px solid #d1d5db;
@@ -333,21 +335,21 @@
   margin-left: 8px;
 }
 
-/* 選択肢リスト（絶対配置で浮かる） */
+/* 選択肢リスト */
 .dropdownList {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
   width: 100%;
   
-  max-height: 95px;     /* 高さを95pxに制限（これ以上伸びない） */
-  overflow-y: auto;      /* 中身が溢れたらリストの中だけでスクロールする */
+  max-height: 95px;
+  overflow-y: auto;
 
   background-color: white;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;         /* 他の要素（保存ボタンなど）の上に浮いて表示 */
+  z-index: 1000;
   display: block; 
   padding: 0;
 }
@@ -425,20 +427,19 @@
   background-color: #2563eb;
 }
 
-/* スマホサイズ（幅480px以下）の時のレイアウト調整 */
+/* レイアウト調整 */
 @media (max-width: 480px) {
   .formRow {
-    flex-direction: column; /* 横並びをやめて縦積みにする */
-    align-items: flex-start; /* 左寄せにする */
-    gap: 0.5rem; /* ラベルと入力欄の間隔 */
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
 
   .rowLabel {
-    width: 100%; /* ラベルを横幅いっぱいに */
-    margin-bottom: 4px; /* 入力欄との隙間 */
+    width: 100%;
+    margin-bottom: 4px;
   }
 
-  /* 入力欄や時間選択も幅いっぱいに広げる */
   .rowInput,
   .timeSelectContainer {
     width: 100%;
