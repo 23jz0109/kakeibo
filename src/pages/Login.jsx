@@ -241,6 +241,7 @@ const Login = () => {
   };
 
   return (
+    <div className="login-scroll-root">
     <div className="login-page-container">      
       {/* ログイン・新規登録タブ */}
       <div className="tab-container">
@@ -341,6 +342,7 @@ const Login = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };
