@@ -26,8 +26,7 @@ const TimeDropdown = ({ value, options, onChange }) => {
     <div className={styles.dropdownWrapper} ref={wrapperRef}>
       <div
         className={`${styles.dropdownDisplay} ${isOpen ? styles.open : ''}`}
-        onClick={() => setIsOpen(!isOpen)}
-      >
+        onClick={() => setIsOpen(!isOpen)}>
         {/* 0埋め表示 */}
         <span>{String(value).padStart(2, '0')}</span>
         <span className={styles.arrow}>▾</span>
@@ -42,8 +41,7 @@ const TimeDropdown = ({ value, options, onChange }) => {
               onClick={() => {
                 onChange(opt);
                 setIsOpen(false);
-              }}
-            >
+              }}>
               {String(opt).padStart(2, '0')}
             </div>
           ))}
@@ -493,7 +491,7 @@ const Notification = () => {
           <h1 className={styles.headerTitle}>通知設定</h1>
           <div className={styles.headerButtons}>
             <button onClick={openCreateModal} className={styles.iconButton}>
-              <Plus size={26} color="#3b82f6" />
+              追加
             </button>
           </div>
         </div>
