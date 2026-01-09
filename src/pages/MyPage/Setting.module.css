@@ -165,13 +165,43 @@
   border-radius: 50%;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: #3b82f6;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   transform: translateX(20px);
 }
+
+/* ON/OFF ver2*/
+.cardActions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggleBtn {
+  padding: 4px 0;
+  width: 50px;
+  border-radius: 20px;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: #fff;
+  text-align: center;
+  transition: background-color 0.2s;
+}
+
+.toggleOn {
+  background-color: #3b82f6;
+}
+
+.toggleOff {
+  background-color: #d1d5db;
+}
+
 
 /* ヘッダー共通デザイン */
 .headerContainer {
