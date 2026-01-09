@@ -296,29 +296,25 @@ const Notification = () => {
             </button>
           </div>
 
+          {/* ローディング */}
           {loading && <p className={styles.loadingText}>読み込み中...</p>}
           
+          {/* 表示 */}
           {!loading && (
             <div className={styles.viewContainer}>
-              
-              {/* ▼▼▼ ここを変更しました：中身を空白にしています ▼▼▼ */}
-
-              {/* タブ1: 通知一覧 */}
+              {/* 通知一覧 */}
               {activeTab === 'list' && (
                 <div className={styles.contentWrapper}>
                   {/* ここに通知一覧データが入る予定（現在は空白） */}
                 </div>
               )}
 
-              {/* タブ2: 補充通知設定 */}
+              {/* 補充通知設定 */}
               {activeTab === 'settings' && (
                 <div className={styles.contentWrapper}>
                    {renderNotificationList()}
                 </div>
               )}
-
-              {/* ▲▲▲ 変更ここまで ▲▲▲ */}
-
             </div>
           )}
 
