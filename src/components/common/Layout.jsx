@@ -17,7 +17,10 @@ const Layout = ({
   const location = useLocation();
   const navigate = useNavigate();
   const [isPlusOpen, setIsPlusOpen] = useState(false);  // 「＋」ボタンの開閉状態
+  
   const plusRef = useRef(null);
+  const plusButtonRef = useRef(null);
+  const mouseDownOutsideRef = useRef(false);
 
   const isActive = (path) => location.pathname === path;
 
@@ -30,7 +33,6 @@ const Layout = ({
   // const isPlusDisabled = disableDataInputButton || isDataInputPage;
 
   const isPlusDisabled = disableDataInputButton;
-  const plusButtonRef = useRef(null);
 
   // ナビ以外タップで閉じる
   useEffect(() => { 
