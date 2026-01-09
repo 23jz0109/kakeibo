@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Plus, Edit2, Trash2, X, CheckCircle, Calendar, AlertCircle } from "lucide-react";
+import { Edit2, Trash2, X, CheckCircle, Calendar, AlertCircle } from "lucide-react";
 import Layout from "../../components/common/Layout";
 import styles from "./Budget.module.css";
 import Categories from "../../components/dataInput/Categories";

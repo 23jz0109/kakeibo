@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/common/Layout';
-import { Trash2, Search, CheckCircle, Settings, X, Plus } from 'lucide-react'; // Plusアイコン追加
+import { Trash2, Search, CheckCircle, Settings, X } from 'lucide-react';
 import styles from './Notification.module.css';
 import { useNotification } from '../../hooks/notification/useNotification';
 
@@ -274,7 +274,7 @@ const Notification = () => {
           <h1 className={styles.headerTitle}>通知設定</h1>
           <div className={styles.headerButtons}>
             <button onClick={openCreateModal} className={styles.iconButton}>
-              <Plus size={20} style={{ marginRight: 4 }} />追加
+              追加
             </button>
           </div>
         </div>
