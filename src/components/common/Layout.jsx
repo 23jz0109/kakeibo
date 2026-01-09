@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Wallet, List, Bell, User, Plus, ChevronLeft, Trash2, X, Camera, Edit3, ArrowDownCircle } from "lucide-react";
+import { Wallet, Calendar, Bell, User, Plus, ChevronLeft, Trash2, X, Camera, Edit3, ArrowDownCircle } from "lucide-react";
 import { usePreventBack } from "../../hooks/common/usePreventBack";
 import styles from "./Layout.module.css";
 
@@ -139,7 +139,7 @@ const Layout = ({
           <nav className={styles["footer-nav"]}>
             {/* 履歴 */}
             <Link to="/history" className={`${styles["nav-item"]} ${isActive("/history") ? styles.active : ""}`}>
-              <List className={styles["nav-icon"]} size={20} />
+              <Calendar className={styles["nav-icon"]} size={20} />
               <span className={styles["nav-label"]}>履歴</span>
             </Link>
 
