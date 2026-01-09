@@ -54,8 +54,9 @@
 .financeSummary {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   background-color: #f9fafb;
-  padding: 16px;
+  padding: 4px;
   border-radius: 12px;
   margin: 16px 0 24px 0;
   border: 1px solid #e5e7eb;
@@ -63,7 +64,7 @@
 
 .financeItem {
   display: flex;
-  flex-direction: column;
+  flex-direction:column;
   align-items: center;
   flex: 1;
   position: relative;

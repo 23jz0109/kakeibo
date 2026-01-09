@@ -6,10 +6,11 @@ import Categories from "../../components/dataInput/Categories";
 import { useBudgetApi } from "../../hooks/budget/useBudget";
 import { useFixedCostApi } from "../../hooks/budget/useFixedCost";
 import { useCategories } from "../../hooks/common/useCategories";
+import { getIcon } from "../../constants/categories";
 
 const Budget = () => {
   const [activeTab, setActiveTab] = useState('budget');
-  const [data, setData] = useState([]); 
+  const [data, setData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
 
@@ -18,10 +19,10 @@ const Budget = () => {
   const [fixedCostRules, setFixedCostRules] = useState([]);
 
   // フォームデータ
-  const [formData, setFormData] = useState({ 
-    categoryId: "", 
-    amount: "", 
-    
+  const [formData, setFormData] = useState({
+    categoryId: "",
+    amount: "",
+
     // 予算用
     budgetRuleId: "",
     notificationStatus: false,
@@ -29,30 +30,30 @@ const Budget = () => {
 
     // 固定費用
     fixedCostRuleId: "",
-  });  
-  
-  const [fixedRuleType, setFixedRuleType] = useState(""); 
+  });
+
+  const [fixedRuleType, setFixedRuleType] = useState("");
   const [transactionType, setTransactionType] = useState(2);
 
   // --- API Hooks ---
-  const { 
-    fetchBudgets, 
-    fetchRules: fetchBudgetRulesApi, 
-    createBudget, 
-    updateBudget, 
-    deleteBudget, 
-    loading: budgetLoading, 
-    error: budgetError 
+  const {
+    fetchBudgets,
+    fetchRules: fetchBudgetRulesApi,
+    createBudget,
+    updateBudget,
+    deleteBudget,
+    loading: budgetLoading,
+    error: budgetError
   } = useBudgetApi();
 
-  const { 
-    fetchFixedCosts, 
+  const {
+    fetchFixedCosts,
     fetchRules: fetchFixedCostRulesApi,
-    createFixedCost, 
-    updateFixedCost, 
-    deleteFixedCost, 
-    loading: fixedCostLoading, 
-    error: fixedCostError 
+    createFixedCost,
+    updateFixedCost,
+    deleteFixedCost,
+    loading: fixedCostLoading,
+    error: fixedCostError
   } = useFixedCostApi();
 
   const { categories, fetchCategories } = useCategories();
@@ -84,68 +85,127 @@ const Budget = () => {
 
   useEffect(() => {
     if (isModalOpen) {
-        fetchCategories(transactionType);
+      fetchCategories(transactionType);
     }
   }, [transactionType, fetchCategories, isModalOpen]);
 
-  // IDから固定費タイプを特定
-  const getFixedRuleTypeById = (id, rules) => {
-    const found = rules.find(r => String(r.id) === String(id));
-    return found ? found.rule_name : "";
-  };
-
   // --- モーダルオープン ---
-  const handleOpenModal = (type, item = null) => {
+  const handleOpenModal = async (type, item = null) => {
+    setIsModalOpen(true);
+
     if (type === 'edit' && item) {
+      //console.log("編集データ:", item); // デバッグ用
       setEditItem(item);
-      
+
       if (activeTab === 'budget') {
-        setTransactionType(2);
+
+        // 1. ルール一覧を確実に取得
+        let currentRules = budgetRules;
+        if (currentRules.length === 0) {
+          currentRules = await fetchBudgetRulesApi();
+          setBudgetRules(currentRules);
+        }
+
+        let targetRuleId = item.budget_rule_id;
+
+        if (!targetRuleId && item.rule_name) {
+          const foundRule = currentRules.find(r => r.rule_name === item.rule_name);
+          if (foundRule) {
+            targetRuleId = foundRule.id;
+          }
+        }
+
+        const isNotif = String(item.notification_status) === "1";
+
+        // フォームにセット
         setFormData({
-          categoryId: item.category_id || "", 
-          amount: item.budget_limit || "", 
-          budgetRuleId: item.budget_rule_id || "", 
-          notificationStatus: item.notification_status === 1,
-          customDays: item.custom_days || "",
+          categoryId: String(item.category_id),
+          amount: String(item.budget_limit), // 予算上限
+          budgetRuleId: targetRuleId ? String(targetRuleId) : "", // 特定したIDを入れる
+          notificationStatus: isNotif,
+          customDays: item.custom_days ? String(item.custom_days) : (item.rule_days ? String(item.rule_days) : ""),
           fixedCostRuleId: "",
         });
-      }
-      else {        
-        const typeId = item.type_id ? Number(item.type_id) : 2;
-        setTransactionType(typeId);
-        
-        const currentRuleId = item.fixed_cost_rule_id || "";
-        
+
+      } else {
+        // 固定費の編集
+
+        // 1. ルール一覧を確実に取得
+        let currentRules = fixedCostRules;
+        if (currentRules.length === 0) {
+          currentRules = await fetchFixedCostRulesApi();
+          setFixedCostRules(currentRules);
+        }
+
+        // --- ID特定ロジック ---
+        let targetRuleId = item.fixed_cost_rule_id;
+
+        // IDがない場合、rule_name と rule_days を使って一覧から検索する
+        if (!targetRuleId && item.rule_name) {
+          const matched = currentRules.find(r => {
+            // 名前が一致するか
+            if (r.rule_name !== item.rule_name) return false;
+
+            if (['fixed_day', 'week_day'].includes(r.rule_name)) {
+              return r.rule_days == item.rule_days;
+            }
+            return true;
+          });
+
+          if (matched) {
+            targetRuleId = matched.id;
+          }
+        }
+
+        targetRuleId = targetRuleId ? String(targetRuleId) : "";
+
+        // --- 親タイプ（毎月/毎週など）の判定 ---
+        const matchedRule = currentRules.find(r => String(r.id) === targetRuleId);
+
+        let derivedType = "";
+        if (matchedRule) {
+          if (matchedRule.rule_name === "fixed_day") derivedType = "monthly_fixed";
+          else if (matchedRule.rule_name === "week_day") derivedType = "weekly_fixed";
+          else if (matchedRule.rule_name === "daily") derivedType = "daily";
+          else if (matchedRule.rule_name === "last_day") derivedType = "last_day";
+        }
+
+        // 画面のプルダウン表示を切り替え
+        setFixedRuleType(derivedType);
+
+        // 収入/支出の設定 (データにtype_idがあれば反映)
+        if (item.type_id) {
+          setTransactionType(Number(item.type_id));
+        }
+
+        // フォームデータをセット
         setFormData({
-          categoryId: item.category_id || "",
-          amount: item.cost || "",
-          fixedCostRuleId: currentRuleId,
-          budgetRuleId: "", 
+          categoryId: String(item.category_id),
+          amount: String(item.cost ?? item.amount ?? ""),
+          fixedCostRuleId: targetRuleId, 
+          budgetRuleId: "",
           notificationStatus: false,
           customDays: "",
         });
-
-        const currentType = getFixedRuleTypeById(currentRuleId, fixedCostRules);
-        if (currentType === 'fixed_day') setFixedRuleType('monthly_fixed');
-        else if (currentType === 'week_day') setFixedRuleType('weekly_fixed');
-        else setFixedRuleType(currentType);
       }
-    }
-    else {
-      // 新規作成
+    } else {
+      // --- 新規追加 ---
       setEditItem(null);
-      setFormData({ 
-        categoryId: "", 
-        amount: "", 
-        budgetRuleId: "", 
-        notificationStatus: false, 
+      setFixedRuleType("");
+
+      // ルール一覧ロード
+      if (activeTab === 'budget') fetchBudgetRulesApi().then(setBudgetRules);
+      else fetchFixedCostRulesApi().then(setFixedCostRules);
+
+      setFormData({
+        categoryId: "",
+        amount: "",
+        budgetRuleId: "",
+        notificationStatus: false,
         customDays: "",
         fixedCostRuleId: "",
       });
-      setFixedRuleType("");
-      setTransactionType(2); 
     }
-    setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
@@ -155,9 +215,9 @@ const Budget = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({ 
-        ...prev, 
-        [name]: type === 'checkbox' ? checked : value 
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
@@ -169,33 +229,36 @@ const Budget = () => {
     const newType = e.target.value;
     setFixedRuleType(newType);
 
+    // 日付指定などのプルダウンをリセットするか、自動設定するか
+    let newRuleId = ""; // デフォルトはリセット
+
     if (newType === 'daily') {
-        const rule = fixedCostRules.find(r => r.rule_name === 'daily');
-        setFormData(prev => ({ ...prev, fixedCostRuleId: rule ? rule.id : "" }));
+      const rule = fixedCostRules.find(r => r.rule_name === 'daily');
+      if (rule) newRuleId = String(rule.id);
     } else if (newType === 'last_day') {
-        const rule = fixedCostRules.find(r => r.rule_name === 'last_day');
-        setFormData(prev => ({ ...prev, fixedCostRuleId: rule ? rule.id : "" }));
-    } else {
-        setFormData(prev => ({ ...prev, fixedCostRuleId: "" }));
+      const rule = fixedCostRules.find(r => r.rule_name === 'last_day');
+      if (rule) newRuleId = String(rule.id);
     }
+
+    setFormData(prev => ({ ...prev, fixedCostRuleId: newRuleId }));
   };
 
   // --- 保存処理 ---
   const handleSave = async () => {
     if (!formData.categoryId) {
-        alert("カテゴリを選択してください");
-        return;
+      alert("カテゴリを選択してください");
+      return;
     }
     if (!formData.amount) {
-        alert("金額を入力してください");
-        return;
+      alert("金額を入力してください");
+      return;
     }
 
     try {
       if (activeTab === 'budget') {
         if (!formData.budgetRuleId) {
-            alert("予算ルールを選択してください");
-            return;
+          alert("予算ルールを選択してください");
+          return;
         }
         const payload = {
           category_id: Number(formData.categoryId),
@@ -209,14 +272,14 @@ const Budget = () => {
       }
       else {
         if (!formData.fixedCostRuleId) {
-            alert("固定費の日程ルールを選択してください");
-            return;
+          alert("固定費の日程ルールを選択してください");
+          return;
         }
         const payload = {
-            type_id: transactionType,
-            category_id: Number(formData.categoryId),
-            fixed_cost_rule_id: Number(formData.fixedCostRuleId),
-            cost: Number(formData.amount)
+          type_id: transactionType,
+          category_id: Number(formData.categoryId),
+          fixed_cost_rule_id: Number(formData.fixedCostRuleId),
+          cost: Number(formData.amount)
         };
         if (editItem) await updateFixedCost(editItem.id, payload);
         else await createFixedCost(payload);
@@ -230,7 +293,7 @@ const Budget = () => {
   };
 
   const handleDelete = async (id) => {
-    if(!window.confirm("本当に削除しますか？")) return;
+    if (!window.confirm("本当に削除しますか？")) return;
     try {
       if (activeTab === 'budget') await deleteBudget(id);
       else await deleteFixedCost(id);
@@ -241,20 +304,21 @@ const Budget = () => {
     }
   };
 
-  // ★ 修正: 予算アイテム (period_messageを復活)
+  //予算アイテム
   const renderBudgetItem = (item) => {
-    const limit = Number(item.budget_limit) || 0; 
+    const limit = Number(item.budget_limit) || 0;
     const spent = Number(item.current_usage) || 0;
-    const percent = Number(item.usage_percent) || 0;    
+    const percent = Number(item.usage_percent) || 0;
     const isOver = spent > limit;
     const color = item.category_color || "#3b82f6";
+    const IconComponent = getIcon(item.icon_name || "circle");
 
     return (
       <div key={item.id} className={styles.card} style={{ borderLeft: `4px solid ${color}` }}>
         <div className={styles.cardHeader}>
           <div className={styles.cardTitleGroup}>
             <span className={styles.cardIconBox} style={{ backgroundColor: color }}>
-                <CheckCircle size={16} color="#fff" />
+            <IconComponent size={20} color="#fff" />
             </span>
             <span className={styles.cardTitle}>{item.category_name}</span>
           </div>
@@ -263,45 +327,46 @@ const Budget = () => {
             <button onClick={() => handleDelete(item.id)}><Trash2 size={16} /></button>
           </div>
         </div>
-        
-        <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed #e5e7eb' }}>
-            <div className={styles.budgetAmounts}>
-              <span className={styles.amountSpent}>¥{spent.toLocaleString()}</span>
-              <span className={styles.amountLimit}> / ¥{limit.toLocaleString()}</span>
-            </div>
-            
-            <div className={styles.progressContainer}>
-              <div className={`${styles.progressBar} ${isOver ? styles.progressOver : ''}`} 
-                style={{ width: `${Math.min(percent, 100)}%`, backgroundColor: isOver ? '#ef4444' : color }}></div>
-            </div>
 
-            {/* ★ ここで「あと何日」と「%」を表示 */}
-            <div className={styles.progressText}>
-              <span>{item.period_message}</span>
-              <span className={styles.percentText}>({percent}%)</span>
-            </div>
+        <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed #e5e7eb' }}>
+          <div className={styles.budgetAmounts}>
+            <span className={styles.amountSpent}>¥{spent.toLocaleString()}</span>
+            <span className={styles.amountLimit}> / ¥{limit.toLocaleString()}</span>
+          </div>
+
+          <div className={styles.progressContainer}>
+            <div className={`${styles.progressBar} ${isOver ? styles.progressOver : ''}`}
+              style={{ width: `${Math.min(percent, 100)}%`, backgroundColor: isOver ? '#ef4444' : color }}></div>
+          </div>
+
+          {/* ★ ここで「あと何日」と「%」を表示 */}
+          <div className={styles.progressText}>
+            <span>{item.period_message}</span>
+            <span className={styles.percentText}>({percent}%)</span>
+          </div>
         </div>
       </div>
     );
   };
 
-  // ★ 修正: 固定費アイテム (フッターデザインを統一)
+  //固定費アイテム (フッターデザインを統一)
   const renderFixedItem = (item) => {
     const amount = Number(item.cost || item.amount || 0);
     const color = item.category_color || "#ec4899";
-    
+    const IconComponent = getIcon(item.icon_name || "calendar");
+
     return (
       <div key={item.id} className={styles.card} style={{ borderLeft: `4px solid ${color}` }}>
         <div className={styles.cardHeader}>
           <div className={styles.cardTitleGroup}>
             <span className={`${styles.cardIconBox}`} style={{ backgroundColor: color }}>
-              <Calendar size={16} color="#fff" />
+            <IconComponent size={20} color="#fff" />
             </span>
             <div>
               <span className={styles.cardTitle}>{item.category_name}</span>
               {/* 日付/曜日情報もヘッダー付近に表示 */}
               <div className={styles.fixedDate}>
-                {item.rule_name_jp} 
+                {item.rule_name_jp}
               </div>
             </div>
           </div>
@@ -313,16 +378,16 @@ const Budget = () => {
 
         {/* 予算と同じデザインのフッター区切り線を追加 */}
         <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed #e5e7eb' }}>
-            <div className={styles.fixedFooter}>
-                <div className={styles.fixedAmount}>¥{amount.toLocaleString()}</div>
-                {/* 固定費もメッセージがあれば表示 (ない場合は非表示) */}
-                {item.period_message && (
-                    <div className={styles.periodMessage} style={{ color: color }}>
-                        <AlertCircle size={14} style={{ marginRight: 4 }}/>
-                        {item.period_message}
-                    </div>
-                )}
-            </div>
+          <div className={styles.fixedFooter}>
+            <div className={styles.fixedAmount}>¥{amount.toLocaleString()}</div>
+            {/* 固定費もメッセージがあれば表示 (ない場合は非表示) */}
+            {item.period_message && (
+              <div className={styles.periodMessage} style={{ color: color }}>
+                <AlertCircle size={14} style={{ marginRight: 4 }} />
+                {item.period_message}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -341,10 +406,10 @@ const Budget = () => {
           {/* 固定費: 収入/支出 切り替え */}
           {activeTab === 'fixed' && (
             <div className={styles.typeToggleContainer}>
-              <button type="button" 
+              <button type="button"
                 className={`${styles.typeButton} ${transactionType === 1 ? styles.typeActiveIncome : ''}`}
                 onClick={() => setTransactionType(1)}>収入</button>
-              <button type="button" 
+              <button type="button"
                 className={`${styles.typeButton} ${transactionType === 2 ? styles.typeActiveExpense : ''}`}
                 onClick={() => setTransactionType(2)}>支出</button>
             </div>
@@ -353,125 +418,125 @@ const Budget = () => {
           <div className={styles.categoryCard}>
             <label className={styles.categoryLabel}>カテゴリ</label>
             <Categories
-                categories={categories}
-                selectedCategoryId={formData.categoryId}
-                onSelectedCategory={handleCategorySelect}/>
+              categories={categories}
+              selectedCategoryId={formData.categoryId}
+              onSelectedCategory={handleCategorySelect} />
           </div>
 
           <div className={styles.formGroup}>
             <label className={styles.label}>{activeTab === 'budget' ? '上限額' : '金額'}</label>
             <div className={styles.amountInputWrapper}>
-                <span className={styles.yenMark}>¥</span>
-                <input type="number" name="amount" value={formData.amount} 
-                  onChange={handleInputChange} className={styles.amountInput} placeholder="0"/>
+              <span className={styles.yenMark}>¥</span>
+              <input type="number" name="amount" value={formData.amount}
+                onChange={handleInputChange} className={styles.amountInput} placeholder="0" />
             </div>
           </div>
 
           {/* --- 予算タブの場合 --- */}
           {activeTab === 'budget' && (
             <>
-                <div className={styles.formGroup}>
-                    <label className={styles.label}>予算ルール設定</label>
-                    <div className={styles.flexRow}>
-                        <div className={styles.flexItem}>
-                            <select 
-                                name="budgetRuleId" 
-                                value={formData.budgetRuleId} 
-                                onChange={handleInputChange}
-                                className={styles.selectInput}
-                            >
-                                <option value="">選択してください</option>
-                                {budgetRules.map(rule => (
-                                    <option key={rule.id} value={rule.id}>{rule.rule_name_jp}</option>
-                                ))}
-                            </select>
-                        </div>
-                        
-                        {budgetRules.find(r => String(r.id) === String(formData.budgetRuleId))?.rule_name === 'custom' && (
-                             <div className={styles.flexItemSmall}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <input 
-                                        type="number" 
-                                        name="customDays" 
-                                        value={formData.customDays} 
-                                        onChange={handleInputChange}
-                                        className={styles.inputField} 
-                                        placeholder="日数"
-                                        style={{ marginBottom: 0 }}
-                                    />
-                                    <span style={{ fontSize: '14px', whiteSpace: 'nowrap' }}>日</span>
-                                </div>
-                             </div>
-                        )}
-                    </div>
-                </div>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>予算ルール設定</label>
+                <div className={styles.flexRow}>
+                  <div className={styles.flexItem}>
+                    <select
+                      name="budgetRuleId"
+                      value={formData.budgetRuleId}
+                      onChange={handleInputChange}
+                      className={styles.selectInput}
+                    >
+                      <option value="">選択してください</option>
+                      {budgetRules.map(rule => (
+                        <option key={rule.id} value={rule.id}>{rule.rule_name_jp}</option>
+                      ))}
+                    </select>
+                  </div>
 
-                <div className={styles.formGroup}>
-                    <label className={styles.checkboxLabel}>
-                        <input type="checkbox" name="notificationStatus" 
-                            checked={formData.notificationStatus} onChange={handleInputChange} />
-                        通知を有効にする
-                    </label>
+                  {budgetRules.find(r => String(r.id) === String(formData.budgetRuleId))?.rule_name === 'custom' && (
+                    <div className={styles.flexItemSmall}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <input
+                          type="number"
+                          name="customDays"
+                          value={formData.customDays}
+                          onChange={handleInputChange}
+                          className={styles.inputField}
+                          placeholder="日数"
+                          style={{ marginBottom: 0 }}
+                        />
+                        <span style={{ fontSize: '14px', whiteSpace: 'nowrap' }}>日</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.checkboxLabel}>
+                  <input type="checkbox" name="notificationStatus"
+                    checked={formData.notificationStatus} onChange={handleInputChange} />
+                  通知を有効にする
+                </label>
+              </div>
             </>
           )}
-          
+
           {/* --- 固定費タブの場合 --- */}
           {activeTab === 'fixed' && (
             <div className={styles.formGroup}>
-                <label className={styles.label}>発生タイミング</label>
-                
-                <div style={{ marginBottom: '10px' }}>
-                    <select 
-                        value={fixedRuleType} 
-                        onChange={handleFixedTypeChange}
-                        className={styles.selectInput}
-                    >
-                        <option value="">頻度を選択してください</option>
-                        <option value="monthly_fixed">毎月 (日付指定)</option>
-                        <option value="weekly_fixed">毎週 (曜日指定)</option>
-                        <option value="last_day">毎月 (末日)</option>
-                        <option value="daily">毎日</option>
-                    </select>
+              <label className={styles.label}>発生タイミング</label>
+
+              <div style={{ marginBottom: '10px' }}>
+                <select
+                  value={fixedRuleType}
+                  onChange={handleFixedTypeChange}
+                  className={styles.selectInput}
+                >
+                  <option value="">頻度を選択してください</option>
+                  <option value="monthly_fixed">毎月 (日付指定)</option>
+                  <option value="weekly_fixed">毎週 (曜日指定)</option>
+                  <option value="last_day">毎月 (末日)</option>
+                  <option value="daily">毎日</option>
+                </select>
+              </div>
+
+              {fixedRuleType === 'monthly_fixed' && (
+                <div className={styles.flexRow}>
+                  <select
+                    name="fixedCostRuleId"
+                    value={formData.fixedCostRuleId}
+                    onChange={handleInputChange}
+                    className={styles.selectInput}
+                  >
+                    <option value="">日付を選択</option>
+                    {fixedCostRules
+                      .filter(r => r.rule_name === 'fixed_day')
+                      .map(rule => (
+                        <option key={rule.id} value={rule.id}>{rule.rule_name_jp}</option>
+                      ))
+                    }
+                  </select>
                 </div>
+              )}
 
-                {fixedRuleType === 'monthly_fixed' && (
-                    <div className={styles.flexRow}>
-                         <select 
-                            name="fixedCostRuleId"
-                            value={formData.fixedCostRuleId} 
-                            onChange={handleInputChange}
-                            className={styles.selectInput}
-                        >
-                            <option value="">日付を選択</option>
-                            {fixedCostRules
-                                .filter(r => r.rule_name === 'fixed_day')
-                                .map(rule => (
-                                    <option key={rule.id} value={rule.id}>{rule.rule_name_jp}</option>
-                                ))
-                            }
-                        </select>
-                    </div>
-                )}
-
-                {fixedRuleType === 'weekly_fixed' && (
-                     <div className={styles.flexRow}>
-                        <select 
-                           name="fixedCostRuleId"
-                           value={formData.fixedCostRuleId} 
-                           onChange={handleInputChange}
-                           className={styles.selectInput}
-                       >
-                           <option value="">曜日を選択</option>
-                           {fixedCostRules
-                               .filter(r => r.rule_name === 'week_day')
-                               .map(rule => (
-                                   <option key={rule.id} value={rule.id}>{rule.rule_name_jp}</option>
-                               ))
-                           }
-                       </select>
-                   </div>
-                )}
+              {fixedRuleType === 'weekly_fixed' && (
+                <div className={styles.flexRow}>
+                  <select
+                    name="fixedCostRuleId"
+                    value={formData.fixedCostRuleId}
+                    onChange={handleInputChange}
+                    className={styles.selectInput}
+                  >
+                    <option value="">曜日を選択</option>
+                    {fixedCostRules
+                      .filter(r => r.rule_name === 'week_day')
+                      .map(rule => (
+                        <option key={rule.id} value={rule.id}>{rule.rule_name_jp}</option>
+                      ))
+                    }
+                  </select>
+                </div>
+              )}
             </div>
           )}
 
@@ -497,24 +562,24 @@ const Budget = () => {
   );
 
   const renderMainContent = () => (
-      <div className={styles.container}>
-        <div className={styles.tabContainer}>
-          <button className={`${styles.tabButton} ${activeTab === 'budget' ? styles.active : ''}`}
-              onClick={() => setActiveTab('budget')}>予算管理</button>
-          <button className={`${styles.tabButton} ${activeTab === 'fixed' ? styles.active : ''}`}
-              onClick={() => setActiveTab('fixed')}>固定費</button>
-        </div>
-        <div className={styles.contentArea}>
-          {isLoading ? <div className={styles.loading}>読み込み中...</div> : error ? <div className={styles.error}>{error}</div> : (
-              <div className={styles.listContainer}>
-              {data.length === 0 ? <div className={styles.placeholderBox}>データがありません</div> : (
-                  data.map((item) => (activeTab === 'budget' ? renderBudgetItem(item) : renderFixedItem(item)))
-              )}
-              </div>
-          )}
-        </div>
-        {isModalOpen && renderModal()}
+    <div className={styles.container}>
+      <div className={styles.tabContainer}>
+        <button className={`${styles.tabButton} ${activeTab === 'budget' ? styles.active : ''}`}
+          onClick={() => setActiveTab('budget')}>予算管理</button>
+        <button className={`${styles.tabButton} ${activeTab === 'fixed' ? styles.active : ''}`}
+          onClick={() => setActiveTab('fixed')}>固定費</button>
       </div>
+      <div className={styles.contentArea}>
+        {isLoading ? <div className={styles.loading}>読み込み中...</div> : error ? <div className={styles.error}>{error}</div> : (
+          <div className={styles.listContainer}>
+            {data.length === 0 ? <div className={styles.placeholderBox}>データがありません</div> : (
+              data.map((item) => (activeTab === 'budget' ? renderBudgetItem(item) : renderFixedItem(item)))
+            )}
+          </div>
+        )}
+      </div>
+      {isModalOpen && renderModal()}
+    </div>
   );
 
   return <Layout headerContent={headerContent} mainContent={renderMainContent()} />;
