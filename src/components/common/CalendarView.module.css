@@ -15,6 +15,8 @@
   background-color: #42A5F5;
   color: white;
   text-align: center;
+  padding: 0.25rem 0; 
+  font-size: 0.8rem;
 }
 
 .days {
@@ -28,20 +30,23 @@
 .calendar-cell {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 0.25rem;
   min-height: 0;
+  overflow: hidden;
 }
 
 .calendar-cell-inner {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  width: 100%;
+  margin-top: auto;
 }
 
 .calendar-cell-day {
   border: 1px solid #e5e7eb;
-  background-color: #f3f4f6; /* 淡いグレー */
+  background-color: #f3f4f6;
 }
 
 .current-month-day {
@@ -50,7 +55,18 @@
 
 .day {
   color: #374151;
-  font-size: 0.625rem;
+  font-size: 0.75rem;
+  margin-bottom: 2px;
+}
+
+.amount-text {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+  font-size: 0.7rem;
+  line-height: 1.2;
 }
 
 .expense {

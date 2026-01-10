@@ -17,10 +17,12 @@ const CalendarView = ({ dailySummary = [], currentMonth }) => {
   for (let d = startDay - 1; d >= 0; d--) {
     days.push({ days: prevMonthDays - d, isCurrentMonth: false });
   }
+  
   // 今月分
   for (let d = 1; d <= dayInMonth; d++) {
     days.push({ days: d, isCurrentMonth: true });
   }
+  
   // 来月分 (マス埋め)
   const TOTAL_SLOTS = 42; 
   const currentCount = days.length;
@@ -29,8 +31,7 @@ const CalendarView = ({ dailySummary = [], currentMonth }) => {
   for (let d = 1; d <= remainingSlots; d++) {
     days.push({ days: d, isCurrentMonth: false });
   }
-  // ★修正: APIデータ(calendar_daily_sum)をマッピング
-  // API: { record_date: "2025-01-01", type_id: 1, daily_total: "1000" }
+
   const dailyDataMap = dailySummary.reduce((acc, item) => {
     const date = item.record_date; 
     
@@ -41,10 +42,10 @@ const CalendarView = ({ dailySummary = [], currentMonth }) => {
     const amount = parseInt(item.daily_total, 10);
 
     // type_id: 1=収入, 2=支出 (DB定義に基づく)
-    // 注意: JSONの数値は文字列で来る場合があるので緩やかに比較(==)するかNumber変換
     if (Number(item.type_id) === 1) {
       acc[date].income += amount;
-    } else if (Number(item.type_id) === 2) {
+    }
+    else if (Number(item.type_id) === 2) {
       acc[date].expense += amount;
     }
 
@@ -83,17 +84,20 @@ const CalendarView = ({ dailySummary = [], currentMonth }) => {
             key={index}
             className={`${styles["calendar-cell"]} ${styles["calendar-cell-day"]} ${
               item.isCurrentMonth ? styles["current-month-day"] : ""
-            }`}
-          >
+            }`}>
             <span className={styles["day"]}>{item.days}</span>
             <div className={styles["calendar-cell-inner"]}>
               {item.incomeAmount > 0 && (
-                <span className={styles["income"]}>
+                <span 
+                  className={styles["income"]} 
+                  title={`収入: +${item.incomeAmount.toLocaleString()}円`}>
                   +{item.incomeAmount.toLocaleString()}
                 </span>
               )}
               {item.expenseAmount > 0 && (
-                <span className={styles["expense"]}>
+                <span 
+                  className={styles["expense"]}
+                  title={`支出: -${item.expenseAmount.toLocaleString()}円`}>
                   -{item.expenseAmount.toLocaleString()}
                 </span>
               )}

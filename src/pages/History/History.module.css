@@ -55,9 +55,9 @@
   display: flex;
   justify-content: space-between;
   background-color: #f9fafb;
-  padding: 16px;
+  padding: 8px;
   border-radius: 12px;
-  margin: 16px 0 24px 0;
+  margin: 8px 0 8px 0;
   border: 1px solid #e5e7eb;
 }
 
@@ -116,11 +116,9 @@
   animation: fadeIn 0.3s ease;
 }
 
-/* カレンダーの表示領域を固定するクラス */
-.calendarContainer {
-  min-height: 400px;
-  width: 100%;
 
+.calendarContainer {
+  width: 100%;
   display: flex;
   justify-content: center;
 }
