@@ -121,7 +121,6 @@ const IncomeInput = () => {
     }
   };
 
-  // const headerContent = <h1 className={styles.headerTitle}>収入</h1>;
   const headerContent = (
     <div className={styles.headerWrapper}>
       <h1 className={styles.headerTitle}>収入</h1>

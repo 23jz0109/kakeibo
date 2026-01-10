@@ -479,13 +479,11 @@ const Budget = () => {
   );
 
   const headerContent = (
-    <div className={styles.headerContainer}>
+    <div className={styles.headerWrapper}>
       <h1 className={styles.headerTitle}>予算・固定費</h1>
-      <div className={styles.headerButtons}>
-        <button onClick={() => handleOpenModal('create')} className={styles.iconButton}>
+      <button onClick={() => handleOpenModal('create')} className={styles.addButton}>
           追加
-        </button>
-      </div>
+      </button>
     </div>
   );
 

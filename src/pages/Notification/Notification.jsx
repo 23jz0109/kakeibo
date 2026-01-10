@@ -270,13 +270,11 @@ const Notification = () => {
   return (
     <Layout
       headerContent={
-        <div className={styles.headerContainer}>
+        <div className={styles.headerWrapper}>
           <h1 className={styles.headerTitle}>通知設定</h1>
-          <div className={styles.headerButtons}>
-            <button onClick={openCreateModal} className={styles.iconButton}>
+          <button onClick={openCreateModal} className={styles.addButton}>
               追加
             </button>
-          </div>
         </div>
       }
       mainContent={
