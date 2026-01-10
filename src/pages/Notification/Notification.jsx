@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/common/Layout';
-import { Trash2, Search, CheckCircle, Settings, X } from 'lucide-react';
+import { Trash2, Search, CheckCircle, Settings, X, Bell, MailOpen } from 'lucide-react';
 import styles from './Notification.module.css';
 import { useNotification } from '../../hooks/notification/useNotification';
 
@@ -50,7 +50,7 @@ const TimeDropdown = ({ value, options, onChange }) => {
 
 /* 時間選択のオプション定義 */
 const hourOptions = Array.from({ length: 24 }, (_, i) => i);
-const minOptions = [0, 15, 30, 45];
+const minOptions = [0, 15, 30, 45]; 
 
 const Notification = () => {
   const navigate = useNavigate();
@@ -58,14 +58,18 @@ const Notification = () => {
   const [activeTab, setActiveTab] = useState("list");
 
   const {
+    notificationHistory,
     notifications,
     loading,
     productList,
     suggestedPeriod,
     setSuggestedPeriod,
+    fetchNotificationHistory,
     fetchNotifications,
     fetchProductCandidates,
     fetchSuggestedInterval,
+    markAsRead,
+    deleteHistoryItem,
     saveNotification,
     toggleNotification,
     refillNotification,
@@ -92,9 +96,15 @@ const Notification = () => {
     });
   };
 
+  // 初期/タブ切り替え時の読み込み
   useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+    if (activeTab === 'settings') {
+      fetchNotifications();
+    }
+    else {
+      fetchNotificationHistory();
+    }
+  }, [activeTab, fetchNotifications, fetchNotificationHistory]);
 
   useEffect(() => {
     if (showModal) {
@@ -199,12 +209,62 @@ const Notification = () => {
     navigate(`/price/${encodeURIComponent(name)}`);
   };
 
+  const handleHistoryClick = (item) => {
+    if (Number(item.is_read) === 0) {
+      markAsRead(item.id);
+    }
+  };
+
   const filteredProducts = productList.filter(p =>
     p.product_name.toLowerCase().includes(formData.title.toLowerCase())
   );
 
-  // 通知設定
+  // 通知リスト
   const renderNotificationList = () => (
+    <div className={styles.listContainer}>
+      {notificationHistory.length === 0 && <p className={styles.emptyText}>通知はありません。</p>}
+      {notificationHistory.map((item) => {
+        const isUnread = Number(item.is_read) === 0;
+
+        return (
+          <div
+            key={item.id}
+            className={`${styles.card} ${isUnread ? styles.historyUnread : styles.historyRead}`}
+            onClick={() => handleHistoryClick(item)}>
+
+            <div className={styles.historyHeaderLine}>
+              {isUnread && <span className={styles.newBadge}>NEW</span>}
+
+              <span className={`${styles.historyTitle} ${isUnread ? styles.textBold : ''}`}>
+                {item.title}
+              </span>
+
+              <span className={styles.historyDate}>
+                {formatDate(item.created_at)}
+              </span>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteHistoryItem(item.id, e)
+                }}
+                className={styles.deleteBtnMini}
+                title="削除">
+                <Trash2 size={16} />
+              </button>
+            </div>
+
+            <p className={styles.historyMessage}>
+              {item.message}
+            </p>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  // 補充通知設定
+  const renderRefillNotificationSettingList = () => (
     <div className={styles.listContainer}>
       {notifications.length === 0 && <p className={styles.emptyText}>設定された通知はありません。</p>}
       {notifications.map((item) => {
@@ -303,14 +363,14 @@ const Notification = () => {
               {/* 通知一覧 */}
               {activeTab === 'list' && (
                 <div className={styles.contentWrapper}>
-                  {/* ここに通知一覧データが入る予定（現在は空白） */}
+                  {renderNotificationList()}
                 </div>
               )}
 
               {/* 補充通知設定 */}
               {activeTab === 'settings' && (
                 <div className={styles.contentWrapper}>
-                   {renderNotificationList()}
+                   {renderRefillNotificationSettingList()}
                 </div>
               )}
             </div>

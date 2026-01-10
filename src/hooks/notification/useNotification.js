@@ -4,6 +4,8 @@ const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
 
 export const useNotification = () => {
   const [notifications, setNotifications] = useState([]);
+  const [notificationHistory, setNotificationHistory] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [productList, setProductList] = useState([]);
   const [suggestedPeriod, setSuggestedPeriod] = useState(null);
@@ -17,7 +19,7 @@ export const useNotification = () => {
     return { hour: date.getHours(), min: date.getMinutes() };
   };
 
-  // 通知一覧取得
+  // 補充通知設定一覧取得
   const fetchNotifications = useCallback(async (isSilent = false) => {
     const authToken = getAuthToken();
     if (!authToken) return;
@@ -127,7 +129,7 @@ export const useNotification = () => {
     }
   }, []);
 
-  // 追加・更新
+  // 補充通知の追加・更新
   const saveNotification = async ({ title, period, hour, min, editTargetId, originalItem }) => {
     const authToken = getAuthToken();
     
@@ -197,7 +199,7 @@ export const useNotification = () => {
     }
   };
 
-  // ON/OFF切り替え
+  // 補充通知のON/OFF切り替え
   const toggleNotification = async (item) => {
     const authToken = getAuthToken();
     const targetId = item._id;
@@ -280,7 +282,7 @@ export const useNotification = () => {
     }
   };
 
-  // 削除
+  // 補充通知削除
   const deleteNotification = async (item) => {
     const authToken = getAuthToken();
     const targetId = item._id;
@@ -307,6 +309,124 @@ export const useNotification = () => {
     }
   };
 
+  // 通知一覧
+  const fetchNotificationHistory = useCallback(async (isSilent = false) => {
+    const authToken = getAuthToken();
+    if (!authToken) return;
+    if (!isSilent) setLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/notification/list`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${authToken}`,
+          "Accept": "application/json"
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const rawList = data.notifications || [];
+
+        const formattedList = rawList.map(item => {
+          let dateStr = item.created_at;
+          
+          if (typeof dateStr === 'string' && !dateStr.endsWith('Z')) {
+             dateStr = dateStr.replace(' ', 'T') + 'Z';
+          }
+
+          return {
+            ...item,
+            created_at: new Date(dateStr)
+          };
+        });
+
+        setNotificationHistory(formattedList);
+      }
+    }
+    catch (err) {
+      console.error("履歴取得エラー", err);
+      if (!isSilent) alert("データの読み込みに失敗しました");
+    }
+    finally {
+      if (!isSilent) setLoading(false);
+    }
+  }, []);
+
+  // 通知を既読にする
+  const markAsRead = async (notificationId) => {
+    const authToken = getAuthToken();
+    // UI更新
+    setNotificationHistory(prev => 
+      prev.map(n => n.id === notificationId ? { ...n, is_read: 1 } : n)
+    );
+    // 未読カウントを引く
+    setUnreadCount(prev => Math.max(0, prev - 1));
+
+    try {
+      await fetch(`${API_BASE_URL}/notification/list`, {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+          "X-Notification-ID": String(notificationId)
+        }
+      });
+      // 再度fetchUnreadCountを呼ぶ
+    } 
+    catch (err) {
+      console.error("既読化エラー", err);
+    }
+  };
+
+  // 通知履歴からの削除
+  const deleteHistoryItem = async (notificationId) => {
+    const authToken = getAuthToken();
+    setNotificationHistory(prev => prev.filter(n => n.id !== notificationId));
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/notification/list`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${authToken}`,
+          "X-Notification-ID": String(notificationId)
+        }
+      });
+
+      if (!response.ok) {
+        console.error("削除失敗");
+        // 失敗したらリロード
+      }
+    }
+    catch (err) {
+      console.error("削除エラー", err);
+    }
+  };
+
+  // 未読件数取得
+  const fetchUnreadCount = useCallback(async () => {
+    const authToken = getAuthToken();
+    if (!authToken) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/notification/count`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${authToken}`,
+          "Accept": "application/json"
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUnreadCount(data.count || 0);
+      }
+    }
+    catch (err) {
+      console.error("カウント取得エラー", err);
+    }
+  }, []);
+
   return {
     notifications,
     loading,
@@ -319,6 +439,12 @@ export const useNotification = () => {
     saveNotification,
     toggleNotification,
     refillNotification,
-    deleteNotification
+    deleteNotification,
+    notificationHistory,
+    unreadCount,
+    fetchNotificationHistory,
+    markAsRead,
+    deleteHistoryItem,
+    fetchUnreadCount
   };
 };
