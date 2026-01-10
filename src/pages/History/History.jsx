@@ -151,8 +151,8 @@ const History = () => {
             <div className={`${styles.financeItem} ${styles.itemBalance}`}>
               <span className={styles.financeLabel}>収支</span>
               <span className={styles.financeValue}>
-                {totalIncome - totalExpense >= 0 ? "+" : ""}
-                {(totalIncome - totalExpense).toLocaleString()}
+                {totalIncome - totalExpense >= 0 ? "+" : "-"}¥
+                {Math.abs(totalIncome - totalExpense).toLocaleString()}
               </span>
             </div>
           </div>
