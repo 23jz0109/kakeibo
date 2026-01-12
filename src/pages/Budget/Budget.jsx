@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Edit2, Trash2, X, CheckCircle, Calendar, AlertCircle } from "lucide-react";
+import { Edit2, Trash2, X, CheckCircle, Calendar, AlertCircle, Bell, BellOff } from "lucide-react";
 import Layout from "../../components/common/Layout";
 import styles from "./Budget.module.css";
 import Categories from "../../components/dataInput/Categories";
@@ -41,6 +41,7 @@ const Budget = () => {
     createBudget,
     updateBudget,
     deleteBudget,
+    toggleBudget,
     loading: budgetLoading,
     error: budgetError
   } = useBudgetApi();
@@ -51,6 +52,7 @@ const Budget = () => {
     createFixedCost,
     updateFixedCost, 
     deleteFixedCost,
+    toggleFixedCost,
     loading: fixedCostLoading,
     error: fixedCostError
   } = useFixedCostApi();
@@ -94,6 +96,31 @@ const Budget = () => {
   const getFixedRuleTypeById = (id, rules) => {
     const found = rules.find(r => String(r.id) === String(id));
     return found ? found.rule_name : "";
+  };
+
+  // オンオフボタン
+  const handleToggle = async (item) => {
+    const newStatus = item.notification_enable === 1 ? 0 : 1;
+
+    // 見た目更新
+    setData(prevData => prevData.map(d => 
+      d.id === item.id ? { ...d, notification_enable: newStatus } : d
+    ));
+
+    try {
+      if (activeTab === 'budget') {
+        await toggleBudget(item.id);
+      }
+      else {
+        await toggleFixedCost(item.id);
+      }
+    }
+    catch (err) {
+      setData(prevData => prevData.map(d => 
+        d.id === item.id ? { ...d, notification_enable: item.notification_enable } : d
+      ));
+      alert("更新に失敗しました: " + err.message);
+    }
   };
 
   // モーダルオープン
@@ -252,6 +279,7 @@ const Budget = () => {
     const percent = Number(item.usage_percent) || 0;
     const isOver = spent > limit;
     const color = item.category_color || "#3b82f6";
+    const isNotifyOn = item.notification_enable === 1;
 
     return (
       <div key={item.id} className={styles.card} style={{ borderLeft: `4px solid ${color}` }}>
@@ -263,6 +291,13 @@ const Budget = () => {
             <span className={styles.cardTitle}>{item.category_name}</span>
           </div>
           <div className={styles.cardActions}>
+            <button onClick={() => handleToggle(item)}>
+              {isNotifyOn ? (
+                <Bell size={16} className={styles.iconActive}/>
+              ) : (
+                <BellOff size={16} />
+              )}
+            </button>
             <button onClick={() => handleOpenModal('edit', item)}><Edit2 size={16} /></button>
             <button onClick={() => handleDelete(item.id)}><Trash2 size={16} /></button>
           </div>
@@ -289,6 +324,7 @@ const Budget = () => {
   const renderFixedItem = (item) => {
     const amount = Number(item.cost || item.amount || 0);
     const color = item.category_color || "#ec4899";
+    const isNotifyOn = item.notification_enable === 1;
 
     return (
       <div key={item.id} className={styles.card} style={{ borderLeft: `4px solid ${color}` }}>
@@ -306,6 +342,13 @@ const Budget = () => {
             </div>
           </div>
           <div className={styles.cardActions}>
+            <button onClick={() => handleToggle(item)}>
+              {isNotifyOn ? (
+                 <Bell size={16} className={styles.iconActive} />
+              ) : (
+                 <BellOff size={16} />
+              )}
+            </button>
             <button onClick={() => handleOpenModal('edit', item)}><Edit2 size={16} /></button>
             <button onClick={() => handleDelete(item.id)}><Trash2 size={16} /></button>
           </div>

@@ -13,6 +13,7 @@ export const useFixedCostApi = () => {
     return {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
+      "Accept": "application/json",
     };
   };
 
@@ -108,6 +109,30 @@ export const useFixedCostApi = () => {
     }
   }, []);
 
+  // 通知オンオフ
+  const toggleFixedCost = useCallback(async (id) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const headers = {
+        ...getHeaders(),
+        "X-Fixed-Cost-ID": id,
+      };
+      const res = await fetch(`${BASE_URL}/fixedcost/toggle`, {
+        method: "POST",
+        headers,
+      });
+      await handleResponse(res);
+    }
+    catch (err) {
+      setError(err.message);
+      throw err;
+    }
+    finally {
+      setLoading(false);
+    }
+  }, []);
+
   // 削除
   const deleteFixedCost = useCallback(async (id) => {
     setLoading(true);
@@ -139,6 +164,7 @@ export const useFixedCostApi = () => {
     fetchRules,
     createFixedCost,
     updateFixedCost,
+    toggleFixedCost,
     deleteFixedCost,
   };
 };

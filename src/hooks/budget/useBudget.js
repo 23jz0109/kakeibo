@@ -13,6 +13,7 @@ export const useBudgetApi = () => {
     return {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
+      "Accept": "application/json",
     };
   };
 
@@ -108,6 +109,30 @@ export const useBudgetApi = () => {
     }
   }, []);
 
+  // 通知オンオフ
+  const toggleBudget = useCallback(async (id) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const headers = {
+        ...getHeaders(),
+        "X-Budget-ID": id,
+      };
+      const res = await fetch(`${BASE_URL}/budget/toggle`, {
+        method: "POST",
+        headers,
+      });
+      await handleResponse(res);
+    }
+    catch (err) {
+      setError(err.message);
+      throw err;
+    }
+    finally {
+      setLoading(false);
+    }
+  }, []);
+
   // 削除
   const deleteBudget = useCallback(async (id) => {
     setLoading(true);
@@ -139,6 +164,7 @@ export const useBudgetApi = () => {
     fetchRules,
     createBudget,
     updateBudget,
+    toggleBudget,
     deleteBudget,
   };
 };
