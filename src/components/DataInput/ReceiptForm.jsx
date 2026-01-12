@@ -421,7 +421,7 @@ const ReceiptForm = forwardRef(({
             ))}
             <DropdownModal title={
               <div className={styles.addButtonContent}>
-                <span className={styles.addIcon}><Plus size={20} color="white"/></span>
+                <span className={styles.addIcon}><Plus size={20} color="#fff"/></span>
                 <span className={styles.addText}>項目を追加する</span>
               </div>
             }>

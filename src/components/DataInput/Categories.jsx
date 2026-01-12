@@ -75,7 +75,7 @@ const Categories = ({ categories = [], selectedCategoryId, onSelectedCategory, o
               className={`${styles["category-button"]} ${isSelected ? styles["selected"] : ""}`}
               onClick={() => onSelectedCategory(category.id)}>
               <span className={styles["category-icon"]} style={{ backgroundColor: category.category_color || '#666' }}>
-                <IconComponent size={20}/>
+                <IconComponent size={20} color="#fff"/>
               </span>
               <span className={styles["category-name"]}>{category.category_name}</span>
             </button>
