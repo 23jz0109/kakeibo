@@ -19,7 +19,7 @@ const IncomeInput = () => {
   const [categoryId, setCategoryId, removeCategory] = useFormPersist("income_category", null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [complete, setComplete] = useState(false);
-  const { categories, fetchCategories } = useCategories();
+  const { categories, fetchCategories, addCategory } = useCategories(); 
 
   // 保存データを消す
   const handleClear = () => {
@@ -121,6 +121,13 @@ const IncomeInput = () => {
     }
   };
 
+  const handleAddCategory = async (name, icon, color) => {
+    const success = await addCategory(name, 1, icon, color);
+    if (success) {
+      fetchCategories(1);
+    }
+  };
+
   const headerContent = (
     <div className={styles.headerWrapper}>
       <h1 className={styles.headerTitle}>収入</h1>
@@ -178,6 +185,7 @@ const IncomeInput = () => {
             categories={categories}
             selectedCategoryId={categoryId}
             onSelectedCategory={setCategoryId}
+            onAddCategory={handleAddCategory} 
           />
         </div>
       </div>

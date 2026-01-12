@@ -119,7 +119,7 @@ const ExpenseManualInput = () => {
 
   // 内容を消すボタン
   const handleHeaderClear = () => {
-    if (window.confirm("入力中のデータをすべて消去してリセットしますか？")) {
+    if (window.confirm("入力内容をすべて消去しますか？")) {
       // 初期状態にリセット
       setReceiptQueue([null]); 
       localStorage.removeItem(STORAGE_KEY); 
@@ -249,7 +249,8 @@ const ExpenseManualInput = () => {
               onSubmit={handleCreateSubmit}
               onUpdate={handleReceiptUpdate}
               isSubmitting={isSubmitting}
-              submitLabel={isSubmitting ? "送信中..." : (receiptQueue.length > 1 ? "この1枚を登録" : "登録する")}/>
+              submitLabel={isSubmitting ? "送信中..." : (receiptQueue.length > 1 ? "この1枚を登録" : "登録する")}
+              typeId={2}/>
           )}          
           {complete && <CompleteModal />}
         </div>

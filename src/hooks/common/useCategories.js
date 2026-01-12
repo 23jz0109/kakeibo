@@ -88,11 +88,54 @@ export const useCategories = () => {
     }
   }, []);
 
+  /**
+   * カテゴリを追加する
+   * @param {string} categoryName カテゴリ名
+   * @param {number} typeId - 1: 収入, 2: 支出
+   * @param {string} iconName アイコン名
+   * @param {string} color カラーコード
+   */
+  const addCategory = useCallback(async (categoryName, typeId, iconName, color) => {
+    const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+    if (!token) return false;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/category`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({
+          type_id: typeId,
+          category_name: categoryName,
+          icon_name: iconName, 
+          category_color: color
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("カテゴリの登録に失敗しました");
+      }
+
+      await fetchCategories(typeId);
+      return true;
+
+    }
+    catch (err) {
+      console.error("Add Category Error:", err);
+      alert("カテゴリの追加に失敗しました。");
+      return false;
+    }
+  }, [fetchCategories]);
+
   return { 
     categories, 
     loading, 
     error, 
     fetchCategories, 
-    fetchPersonalCategories 
+    fetchPersonalCategories,
+    addCategory
   };
 };

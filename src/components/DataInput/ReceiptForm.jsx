@@ -5,6 +5,7 @@ import DropdownModal from "./DropdownModal";
 import Categories from "./Categories";
 import SubmitButton from "../common/SubmitButton";
 import { useReceiptForm } from "../../hooks/dataInput/useReceiptForm";
+import { useCategories } from "../../hooks/common/useCategories";
 import styles from "./ReceiptForm.module.css";
 
 const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
@@ -117,11 +118,13 @@ const ReceiptItemPreview = ({ item, categories }) => {
 };
 
 // レシート項目入力部分
-const ReceiptItemModal = ({ mode, item, index, categories, productList = [],priceMode, onSubmit, onDelete, closeModal }) => {
+const ReceiptItemModal = ({ mode, item, index, categories, productList = [], priceMode, onSubmit, onDelete, closeModal, onCategoryRefresh, typeId = 2 }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [formData, setFormData] = useState({
     product_name: "", product_price: "", quantity: 1, category_id: "", tax_rate: "10", discount: "",
   });
+
+  const { addCategory } = useCategories(); 
 
   useEffect(() => {
     if (mode === "edit" && item) {
@@ -185,6 +188,19 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [],pric
 
     mode === "add" ? onSubmit(data) : onSubmit(index, data);
     closeModal();
+  };
+
+  // カテゴリ追加ハンドラ
+  const handleAddCategory = async (newCategoryName, newIconName, newColor) => {
+    const success = await addCategory(newCategoryName, typeId, newIconName, newColor);
+    
+    if (success) {
+      if (onCategoryRefresh) {
+        onCategoryRefresh(); 
+      } else {
+        alert("カテゴリを追加しました。"); 
+      }
+    }
   };
 
   // デフォルト税率
@@ -266,7 +282,13 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [],pric
 
       <div className={styles.scrollableCategoryArea}>
         <label className={styles.categoryLabel}>カテゴリ</label>
-        <Categories categories={categories} selectedCategoryId={Number(formData.category_id)} onSelectedCategory={id=>setFormData({...formData, category_id:id})} />
+        {/* <Categories categories={categories} selectedCategoryId={Number(formData.category_id)} onSelectedCategory={id=>setFormData({...formData, category_id:id})} /> */}
+        <Categories 
+            categories={categories} 
+            selectedCategoryId={Number(formData.category_id)} 
+            onSelectedCategory={id=>setFormData({...formData, category_id:id})}
+            onAddCategory={handleAddCategory} 
+        />
       </div>
       <div className={styles.modalActions}>
         <SubmitButton text={mode === "edit" ? "更新" : "追加"} onClick={handleSubmit} style={{flex: 1}}/>

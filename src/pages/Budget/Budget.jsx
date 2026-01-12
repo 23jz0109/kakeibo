@@ -57,7 +57,7 @@ const Budget = () => {
     error: fixedCostError
   } = useFixedCostApi();
 
-  const { categories, fetchCategories } = useCategories();
+  const { categories, fetchCategories, addCategory } = useCategories();
   const isLoading = activeTab === 'budget' ? budgetLoading : fixedCostLoading;
   const error = activeTab === 'budget' ? budgetError : fixedCostError;
 
@@ -192,6 +192,13 @@ const Budget = () => {
 
   const handleCategorySelect = (id) => {
     setFormData(prev => ({ ...prev, categoryId: id }));
+  };
+
+  const handleAddCategory = async (name, icon, color) => {
+    const success = await addCategory(name, transactionType, icon, color);
+    if (success) {
+      alert("カテゴリを追加しました");
+    }
   };
 
   const handleFixedTypeChange = (e) => {
@@ -396,7 +403,8 @@ const Budget = () => {
             <Categories
               categories={categories}
               selectedCategoryId={formData.categoryId}
-              onSelectedCategory={handleCategorySelect}/>
+              onSelectedCategory={handleCategorySelect}
+              onAddCategory={handleAddCategory}/>
           </div>
 
           <div className={styles.formGroup}>
