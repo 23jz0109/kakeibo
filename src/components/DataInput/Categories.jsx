@@ -118,7 +118,7 @@ const Categories = ({ categories = [], selectedCategoryId, onSelectedCategory, o
               <div className={styles.formGroup}>
                 <label>アイコン</label>
                 <div className={styles.iconGrid}>
-                  {ICON_LIST.map(({ name, component: Icon }) => (
+                  {ICON_OPTIONS.map(({ name, component: Icon }) => (
                     <div 
                       key={name}
                       className={`${styles.iconOption} ${formData.icon === name ? styles.activeIcon : ""}`}

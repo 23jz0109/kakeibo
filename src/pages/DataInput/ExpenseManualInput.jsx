@@ -223,8 +223,7 @@ const ExpenseManualInput = () => {
         <div 
           className={styles.container}
           onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEnd}
-        >
+          onTouchEnd={onTouchEnd}>
           {receiptQueue.length > 1 && (
             <>
               {currentIndex > 0 && (

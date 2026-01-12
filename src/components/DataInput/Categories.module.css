@@ -53,9 +53,9 @@
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5); /* 半透明の黒背景 */
-  z-index: 1000; /* 他の要素より上に */
+  height: 100dvh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -102,7 +102,7 @@
 
 .modalBody {
   padding: 16px;
-  max-height: 70vh;
+  /* max-height: 70vh; */
   overflow-y: auto;
 }
 

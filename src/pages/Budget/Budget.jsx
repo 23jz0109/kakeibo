@@ -414,7 +414,7 @@ const Budget = () => {
             <label className={styles.label}>{activeTab === 'budget' ? '上限額' : '金額'}</label>
             <div className={styles.amountInputWrapper}>
               <span className={styles.yenMark}>¥</span>
-              <input type="number" name="amount" value={formData.amount} 
+              <input type="text" inputmode="numeric" pattern="\d*" name="amount" value={formData.amount} 
                 onChange={handleInputChange} className={styles.amountInput} placeholder="0"/>
             </div>
           </div>

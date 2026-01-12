@@ -4,6 +4,7 @@
   flex-direction: column;
   gap: 0.75rem;
   z-index: 10;
+  position: relative;
 }
 
 .inputSection {
@@ -212,6 +213,9 @@
   padding: 0.75rem; 
   background-color: white;
   gap: 0.5rem; 
+  position: relative; 
+  z-index: 100; 
+  transform: translateZ(0);
 }
 
 .modalHeader {
