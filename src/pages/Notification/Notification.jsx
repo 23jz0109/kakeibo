@@ -433,6 +433,7 @@ const Notification = () => {
                     <label className={styles.rowLabel}>間隔(日)</label>
                     <input
                       type="text"
+                      inputMode="numeric"
                       pattern="\d*"
                       className={styles.rowInput}
                       value={formData.notification_period}

@@ -151,7 +151,8 @@ const IncomeInput = () => {
                 <span className={styles.yenMark}>¥</span>
                 <input
                   className={styles.amountInput}
-                  type="text" 
+                  type="text"
+                  inputMode="numeric"
                   pattern="\d*"
                   placeholder="0"
                   value={amount}

@@ -2,7 +2,7 @@ import React, { useEffect, useState, forwardRef, useImperativeHandle } from "rea
 import { Plus, CircleAlert, X } from "lucide-react";
 import DayPicker from "./DayPicker";
 import DropdownModal from "./DropdownModal";
-import Categories from "./Categories";
+import Categories from "../../components/dataInput/Categories";
 import SubmitButton from "../common/SubmitButton";
 import { useReceiptForm } from "../../hooks/dataInput/useReceiptForm";
 import { useCategories } from "../../hooks/common/useCategories";
@@ -246,17 +246,17 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
              </div>
              <div style={{flex:1}} className={styles.modalRow}>
                 <label className={styles.modalLabel}>個数</label>
-                <input className={styles.modalInput} type="number" value={formData.quantity} onChange={e=>setFormData({...formData, quantity:e.target.value})} />
+                <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" value={formData.quantity} onChange={e=>setFormData({...formData, quantity:e.target.value})} />
              </div>
         </div>
         <div className={styles.modalFlexRow}>
              <div style={{flex:2}} className={styles.modalRow}>
                 <label className={styles.modalLabel}>単価 ({isInclusive ? "税込" : "税抜"})</label>
-                <input className={styles.modalInput} type="number" placeholder="0" value={formData.product_price} onChange={e=>setFormData({...formData, product_price:e.target.value})} />
+                <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="0" value={formData.product_price} onChange={e=>setFormData({...formData, product_price:e.target.value})} />
              </div>
              <div style={{flex:1}} className={styles.modalRow}>
                 <label className={styles.modalLabel}>割引</label>
-                <input className={styles.modalInput} type="number" placeholder="0" value={formData.discount} onChange={e=>setFormData({...formData, discount:e.target.value})} />
+                <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="0" value={formData.discount} onChange={e=>setFormData({...formData, discount:e.target.value})} />
              </div>
         </div>
         
