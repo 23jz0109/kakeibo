@@ -93,7 +93,7 @@ const CategorySettings = () => {
     const success = await deleteCategory(editTargetId, activeTab);
     if (success) {
       await fetchPersonalCategories(activeTab);
-      setViewMode('list');
+      setIsModalOpen(false);
     }
   };
 
@@ -122,10 +122,8 @@ const CategorySettings = () => {
             </button>
           </div>
 
-          {/* コンテンツ本体 (スクロール可能エリア) */}
-          <div className={styles.modalBody}>
-            
-            {/* プレビュー & 名前入力 */}
+          {/* プレビュー & 名前入力 */}
+          <div className={styles.scrollArea}>
             <div className={styles.previewSection}>
               <div className={styles.iconPreviewCircle} style={{ backgroundColor: formData.color }}>
                 <IconPreview size={32} color="#fff" />
@@ -138,7 +136,11 @@ const CategorySettings = () => {
                 placeholder="カテゴリ名"
               />
             </div>
+          </div>
 
+          {/* コンテンツ本体 (スクロール可能エリア) */}
+          <div className={styles.modalBody}>
+            
             {/* アイコン選択 */}
             <div className={styles.sectionTitle}>アイコン</div>
             <div className={styles.iconGrid}>
@@ -161,8 +163,7 @@ const CategorySettings = () => {
                   key={c}
                   className={`${styles.colorItem} ${formData.color === c ? styles.selectedColor : ""}`}
                   style={{ backgroundColor: c }}
-                  onClick={() => setFormData({ ...formData, color: c })}
-                >
+                  onClick={() => setFormData({ ...formData, color: c })}>
                   {formData.color === c && <Check size={16} color="#fff" strokeWidth={3} />}
                 </div>
               ))}
