@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Settings, LogOut, ChartBar, UserPen } from "lucide-react";
+import { Settings, LogOut, ChartBar, UserPen, Tag } from "lucide-react";
 import Layout from "../../components/common/Layout";
 import styles from "./MyPage.module.css";
 
@@ -75,6 +75,7 @@ const MyPage = () => {
   const goToUserInfo = () => navigate("/userinfo");
   const goToStatistics = () => navigate("/statistics");
   const goSetting = () => navigate("/setting");
+  const goToCategories = () => navigate("/categories");
 
   // ログアウト
   const handleLogout = () => {
@@ -118,22 +119,32 @@ const MyPage = () => {
           </button>
         </li>
 
+        {/* カテゴリ設定 */}
+        <li className={styles.menuItem}>
+          <button className={styles.menuButton} onClick={goToCategories}>
+            <div className={styles.labelContent}>
+              <Tag size={20} />
+              <span>カテゴリ設定</span>
+            </div>
+          </button>
+        </li>
+
+        {/* デバイス設定 */}
+        <li className={styles.menuItem}>
+          <button className={styles.menuButton} onClick={goSetting}>
+            <div className={styles.labelContent}>
+              <Settings size={20} />
+              <span>デバイス設定</span>
+            </div>
+          </button>
+        </li>
+
         {/* 統計データ */}
         <li className={styles.menuItem}>
           <button className={styles.menuButton} onClick={goToStatistics}>
             <div className={styles.labelContent}>
               <ChartBar size={20} />
               <span>統計データ</span>
-            </div>
-          </button>
-        </li>
-
-        {/* 設定 */}
-        <li className={styles.menuItem}>
-          <button className={styles.menuButton} onClick={goSetting}>
-            <div className={styles.labelContent}>
-              <Settings size={20} />
-              <span>設定</span>
             </div>
           </button>
         </li>

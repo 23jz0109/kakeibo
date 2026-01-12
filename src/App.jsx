@@ -16,7 +16,8 @@ import PriceInfo from "./pages/Notification/PriceInfo";
 import MyPage from "./pages/MyPage/MyPage";
 import UserInfo from './pages/MyPage/UserInfo';
 import Statistics from './pages/MyPage/Statistics';
-import Setting from './pages/MyPage/Setting'
+import Setting from './pages/MyPage/Setting';
+import CategorySettings from './pages/MyPage/CategorySetting';
 
 
 /**
@@ -84,8 +85,9 @@ function App() {
           {/* マイページ */}
           <Route path="/mypage" element={<PrivateRoute><MyPage /></PrivateRoute>} />
             <Route path="/userinfo" element={<PrivateRoute><UserInfo /></PrivateRoute>} />
-            <Route path="/statistics" element={<PrivateRoute><Statistics /></PrivateRoute>} />
+            <Route path="/categories" element={<PrivateRoute><CategorySettings /></PrivateRoute>} />
             <Route path='/setting' element={<PrivateRoute><Setting /></PrivateRoute>} />
+            <Route path="/statistics" element={<PrivateRoute><Statistics /></PrivateRoute>} />            
       </Routes>
     </Router>
   );

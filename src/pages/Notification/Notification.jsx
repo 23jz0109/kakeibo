@@ -333,8 +333,8 @@ const Notification = () => {
         <div className={styles.headerWrapper}>
           <h1 className={styles.headerTitle}>通知設定</h1>
           <button onClick={openCreateModal} className={styles.addButton}>
-              追加
-            </button>
+            追加
+          </button>
         </div>
       }
       mainContent={

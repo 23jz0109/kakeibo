@@ -56,12 +56,9 @@ export const useCategories = () => {
     setLoading(true);
     setError(null);
     const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-
     if (!token) return;
 
     try {
-      // コントローラーの personal メソッドに対応するURL
-      // ※ route定義が /categories/personal だと仮定
       const response = await fetch(`${API_BASE_URL}/category/personal`, {
         method: "GET",
         headers: {
@@ -77,7 +74,6 @@ export const useCategories = () => {
 
       const data = await response.json();
       setCategories(data.category || []);
-
     }
     catch (err) {
       console.error("Fetch Personal Categories Error:", err);
@@ -130,12 +126,84 @@ export const useCategories = () => {
     }
   }, [fetchCategories]);
 
+  /**
+   * カテゴリ更新
+   */
+  const updateCategory = useCallback(async (categoryId, categoryName, iconName, color, typeId) => {
+    const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+    if (!token) return false;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/category`, { 
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "X-Category-ID": categoryId,
+        },
+        body: JSON.stringify({
+          type_id: typeId,
+          category_name: categoryName,
+          icon_name: iconName,
+          category_color: color
+        }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.message || "更新失敗");
+      }
+      
+      await fetchCategories(typeId);
+      return true;
+    }
+    catch (err) {
+      console.error("Update Category Error:", err);
+      alert("カテゴリの更新に失敗しました。");
+      return false;
+    }
+  }, [fetchCategories]);
+
+  /**
+   * カテゴリ削除
+   */
+  const deleteCategory = useCallback(async (categoryId, typeId) => {
+    const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+    if (!token) return false;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/category`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/json",
+          "X-Category-ID": categoryId,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("削除失敗");
+      }
+
+      await fetchCategories(typeId);
+      return true;
+    }
+    catch (err) {
+      console.error("Delete Category Error:", err);
+      alert("削除できませんでした。");
+      return false;
+    }
+  }, [fetchCategories]);
+
   return { 
     categories, 
     loading, 
     error, 
     fetchCategories, 
     fetchPersonalCategories,
-    addCategory
+    addCategory,
+    updateCategory,
+    deleteCategory
   };
 };

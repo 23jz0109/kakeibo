@@ -321,7 +321,7 @@ function Setting() {
       <button className={styles.backButton} onClick={() => navigate("/mypage")}>
         <ChevronLeft size={24} />
       </button>
-      <h1 className={styles.headerTitle}>設定</h1>
+      <h1 className={styles.headerTitle}>デバイス設定</h1>
     </div>
   );
 
