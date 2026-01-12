@@ -91,7 +91,7 @@ const Notification = () => {
   // 日付フォーマット
   const formatDate = (dateObj) => {
     if (!dateObj || isNaN(dateObj.getTime())) return "--/-- --:--";
-    return dateObj.toLocaleString('ja-JP', {
+    return dateObj.toLocaleString(undefined, {
       month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
     });
   };
@@ -130,11 +130,25 @@ const Notification = () => {
     setEditTargetId(item._id);
     setOriginalItem(item);
     setSuggestedPeriod(null);
+
+    let initHour = 9;
+    let initMin = 0;
+
+    if (item.notification_timestamp) {
+      const utcString = item.notification_timestamp.replace(' ', 'T') + 'Z';
+      const dateObj = new Date(utcString);
+
+      if (!isNaN(dateObj.getTime())) {
+        initHour = dateObj.getHours();
+        initMin = dateObj.getMinutes();
+      }
+    }
+
     setFormData({
       title: item.product_name || item.title,
       notification_period: String(item.notification_period),
-      notification_hour: item._localHour ?? 9,
-      notification_min: item._localMin ?? 0
+      notification_hour: initHour,
+      notification_min: initMin
     });
     setShowModal(true);
   };
