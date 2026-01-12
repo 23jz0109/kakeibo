@@ -67,22 +67,22 @@ const CategorySettings = () => {
     setEditTargetId(null);
   };
 
-  // 保存 (追加 or 更新)
+  // 保存
   const handleSave = async () => {
     if (!formData.name.trim()) return alert("カテゴリ名を入力してください");
 
     let success = false;
     if (editTargetId) {
-      // 更新 (PATCH)
+      // 更新
       success = await updateCategory(editTargetId, formData.name, formData.icon, formData.color, activeTab);
     } else {
-      // 追加 (POST)
+      // 追加
       success = await addCategory(formData.name, activeTab, formData.icon, formData.color);
     }
 
     if (success) {
       await fetchPersonalCategories(activeTab);
-      setViewMode('list');
+      handleCloseModal();
     }
   };
 
