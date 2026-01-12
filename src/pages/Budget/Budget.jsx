@@ -3,6 +3,7 @@ import { Edit2, Trash2, X, CheckCircle, Calendar, AlertCircle, Bell, BellOff } f
 import Layout from "../../components/common/Layout";
 import styles from "./Budget.module.css";
 import Categories from "../../components/dataInput/Categories";
+import { getIcon } from "../../constants/categories"; 
 import { useBudgetApi } from "../../hooks/budget/useBudget";
 import { useFixedCostApi } from "../../hooks/budget/useFixedCost";
 import { useCategories } from "../../hooks/common/useCategories";
@@ -287,13 +288,14 @@ const Budget = () => {
     const isOver = spent > limit;
     const color = item.category_color || "#3b82f6";
     const isNotifyOn = item.notification_enable === 1;
+    const IconComponent = getIcon(item.icon_name);
 
     return (
       <div key={item.id} className={styles.card} style={{ borderLeft: `4px solid ${color}` }}>
         <div className={styles.cardHeader}>
           <div className={styles.cardTitleGroup}>
             <span className={styles.cardIconBox} style={{ backgroundColor: color }}>
-              <CheckCircle size={16} color="#fff" />
+              <IconComponent size={16} color="#fff" />
             </span>
             <span className={styles.cardTitle}>{item.category_name}</span>
           </div>
@@ -332,13 +334,14 @@ const Budget = () => {
     const amount = Number(item.cost || item.amount || 0);
     const color = item.category_color || "#ec4899";
     const isNotifyOn = item.notification_enable === 1;
+    const IconComponent = getIcon(item.icon_name);
 
     return (
       <div key={item.id} className={styles.card} style={{ borderLeft: `4px solid ${color}` }}>
         <div className={styles.cardHeader}>
           <div className={styles.cardTitleGroup}>
             <span className={`${styles.cardIconBox}`} style={{ backgroundColor: color }}>
-              <Calendar size={16} color="#fff" />
+              <IconComponent size={16} color="#fff" />
             </span>
             <div>
               <span className={styles.cardTitle}>{item.category_name}</span>

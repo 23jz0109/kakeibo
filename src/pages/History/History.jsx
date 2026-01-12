@@ -4,16 +4,10 @@ import MonthPicker from "../../components/common/MonthPicker";
 import CalendarView from "../../components/common/CalendarView";
 import GraphView from "../../components/common/GraphView";
 import Loader from "../../components/common/Loader";
-import * as Icons from "lucide-react";
+// import * as Icons from "lucide-react";
+import { getIcon } from "../../constants/categories"; 
 import { useGetRecord } from "../../hooks/history/useGetRecord";
 import styles from "./History.module.css";
-
-// アイコン
-const getIconComponent = (iconName) => {
-  if (!iconName) return Icons.HelpCircle;
-  const Icon = Icons[iconName] || Icons.HelpCircle;
-  return Icon;
-};
 
 const History = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -185,7 +179,7 @@ const History = () => {
                   {/* カテゴリ別リスト */}
                   <div className={styles.detailList}>
                     {filteredGraphData.map((cat, idx) => {
-                      const Icon = getIconComponent(cat.icon_name);
+                      const Icon = getIcon(cat.icon_name);
                       return (
                         <div key={idx} className={styles.listItem}>
                           <div className={styles.listItemLeft}>
@@ -232,17 +226,17 @@ const History = () => {
                           </div>
 
                           {records.map((r, index) => {
-                            const Icon = getIconComponent(r.icon_name);
+                            const Icon = getIcon(r.icon_name);
                             const isIncome = Number(r.type_id) === 1;
+                            
                             return (
                               <div key={r.record_id} className={styles.listItem}>
                                 <div className={styles.listItemLeft}>
-                                  {/* カテゴリ混合の場合があるかもしれません、一旦コメントアウト */}
-                                  {/* <span 
+                                  <span 
                                     className={styles.categoryIcon}
                                     style={{ backgroundColor: r.category_color || "#ccc" }}>
                                     <Icon size={18} color="#fff" />
-                                  </span> */}
+                                  </span>
                                   <div className={styles.recordInfo}>
                                     <span className={styles.record}>履歴{index + 1}</span>
                                     <span className={styles.shopName}>{r.shop_name}</span>

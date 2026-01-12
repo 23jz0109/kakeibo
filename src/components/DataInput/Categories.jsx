@@ -1,28 +1,12 @@
 import React, { useState } from "react";
 import styles from "./Categories.module.css";
-import { getIcon } from "../../constants/categories";
-import { 
-  Plus, Check, X, 
-  ShoppingBag, Utensils, Car, Home, Zap, Heart, 
-  Coffee, Shirt, Smartphone, Book, Gift, Smile, Circle
-} from "lucide-react";
+import iconMap, { getIcon } from "../../constants/categories"; 
+import { Plus, Check, X } from "lucide-react";
 
-// アイコンリスト
-const ICON_LIST = [
-  { name: "ShoppingBag", component: ShoppingBag },
-  { name: "Utensils", component: Utensils },
-  { name: "Car", component: Car },
-  { name: "Home", component: Home },
-  { name: "Zap", component: Zap },
-  { name: "Smartphone", component: Smartphone },
-  { name: "Coffee", component: Coffee },
-  { name: "Shirt", component: Shirt },
-  { name: "Book", component: Book },
-  { name: "Gift", component: Gift },
-  { name: "Heart", component: Heart },
-  { name: "Smile", component: Smile },
-  { name: "Circle", component: Circle },
-];
+const ICON_OPTIONS = Object.keys(iconMap).map((key) => ({
+  name: key,
+  component: iconMap[key]
+}));
 
 // カラーパレット
 const COLOR_PALETTE = [
@@ -37,12 +21,6 @@ const COLOR_PALETTE = [
   "#f43f5e", // Rose
   "#6b7280", // Gray
 ];
-
-// アイコン名を動的に取得するためのヘルパー
-const getIconComponent = (iconName) => {
-  const found = ICON_LIST.find(i => i.name === iconName);
-  return found ? found.component : Circle;
-};
 
 const Categories = ({ categories = [], selectedCategoryId, onSelectedCategory, onAddCategory }) => {
   // モーダル表示状態
@@ -118,7 +96,6 @@ const Categories = ({ categories = [], selectedCategoryId, onSelectedCategory, o
       {/* カテゴリ追加モーダル */}
       {isModalOpen && (
         <div className={styles.modalOverlay} onClick={handleCloseModal}>
-          {/* stopPropagationで中身をクリックしても閉じないようにする */}
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h3>カテゴリ追加</h3>
@@ -133,9 +110,8 @@ const Categories = ({ categories = [], selectedCategoryId, onSelectedCategory, o
                   type="text" 
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  placeholder="例: 食費"
-                  className={styles.textInput}
-                />
+                  placeholder="カテゴリ名"
+                  className={styles.textInput}/>
               </div>
 
               {/* アイコン選択 */}

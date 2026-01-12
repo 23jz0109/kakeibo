@@ -9,7 +9,18 @@ import {
   Gamepad2,
   ShoppingBag,
   Receipt,
-  HelpCircle
+  HelpCircle,
+  Utensils, 
+  Car, 
+  Home, 
+  Heart, 
+  Coffee, 
+  Shirt, 
+  Smartphone, 
+  Book, 
+  Gift, 
+  Smile, 
+  Circle,
 } from 'lucide-react';
 
 // アイコンマッピング
@@ -23,6 +34,17 @@ const iconMap = {
   'Gamepad2': Gamepad2,
   'ShoppingBag': ShoppingBag,
   'Receipt': Receipt,
+  'Utensils': Utensils,
+  'Car': Car,
+  'Home': Home,
+  'Heart': Heart,
+  'Coffee': Coffee,
+  'Shirt': Shirt,
+  'Smartphone': Smartphone,
+  'Book': Book,
+  'Gift': Gift,
+  'Smile': Smile,
+  'Circle': Circle,
 };
 
 /**
