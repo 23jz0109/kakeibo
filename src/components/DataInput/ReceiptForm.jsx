@@ -361,6 +361,20 @@ const ReceiptForm = forwardRef(({
 
   const [validationError, setValidationError] = useState(null);
 
+  // 税率モード保存
+  useEffect(() => {
+    const savedMode = localStorage.getItem("kakeibo_price_mode");
+    if (savedMode === "inclusive" || savedMode === "exclusive") {
+      setPriceMode(savedMode);
+    }
+  }, [setPriceMode]);
+
+  // 税率モード変換時も保存する
+  const handleSwitchPriceMode = (mode) => {
+    setPriceMode(mode);
+    localStorage.setItem("kakeibo_price_mode", mode);
+  };
+
   // レシート内容変更するたびに保存
   useEffect(() => {
     if (onUpdate) {
@@ -419,7 +433,7 @@ const ReceiptForm = forwardRef(({
       </div>
 
       <div className={styles.scrollArea}>
-        <ReceiptSummary calculated={calculated} priceMode={priceMode} setPriceMode={setPriceMode} />
+        <ReceiptSummary calculated={calculated} priceMode={priceMode} setPriceMode={handleSwitchPriceMode} />
         
         <div className={styles.itemContainer}>
           <div className={styles.itemList}>
