@@ -25,12 +25,12 @@ const ReceiptHeader = ({ receipt, updateReceiptInfo }) => (
     <div className={styles.divider}></div>
     <div className={styles.inputRow}>
       <label className={styles.label}>メモ</label>
-      <input
-        type="text"
-        className={styles.cleanInput}
+      <textarea
+        className={styles.memoInput}
         placeholder="備考"
         value={receipt.memo}
-        onChange={(e) => updateReceiptInfo("memo", e.target.value)}/>
+        onChange={(e) => updateReceiptInfo("memo", e.target.value)}
+      />
     </div>
   </div>
 );
