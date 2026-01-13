@@ -31,17 +31,20 @@
 }
 
 /* オーバーレイ */
+/* ナビゲーションバーを隠さない場合はpositionをabsoluteに、widthとheightを100%に */
 .analyzingOverlay {
-  position: absolute;
-  /* position: fixed; */
+  /* position: absolute; */
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  width: 100%;
-  height: 100%;
+  /* width: 100%; */
+  /* height: 100%; */
+  width: 100vw;  
+  height: 100vh;
   background-color: #f9fafb;
-  z-index: 30;
+  z-index: 50;
   display: flex;
   flex-direction: column;
   align-items: center;

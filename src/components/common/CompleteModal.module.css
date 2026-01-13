@@ -11,12 +11,16 @@
   align-items: center;
   justify-content: center;
   color: #2563eb;
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .complete-container {
-  padding: 1rem;
-  border-radius: 0.3rem;
+  padding: 2rem;
+  border-radius: 0.5rem;
   background-color: white;
   transition: all 0.3s ease;
+}
+
+complete-message {
+  font-size: 1.2rem;
 }
