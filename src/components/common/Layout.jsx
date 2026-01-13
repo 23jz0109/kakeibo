@@ -10,7 +10,9 @@ const Layout = ({
   disableDataInputButton = false,
   redirectPath,
   state = null,
-  onDeleteButtonClick
+  onDeleteButtonClick,
+  hideHeader = false,
+  hideFooter = false,
 }) => {
   usePreventBack();
 
@@ -71,27 +73,29 @@ const Layout = ({
   return (
     <div className={styles.container}>
       {/* ヘッダー */}
-      <header className={styles.header}>
-        {/* 戻るボタン */}
-        {redirectPath && (
-          <div className={styles["back-button"]}>
-            <ChevronLeft size={24}
-              className={styles["icon"]}
-              onClick={() => navigate(redirectPath, { state })}
-              style={{ cursor: "pointer" }} />
-          </div>
-        )}
+      {!hideHeader && (
+        <header className={styles.header}>
+          {/* 戻るボタン */}
+          {redirectPath && (
+            <div className={styles["back-button"]}>
+              <ChevronLeft size={24}
+                className={styles["icon"]}
+                onClick={() => navigate(redirectPath, { state })}
+                style={{ cursor: "pointer" }} />
+            </div>
+          )}
 
-        {/* ヘッダーの中身（タイトルなど） */}
-        {headerContent}
+          {/* ヘッダーの中身（タイトルなど） */}
+          {headerContent}
 
-        {/* 削除ボタン */}
-        {onDeleteButtonClick && (
-          <button className={styles["delete-button"]} onClick={() => onDeleteButtonClick()}>
-            <Trash2 size={20} />
-          </button>
-        )}
-      </header>
+          {/* 削除ボタン */}
+          {onDeleteButtonClick && (
+            <button className={styles["delete-button"]} onClick={() => onDeleteButtonClick()}>
+              <Trash2 size={20} />
+            </button>
+          )}
+        </header>
+      )}
 
       {/* メインコンテンツ*/}
       <main className={styles.main}>
@@ -133,7 +137,8 @@ const Layout = ({
       )}
 
       {/* フッターナビゲーション */}
-      <footer className={`${styles.footer} pb-safe`}>
+      {!hideFooter && (
+        <footer className={`${styles.footer} pb-safe`}>
           <nav className={styles["footer-nav"]}>
             {/* 履歴 */}
             <Link to="/history" className={`${styles["nav-item"]} ${isActive("/history") ? styles.active : ""}`}>
@@ -171,7 +176,8 @@ const Layout = ({
             </Link>
           </nav>
         </footer>
-      </div>
+      )}
+    </div>
   );
 };
 
