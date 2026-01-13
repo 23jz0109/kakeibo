@@ -111,7 +111,6 @@ const Layout = ({
               <span>収入</span>
             </button>
 
-
             {/* カメラ起動 */}
             <button className={`${styles.expandItem} ${styles.expense}`} onClick={() => {
               setIsPlusOpen(false);
@@ -135,7 +134,6 @@ const Layout = ({
 
       {/* フッターナビゲーション */}
       <footer className={`${styles.footer} pb-safe`}>
-
           <nav className={styles["footer-nav"]}>
             {/* 履歴 */}
             <Link to="/history" className={`${styles["nav-item"]} ${isActive("/history") ? styles.active : ""}`}>
@@ -150,13 +148,15 @@ const Layout = ({
             </Link>
 
             {/* ＋ボタン */}
-            <button
-              ref={plusButtonRef}
-              className={`${styles["navigate-datainput"]} ${ isPlusOpen ? styles.close : "" }`}
-              disabled={isPlusDisabled}
-              onClick={() => { if (!isPlusDisabled) setIsPlusOpen((prev) => !prev); }}>
-              {isPlusOpen ? <X size={20} /> : <Plus size={20} />}
-            </button>
+            <div className={styles["nav-item-center"]}>
+              <button
+                ref={plusButtonRef}
+                className={`${styles["navigate-datainput"]} ${ isPlusOpen ? styles.close : "" }`}
+                disabled={isPlusDisabled}
+                onClick={() => { if (!isPlusDisabled) setIsPlusOpen((prev) => !prev); }}>
+                {isPlusOpen ? <X size={20} /> : <Plus size={20} />}
+              </button>
+            </div>
 
             {/* 通知 */}
             <Link to="/notification" className={`${styles["nav-item"]} ${isActive("/notification") ? styles.active : ""}`}>

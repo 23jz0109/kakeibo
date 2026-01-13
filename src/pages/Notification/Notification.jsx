@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/common/Layout';
-import { Trash2, Search, CheckCircle, Settings, X, Bell, MailOpen } from 'lucide-react';
+import { Trash2, Search, CheckCircle, Edit2, X } from 'lucide-react';
 import styles from './Notification.module.css';
 import { useNotification } from '../../hooks/notification/useNotification';
 
@@ -309,7 +309,7 @@ const Notification = () => {
                 <button
                   onClick={(e) => openEditModal(item, e)}
                   className={styles.settingButton}>
-                  <Settings size={20} color="#888" />
+                  <Edit2 size={20} color="#888" />
                 </button>
               </div>
             </div>
