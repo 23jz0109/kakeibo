@@ -1,6 +1,6 @@
 import React, { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { Plus, CircleAlert, X, Trash2 } from "lucide-react";
-import DayPicker from "./DayPicker";
+import DayPicker from "../../components/dataInput/DayPicker";
 import DropdownModal from "./DropdownModal";
 import Categories from "../../components/dataInput/Categories";
 import SubmitButton from "../common/SubmitButton";
@@ -108,15 +108,16 @@ const ReceiptItemPreview = ({ item, categories }) => {
           {item.product_name || "名称未定"}
         </span>
         {quantity >= 2 && (
-          <span className={styles.discount}>
-            -¥{discount.toLocaleString()}
+          <span className={styles.quantity}>
+            ¥{unitPrice.toLocaleString()} × {quantity}
           </span>
         )}
       </div>
       <div className={styles.priceColumn}>
         <span className={styles.productPrice}>¥{finalPrice.toLocaleString()}</span>
         {discount > 0 && (
-          <span className={styles.discount}>-¥{discount.toLocaleString()}
+          <span className={styles.discount}>
+            -¥{discount.toLocaleString()}
           </span>
         )}
       </div>
@@ -245,8 +246,7 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
                   onChange={handleNameChange}
                   onFocus={() => setShowSuggestions(true)}
                   onBlur={handleBlur}
-                  autoComplete="off"
-                />
+                  autoComplete="off"/>
                 {/* 候補リスト */}
                 {showSuggestions && formData.product_name && filteredProducts.length > 0 && (
                   <ul className={styles.suggestionList}>
