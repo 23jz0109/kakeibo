@@ -398,8 +398,7 @@ function Setting() {
                         <td style={{ textAlign: "center" }}>
                           <button
                             className={styles.deleteBtn}
-                            onClick={() => deleteDevice(deviceId)}
-                          >
+                            onClick={() => deleteDevice(deviceId)}>
                             <Trash2 size={16} />
                           </button>
                         </td>

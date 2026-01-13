@@ -166,7 +166,7 @@ body {
 
 .navigate-datainput.close {
   background-color: #ef4444;
-  transform: rotate(45deg);
+  transform: rotate(90deg);
   -webkit-tap-highlight-color: transparent;
 }
 

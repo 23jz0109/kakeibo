@@ -4,7 +4,7 @@ import styles from "./CategorySetting.module.css";
 import Layout from "../../components/common/Layout";
 import { useCategories } from "../../hooks/common/useCategories";
 import iconMap, { getIcon } from "../../constants/categories";
-import { ArrowLeft, Check, Trash2, Edit2, Save, X } from "lucide-react";
+import { ChevronLeft, Check, Trash2, Edit2, Save, X } from "lucide-react";
 
 // アイコン選択肢
 const ICON_OPTIONS = Object.keys(iconMap).map((key) => ({
@@ -222,7 +222,10 @@ const CategorySettings = () => {
   return (
     <Layout
       headerContent={
-        <div className={styles.headerWrapper}>
+        <div className={styles.headerContainer}>
+        <button className={styles.backButton} onClick={() => navigate("/mypage")}>
+          <ChevronLeft size={24} />
+        </button>
           <h1 className={styles.headerTitle}>カテゴリ設定</h1>
           <button onClick={handleCreateClick} className={styles.addButton}>
             追加
