@@ -26,12 +26,12 @@ const ReceiptHeader = ({ receipt, updateReceiptInfo }) => (
     <div className={styles.divider}></div>
     <div className={styles.inputRow}>
       <label className={styles.label}>メモ</label>
-      <input
-        type="text"
-        className={styles.cleanInput}
+      <textarea
+        className={styles.memoInput}
         placeholder="備考"
         value={receipt.memo}
-        onChange={(e) => updateReceiptInfo("memo", e.target.value)}/>
+        onChange={(e) => updateReceiptInfo("memo", e.target.value)}
+      />
     </div>
   </div>
 );
@@ -104,7 +104,7 @@ const ReceiptItemPreview = ({ item, categories }) => {
         <IconComponent size={16} />
       </div>
       <div className={styles.info}>
-      <span className={styles.productName}>
+        <span className={styles.productName}>
           {item.product_name || "名称未定"}
         </span>
         {quantity >= 2 && (
@@ -116,8 +116,7 @@ const ReceiptItemPreview = ({ item, categories }) => {
       <div className={styles.priceColumn}>
         <span className={styles.productPrice}>¥{finalPrice.toLocaleString()}</span>
         {discount > 0 && (
-          <span style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '1px' }}>
-            -¥{discount.toLocaleString()}
+          <span className={styles.discount}>-¥{discount.toLocaleString()}
           </span>
         )}
       </div>
@@ -241,7 +240,7 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
                 <label className={styles.modalLabel}>商品名</label>
                 <input 
                   className={styles.modalInput} 
-                  value={formData.product_name}
+                  value={formData.product_name} 
                   placeholder="商品名"
                   onChange={handleNameChange}
                   onFocus={() => setShowSuggestions(true)}
@@ -434,7 +433,7 @@ const ReceiptForm = forwardRef(({
       </div>
 
       <div className={styles.scrollArea}>
-      <ReceiptSummary calculated={calculated} priceMode={priceMode} setPriceMode={handleSwitchPriceMode} />
+        <ReceiptSummary calculated={calculated} priceMode={priceMode} setPriceMode={handleSwitchPriceMode} />
         
         <div className={styles.itemContainer}>
           <div className={styles.itemList}>

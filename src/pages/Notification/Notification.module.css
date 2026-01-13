@@ -40,7 +40,6 @@
 .mainContainer {
   margin: 0 auto;
   padding: 1rem;
-  padding-bottom: 80px; /* スクロール余白 */
 }
 
 /* タブ */

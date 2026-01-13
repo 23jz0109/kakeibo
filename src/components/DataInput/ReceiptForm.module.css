@@ -43,6 +43,26 @@
   font-weight: 400;
 }
 
+.memoInput {
+  width: 100%;
+  padding: 0.25rem 0;
+  border: none;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 1rem;
+  color: #1f2937;
+  outline: none;
+  background: transparent;
+  font-weight: 500;
+  field-sizing: content;
+}
+.memoInput:focus {
+  border-bottom-color: #3b82f6;
+}
+.memoInput::placeholder {
+  color: #d1d5db;
+  font-weight: 400;
+}
+
 .divider {
   height: 1px;
   background-color: #f3f4f6;
@@ -169,6 +189,14 @@
   border-radius: 50%;
   margin-right: 12px;
   flex-shrink: 0; 
+}
+
+.info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  overflow: hidden;
 }
 
 .productName {
