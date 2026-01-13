@@ -519,7 +519,6 @@ const Budget = () => {
                 <label className={styles.label}>予算ルール設定</label>
                 <div className={styles.flexRow}>
                   <div className={styles.flexItem}>
-                    {/* CustomDropdown に置き換え */}
                     <CustomDropdown
                       value={formData.budgetRuleId}
                       onChange={(val) => handleDropdownChange('budgetRuleId', val)}
@@ -557,7 +556,7 @@ const Budget = () => {
             <div className={styles.formGroup}>
               <label className={styles.label}>発生タイミング</label>
               <div className={styles.flexRow}>
-                {/* 頻度選択: CustomDropdown */}
+                {/* 左側：頻度選択: CustomDropdown */}
                 <div className={styles.flexItem}>
                   <CustomDropdown
                     value={fixedRuleType}
