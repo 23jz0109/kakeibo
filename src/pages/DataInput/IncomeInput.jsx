@@ -168,9 +168,8 @@ const IncomeInput = () => {
 
           <div className={styles.inputRow}>
               <label className={styles.label}>メモ</label>
-              <input
+              <textarea
                 className={styles.memoInput}
-                type="text"
                 placeholder="備考"
                 value={memo}
                 onChange={(e) => setMemo(e.target.value)}
