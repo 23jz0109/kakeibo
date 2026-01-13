@@ -1,11 +1,12 @@
 import React, { useEffect, useState, forwardRef, useImperativeHandle } from "react";
-import { Plus, CircleAlert, X } from "lucide-react";
+import { Plus, CircleAlert, X, Trash2 } from "lucide-react";
 import DayPicker from "./DayPicker";
 import DropdownModal from "./DropdownModal";
 import Categories from "../../components/dataInput/Categories";
 import SubmitButton from "../common/SubmitButton";
 import { useReceiptForm } from "../../hooks/dataInput/useReceiptForm";
 import { useCategories } from "../../hooks/common/useCategories";
+import { getIcon } from "../../constants/categories";
 import styles from "./ReceiptForm.module.css";
 
 const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
@@ -47,12 +48,18 @@ const ReceiptSummary = ({ calculated, priceMode, setPriceMode }) => {
       <div className={styles.summaryRow}>
         <span>小計 (税抜)</span><span>¥{displaySubTotal.toLocaleString()}</span>
       </div>
-      <div className={styles.summaryRow}>
-        <span>消費税 (8%)</span><span>¥{tax8.toLocaleString()}</span>
-      </div>
-      <div className={styles.summaryRow}>
-        <span>消費税 (10%)</span><span>¥{tax10.toLocaleString()}</span>
-      </div>
+      {/* 8%の税金がある場合のみ表示 */}
+      {tax8 > 0 && (
+        <div className={styles.summaryRow}>
+          <span>消費税 (8%)</span><span>¥{tax8.toLocaleString()}</span>
+        </div>
+      )}
+      {/* 10%の税金がある場合のみ表示 */}
+      {tax10 > 0 && (
+        <div className={styles.summaryRow}>
+          <span>消費税 (10%)</span><span>¥{tax10.toLocaleString()}</span>
+        </div>
+      )}
       <div className={styles.summaryTotalRow}>
         <span>合計金額</span>
         <span className={styles.summaryTotalAmount}>¥{calculated.totalAmount.toLocaleString()}</span>
@@ -86,17 +93,18 @@ const ReceiptItemPreview = ({ item, categories }) => {
   if (!categoryData && item.category_id && categories.length > 0) {
     categoryData = categories.find(c => String(c.ID || c.id) === String(item.category_id));
   }
-  const catName = categoryData?.CATEGORY_NAME || categoryData?.category_name || "未分類";
   const catColor = categoryData?.CATEGORY_COLOR || categoryData?.category_color || "#9ca3af";
+  const iconName = categoryData?.CATEGORY_ICON || categoryData?.category_icon || categoryData?.icon_name;
+  const IconComponent = getIcon(iconName);
 
   // 表示部分生成
   return (
-    <div className={styles.previewContainer} style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-      <div style={{ backgroundColor: catColor, color: '#fff', fontSize: '0.65rem', fontWeight: 'bold', padding: '3px 8px', borderRadius: '4px', marginRight: '10px', minWidth: '60px', textAlign: 'center' }}>
-        {catName}
+    <div className={styles.previewContainer}>
+      <div className={styles.categoryIcon} style={{ backgroundColor: catColor }}>
+        <IconComponent size={16} />
       </div>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', textAlign: 'left', overflow: 'hidden' }}>
-        <span className={styles.productName} style={{ width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+      <div className={styles.info}>
+        <span className={styles.productName}>
           {item.product_name || "名称未定"}
         </span>
         {quantity >= 2 && (
@@ -105,11 +113,10 @@ const ReceiptItemPreview = ({ item, categories }) => {
           </span>
         )}
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '80px' }}>
+      <div className={styles.priceColumn}>
         <span className={styles.productPrice}>¥{finalPrice.toLocaleString()}</span>
         {discount > 0 && (
-          <span style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '1px' }}>
-            -¥{discount.toLocaleString()}
+          <span className={styles.discount}>-¥{discount.toLocaleString()}
           </span>
         )}
       </div>
@@ -215,8 +222,17 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
   return (
     <div className={styles.modalDetail}>
       <div className={styles.modalHeader}>
-        <span className={styles.modalTitle}>{mode === "edit" ? "編集" : "追加"}</span>
-        {mode === "edit" && <button className={styles.deleteButton} onClick={() => { onDelete(index); closeModal(); }}>🗑️</button>}
+        <span className={styles.modalTitle}>{mode === "edit" ? "商品編集" : "商品追加"}</span>
+        {mode === "edit" && 
+          <button 
+            className={styles.deleteBtn} 
+            onClick={() => { 
+              onDelete(index); 
+              closeModal(); 
+            }}>
+            <Trash2 size={16} />
+          </button>
+        }
       </div>
       <div className={styles.staticInputArea}>
         <div className={styles.modalFlexRow}>
@@ -225,6 +241,7 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
                 <input 
                   className={styles.modalInput} 
                   value={formData.product_name} 
+                  placeholder="商品名"
                   onChange={handleNameChange}
                   onFocus={() => setShowSuggestions(true)}
                   onBlur={handleBlur}
@@ -236,9 +253,6 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
                     {filteredProducts.map((p) => (
                       <li key={p.id || p.ID} className={styles.suggestionItem} onClick={() => selectProduct(p)}>
                         <span>{p.product_name}</span>
-                        {/* {(p.product_price || p.price) && (
-                           <span className={styles.suggestionPrice}>¥{Number(p.product_price || p.price).toLocaleString()}</span>
-                        )} */}
                       </li>
                     ))}
                   </ul>
@@ -246,17 +260,17 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
              </div>
              <div style={{flex:1}} className={styles.modalRow}>
                 <label className={styles.modalLabel}>個数</label>
-                <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" value={formData.quantity} onChange={e=>setFormData({...formData, quantity:e.target.value})} />
+                <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="個数" value={formData.quantity} onChange={e=>setFormData({...formData, quantity:e.target.value})} />
              </div>
         </div>
         <div className={styles.modalFlexRow}>
              <div style={{flex:2}} className={styles.modalRow}>
                 <label className={styles.modalLabel}>単価 ({isInclusive ? "税込" : "税抜"})</label>
-                <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="0" value={formData.product_price} onChange={e=>setFormData({...formData, product_price:e.target.value})} />
+                <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="0円" value={formData.product_price} onChange={e=>setFormData({...formData, product_price:e.target.value})} />
              </div>
              <div style={{flex:1}} className={styles.modalRow}>
                 <label className={styles.modalLabel}>割引</label>
-                <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="0" value={formData.discount} onChange={e=>setFormData({...formData, discount:e.target.value})} />
+                <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="0円" value={formData.discount} onChange={e=>setFormData({...formData, discount:e.target.value})} />
              </div>
         </div>
         
