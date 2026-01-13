@@ -289,6 +289,7 @@ const Budget = () => {
     const color = item.category_color || "#3b82f6";
     const isNotifyOn = Number(item.notification_enable) === 1;;
     const IconComponent = getIcon(item.icon_name);
+    const ruleDisplayText = item.rule_name === 'custom' ? `指定 (${item.rule_days}日)` : item.rule_name_jp;
 
     return (
       <div key={item.id} className={styles.card} style={{ borderLeft: `4px solid ${color}` }}>
@@ -297,7 +298,12 @@ const Budget = () => {
             <span className={styles.cardIconBox} style={{ backgroundColor: color }}>
               <IconComponent size={16} color="#fff" />
             </span>
-            <span className={styles.cardTitle}>{item.category_name}</span>
+            <div>
+              <div className={styles.cardTitle}>{item.category_name}</div>
+              <div className={styles.fixedDate}>
+                {ruleDisplayText}
+              </div>
+            </div>
           </div>
           <div className={styles.cardActions}>
             <button onClick={() => handleToggle(item)}>
@@ -311,23 +317,32 @@ const Budget = () => {
             <button onClick={() => handleDelete(item.id)}><Trash2 size={16} /></button>
           </div>
         </div>
-        <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed #e5e7eb' }}>
+        <div style={{ marginTop: '12px' }}>
+        
+        {/* 進捗バーを上部に配置 */}
+        <div className={styles.progressContainer} style={{ marginBottom: '8px' }}>
+          <div className={`${styles.progressBar} ${isOver ? styles.progressOver : ''}`} 
+            style={{ width: `${Math.min(percent, 100)}%`, backgroundColor: isOver ? '#ef4444' : color }}></div>
+        </div>
+
+        {/* 金額とメッセージを横並び(Flex)にする */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div className={styles.budgetAmounts}>
             <span className={styles.amountSpent}>¥{spent.toLocaleString()}</span>
             <span className={styles.amountLimit}> / ¥{limit.toLocaleString()}</span>
+            <span className={styles.amountLimit}>({percent}%)</span>
           </div>
-          <div className={styles.progressContainer}>
-            <div className={`${styles.progressBar} ${isOver ? styles.progressOver : ''}`} 
-              style={{ width: `${Math.min(percent, 100)}%`, backgroundColor: isOver ? '#ef4444' : color }}></div>
-          </div>
-          <div className={styles.progressText}>
+
+          <div className={styles.periodMessage} style={{ color: color }}>
+            <AlertCircle size={14} style={{ marginRight: 4 }}/>
             <span>{item.period_message}</span>
-            <span className={styles.percentText}>({percent}%)</span>
           </div>
+
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
   // 固定費アイテム
   const renderFixedItem = (item) => {
