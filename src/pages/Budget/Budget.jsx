@@ -101,7 +101,7 @@ const Budget = () => {
 
   // オンオフボタン
   const handleToggle = async (item) => {
-    const newStatus = item.notification_enable === 1 ? 0 : 1;
+    const newStatus = Number(item.notification_enable) === 1 ? 0 : 1;
 
     // 見た目更新
     setData(prevData => prevData.map(d => 
@@ -287,7 +287,7 @@ const Budget = () => {
     const percent = Number(item.usage_percent) || 0;
     const isOver = spent > limit;
     const color = item.category_color || "#3b82f6";
-    const isNotifyOn = item.notification_enable === 1;
+    const isNotifyOn = Number(item.notification_enable) === 1;;
     const IconComponent = getIcon(item.icon_name);
 
     return (
@@ -333,7 +333,7 @@ const Budget = () => {
   const renderFixedItem = (item) => {
     const amount = Number(item.cost || item.amount || 0);
     const color = item.category_color || "#ec4899";
-    const isNotifyOn = item.notification_enable === 1;
+    const isNotifyOn = Number(item.notification_enable) === 1;
     const IconComponent = getIcon(item.icon_name);
 
     return (
@@ -455,14 +455,6 @@ const Budget = () => {
                   )}
                 </div>
               </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.checkboxLabel}>
-                  <input type="checkbox" name="notificationStatus" 
-                      checked={formData.notificationStatus} onChange={handleInputChange} />
-                  通知を有効にする
-                </label>
-              </div>
             </>
           )}
           
@@ -470,58 +462,61 @@ const Budget = () => {
           {activeTab === 'fixed' && (
             <div className={styles.formGroup}>
               <label className={styles.label}>発生タイミング</label>
-              
-              <div style={{ marginBottom: '10px' }}>
-                  <select 
-                      value={fixedRuleType} 
-                      onChange={handleFixedTypeChange}
-                      className={styles.selectInput}>
-                        <option value="">頻度を選択してください</option>
-                        <option value="monthly_fixed">毎月 (日付指定)</option>
-                        <option value="weekly_fixed">毎週 (曜日指定)</option>
-                        <option value="last_day">毎月 (末日)</option>
-                        <option value="daily">毎日</option>
-                  </select>
-              </div>
-
-              {fixedRuleType === 'monthly_fixed' && (
-                <div className={styles.flexRow}>
-                  <select 
-                    name="fixedCostRuleId"
-                    value={formData.fixedCostRuleId} 
-                    onChange={handleInputChange}
+              <div className={styles.flexRow}>        
+                {/* 左側: 頻度選択 */}
+                <div className={styles.flexItem}>
+                  <select
+                    value={fixedRuleType}
+                    onChange={handleFixedTypeChange}
                     className={styles.selectInput}>
-                      <option value="">日付を選択</option>
-                      {fixedCostRules
-                          .filter(r => r.rule_name === 'fixed_day')
-                          .map(rule => (
-                              <option key={rule.id} value={rule.id}>{rule.rule_name_jp}</option>
-                          ))
-                      }
+                    <option value="">頻度を選択してください</option>
+                    <option value="monthly_fixed">毎月 (日付指定)</option>
+                    <option value="weekly_fixed">毎週 (曜日指定)</option>
+                    <option value="last_day">毎月 (末日)</option>
+                    <option value="daily">毎日</option>
                   </select>
                 </div>
-              )}
-
-              {fixedRuleType === 'weekly_fixed' && (
-                <div className={styles.flexRow}>
-                  <select 
+                
+                {/* 右側: 毎月 */}
+                {fixedRuleType === 'monthly_fixed' && (
+                  <div className={styles.flexItem}>
+                    <select
                       name="fixedCostRuleId"
-                      value={formData.fixedCostRuleId} 
+                      value={formData.fixedCostRuleId}
                       onChange={handleInputChange}
                       className={styles.selectInput}>
-                        <option value="">曜日を選択</option>
-                        {fixedCostRules
-                            .filter(r => r.rule_name === 'week_day')
-                            .map(rule => (
-                                <option key={rule.id} value={rule.id}>{rule.rule_name_jp}</option>
-                            ))
-                        }
-                  </select>
+                      <option value="">日付</option>
+                      {fixedCostRules
+                        .filter(r => r.rule_name === 'fixed_day')
+                        .map(rule => (
+                          <option key={rule.id} value={rule.id}>{rule.rule_name_jp}</option>
+                        ))
+                      }
+                    </select>
+                  </div>
+                )}          
+                
+                {/* 右側: 毎週 */}
+                {fixedRuleType === 'weekly_fixed' && (
+                  <div className={styles.flexItem}>
+                    <select
+                      name="fixedCostRuleId"
+                      value={formData.fixedCostRuleId}
+                      onChange={handleInputChange}
+                      className={styles.selectInput}>
+                      <option value="">曜日</option>
+                      {fixedCostRules
+                        .filter(r => r.rule_name === 'week_day')
+                        .map(rule => (
+                          <option key={rule.id} value={rule.id}>{rule.rule_name_jp}</option>
+                        ))
+                      }
+                    </select>
+                  </div>
+                )}
               </div>
-              )}
             </div>
           )}
-
           <div className={styles.modalActions}>
             <button type="button" className={styles.saveBtn} disabled={isLoading} onClick={handleSave}>
               {isLoading ? '保存中...' : '保存'}
