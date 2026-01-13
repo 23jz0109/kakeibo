@@ -26,6 +26,14 @@ const Layout = ({
 
   const isActive = (path) => location.pathname === path;
 
+  // // 入力関連ページ
+  // const isDataInputPage =
+  //   location.pathname === "/input" ||
+  //   location.pathname.startsWith("/input/");
+
+  // // 「＋」ボタンを無効化するかどうか
+  // const isPlusDisabled = disableDataInputButton || isDataInputPage;
+
   const isPlusDisabled = disableDataInputButton;
 
   // ナビ以外タップで閉じる
