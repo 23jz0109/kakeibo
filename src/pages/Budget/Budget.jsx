@@ -227,9 +227,9 @@ const Budget = () => {
 
         setFormData({
           categoryId: String(item.category_id || ""),
-          amount: String(item.budget_limit || ""),
+          amount: String(item.budget_limit || ""),    
           budgetRuleId: targetRuleId ? String(targetRuleId) : "",
-          notificationStatus: Number(item.notification_enable) === 1,
+          notificationStatus: Number(item.notification_enable) === 1, 
           customDays: item.custom_days || (item.rule_name === 'custom' ? item.rule_days : ""),
           fixedCostRuleId: "",
         });
@@ -248,14 +248,15 @@ const Budget = () => {
         }
 
         setFormData({
-          categoryId: String(item.category_id || ""),
-          amount: String(item.cost || item.amount || ""),
+          categoryId: String(item.category_id || ""), 
+          amount: String(item.cost || item.amount || ""), 
           fixedCostRuleId: currentRuleId ? String(currentRuleId) : "",
           budgetRuleId: "",
           notificationStatus: false,
           customDays: "",
         });
 
+        //ルールに応じたタイプをセット
         let currentType = "";
         if (currentRuleId) {
           currentType = getFixedRuleTypeById(currentRuleId, fixedCostRules);
@@ -310,13 +311,14 @@ const Budget = () => {
 
   const handleFixedTypeChangeDropdown = (value) => {
     setFixedRuleType(value);
-    if (value === 'daily') {
+
+    if (newType === 'daily') {
       const rule = fixedCostRules.find(r => r.rule_name === 'daily');
-      setFormData(prev => ({ ...prev, fixedCostRuleId: rule ? String(rule.id) : "" }));
+      setFormData(prev => ({ ...prev, fixedCostRuleId: rule ? rule.id : "" }));
     }
-    else if (value === 'last_day') {
+    else if (newType === 'last_day') {
       const rule = fixedCostRules.find(r => r.rule_name === 'last_day');
-      setFormData(prev => ({ ...prev, fixedCostRuleId: rule ? String(rule.id) : "" }));
+      setFormData(prev => ({ ...prev, fixedCostRuleId: rule ? rule.id : "" }));
     }
     else {
       setFormData(prev => ({ ...prev, fixedCostRuleId: "" }));
@@ -567,7 +569,6 @@ const Budget = () => {
               <div className={styles.formGroup}>
                 <label className={styles.label}>発生タイミング</label>
                 <div className={styles.flexRow}>
-                  {/* ★変更箇所: 左側：頻度選択を 7割 (flexItem7) に設定 */}
                   <div className={styles.flexItem7}>
                     <CustomDropdown
                       value={fixedRuleType}
@@ -634,7 +635,9 @@ const Budget = () => {
   const headerContent = (
     <div className={styles.headerWrapper}>
       <h1 className={styles.headerTitle}>予算・固定費</h1>
-      <button onClick={() => handleOpenModal('create')} className={styles.addButton}>追加</button>
+      <button onClick={() => handleOpenModal('create')} className={styles.addButton}>
+        追加
+      </button>
     </div>
   );
 
