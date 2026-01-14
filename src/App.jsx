@@ -66,28 +66,28 @@ function App() {
         <Route path="/login" element={<Navigate to="/" replace />} />
 
         {/* ログイン必須エリア */}
-        {/* ナビゲーションバーの各パーツ */}
-        {/* 履歴 */}
-        <Route path="/history" element={<PrivateRoute><History /></PrivateRoute>} />
+          {/* ナビゲーションバーの各パーツ */}
+          {/* 履歴 */}
+          <Route path="/history" element={<PrivateRoute><History /></PrivateRoute>} />
 
-        {/* 予算 */}
-        <Route path="/budget" element={<PrivateRoute><Budget /></PrivateRoute>} />
+          {/* 予算 */}
+          <Route path="/budget" element={<PrivateRoute><Budget /></PrivateRoute>} />
 
-        {/* データ入力 */}
-        <Route path="/input/income" element={<PrivateRoute><IncomeInput /></PrivateRoute>} />
-        <Route path="/input/manual" element={<PrivateRoute><ExpenseManualInput /></PrivateRoute>} />
-        <Route path="/input/ocr" element={<PrivateRoute><ExpenseOcrInput /></PrivateRoute>} />
+          {/* データ入力 */}
+          <Route path="/input/income" element={<PrivateRoute><IncomeInput /></PrivateRoute>} />
+          <Route path="/input/manual" element={<PrivateRoute><ExpenseManualInput /></PrivateRoute>} />
+          <Route path="/input/ocr" element={<PrivateRoute><ExpenseOcrInput /></PrivateRoute>} />
 
-        {/* 通知 */}
-        <Route path="/notification" element={<PrivateRoute><Notification /></PrivateRoute>} />
-        <Route path="/price/:productName" element={<PrivateRoute><PriceInfo /></PrivateRoute>} />
+          {/* 通知 */}
+          <Route path="/notification" element={<PrivateRoute><Notification /></PrivateRoute>} />
+            <Route path="/price/:productName" element={<PrivateRoute><PriceInfo /></PrivateRoute>} />
 
-        {/* マイページ */}
-        <Route path="/mypage" element={<PrivateRoute><MyPage /></PrivateRoute>} />
-        <Route path="/userinfo" element={<PrivateRoute><UserInfo /></PrivateRoute>} />
-        <Route path="/categories" element={<PrivateRoute><CategorySettings /></PrivateRoute>} />
-        <Route path='/setting' element={<PrivateRoute><Setting /></PrivateRoute>} />
-        <Route path="/statistics" element={<PrivateRoute><Statistics /></PrivateRoute>} />
+          {/* マイページ */}
+          <Route path="/mypage" element={<PrivateRoute><MyPage /></PrivateRoute>} />
+            <Route path="/userinfo" element={<PrivateRoute><UserInfo /></PrivateRoute>} />
+            <Route path="/categories" element={<PrivateRoute><CategorySettings /></PrivateRoute>} />
+            <Route path='/setting' element={<PrivateRoute><Setting /></PrivateRoute>} />
+            <Route path="/statistics" element={<PrivateRoute><Statistics /></PrivateRoute>} />
       </Routes>
     </Router>
   );

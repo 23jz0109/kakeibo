@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Wallet, Calendar, Bell, User, Plus, ChevronLeft, Trash2, X, Camera, Edit3, ArrowDownCircle } from "lucide-react";
 import { usePreventBack } from "../../hooks/common/usePreventBack";
+import { useNotification } from "../../hooks/notification/useNotification";
 import styles from "./Layout.module.css";
 
 const Layout = ({
@@ -23,6 +24,9 @@ const Layout = ({
   const plusRef = useRef(null);
   const plusButtonRef = useRef(null);
   const mouseDownOutsideRef = useRef(false);
+  
+  const { unreadCount, fetchUnreadCount } = useNotification();
+  // console.log("Layout: unreadCount =", unreadCount);
 
   const isActive = (path) => location.pathname === path;
 
@@ -35,6 +39,11 @@ const Layout = ({
   // const isPlusDisabled = disableDataInputButton || isDataInputPage;
 
   const isPlusDisabled = disableDataInputButton;
+
+  
+  useEffect(() => {
+    fetchUnreadCount();
+  }, [location, fetchUnreadCount]);
 
   // ナビ以外タップで閉じる
   useEffect(() => { 
@@ -165,7 +174,14 @@ const Layout = ({
 
             {/* 通知 */}
             <Link to="/notification" className={`${styles["nav-item"]} ${isActive("/notification") ? styles.active : ""}`}>
-              <Bell className={styles["nav-icon"]} size={20} />
+              <div className={styles["icon-wrapper"]}>
+                <Bell className={styles["nav-icon"]} size={20} />
+                {unreadCount > 0 && (
+                  <span className={styles["notification-badge"]}>
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
+              </div>
               <span className={styles["nav-label"]}>通知</span>
             </Link>
 

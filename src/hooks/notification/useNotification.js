@@ -1,11 +1,12 @@
 import { useState, useCallback } from 'react';
 
 const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
+let unread = 0;
 
 export const useNotification = () => {
   const [notifications, setNotifications] = useState([]);
   const [notificationHistory, setNotificationHistory] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadCount, setUnreadCount] = useState(unread);
   const [loading, setLoading] = useState(true);
   const [productList, setProductList] = useState([]);
   const [suggestedPeriod, setSuggestedPeriod] = useState(null);
@@ -249,7 +250,7 @@ export const useNotification = () => {
       targetLocalMin = tempDate.getMinutes();
     }
 
-    // 2. 期間分の日付を進めます
+    // 期間分の日付を進めます
     let targetDate = new Date();
     targetDate.setDate(targetDate.getDate() + period);
 
@@ -373,10 +374,14 @@ export const useNotification = () => {
     const authToken = getAuthToken();
     // UI更新
     setNotificationHistory(prev => 
-      prev.map(n => n.id === notificationId ? { ...n, is_read: 1 } : n)
+      prev.map(n => String(n.id) === String(notificationId) ? { ...n, is_read: 1 } : n)
     );
     // 未読カウントを引く
-    setUnreadCount(prev => Math.max(0, prev - 1));
+    setUnreadCount(prev => {
+      const newVal = Math.max(0, prev - 1);
+      unread = newVal;
+      return newVal;
+    });
 
     try {
       await fetch(`${API_BASE_URL}/notification/list`, {
@@ -387,10 +392,9 @@ export const useNotification = () => {
           "X-Notification-ID": String(notificationId)
         }
       });
-      // 再度fetchUnreadCountを呼ぶ
     } 
     catch (err) {
-      console.error("既読化エラー", err);
+      console.error("既読エラー", err);
     }
   };
 
@@ -434,7 +438,10 @@ export const useNotification = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setUnreadCount(data.count || 0);
+
+        // キャッシュにセットする
+        unread = data.count;
+        setUnreadCount(unread);
       }
     }
     catch (err) {
