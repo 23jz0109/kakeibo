@@ -88,7 +88,7 @@ body {
   flex-shrink: 0;
   background-color: white;
   border-top: 1px solid #e5e7eb;
-  position: relative;
+  position: relativze;
   z-index: 40;
   padding-bottom: env(safe-area-inset-bottom); /* safe area */
 }
@@ -166,7 +166,7 @@ body {
 
 .navigate-datainput.close {
   background-color: #ef4444;
-  transform: rotate(45deg);
+  transform: rotate(90deg);
   -webkit-tap-highlight-color: transparent;
 }
 

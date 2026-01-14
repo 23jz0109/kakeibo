@@ -206,6 +206,10 @@ const ExpenseOcrInput = () => {
           )}
         </div>
       }
+
+      //データ解析中はヘッダーとフッターを非表示
+      hideHeader={isProcessing}
+      hideFooter={isProcessing}
     />
   );
 };

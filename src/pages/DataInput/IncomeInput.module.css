@@ -87,6 +87,7 @@
   font-size: 1rem;
   outline: none;
   background: transparent;
+  field-sizing: content;
 }
 
 .memoInput:focus {

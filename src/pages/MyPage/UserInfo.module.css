@@ -1,6 +1,4 @@
-/* src/pages/Mypage/UserInfo.module.css */
-
-/* コンテナ全体 (MyPageと同じ) */
+/* コンテナ全体 */
 .mainContainer {
   width: 100%;
   display: flex;
@@ -20,7 +18,7 @@
   padding-left: 4px;
 }
 
-/* リストコンテナ (MyPageのmenuListに相当) */
+/* リストコンテナ */
 .infoList {
   width: 100%;
   max-width: 500px;
@@ -31,7 +29,7 @@
   padding: 0;
 }
 
-/* 各項目のカードスタイル (MyPageのmenuButtonベース) */
+/* 各項目のカードスタイル */
 .infoItem {
   width: 100%;
   background: white;
@@ -43,7 +41,7 @@
   align-items: center;
 }
 
-/* ラベルテキスト (MyPageのlabelContentベース) */
+/* ラベルテキスト */
 .label {
   font-size: 1rem;
   color: #4b5563;
@@ -82,7 +80,7 @@
   background: #e5e7eb;
 }
 
-/* 退会ボタン (MyPageのlogoutButtonと同じスタイル) */
+/* 退会ボタン */
 .withdrawButton {
   width: 100%;
   background: white;
