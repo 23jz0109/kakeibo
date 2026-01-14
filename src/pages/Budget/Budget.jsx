@@ -312,11 +312,11 @@ const Budget = () => {
   const handleFixedTypeChangeDropdown = (value) => {
     setFixedRuleType(value);
 
-    if (newType === 'daily') {
+    if (value === 'daily') {
       const rule = fixedCostRules.find(r => r.rule_name === 'daily');
       setFormData(prev => ({ ...prev, fixedCostRuleId: rule ? rule.id : "" }));
     }
-    else if (newType === 'last_day') {
+    else if (value === 'last_day') {
       const rule = fixedCostRules.find(r => r.rule_name === 'last_day');
       setFormData(prev => ({ ...prev, fixedCostRuleId: rule ? rule.id : "" }));
     }
