@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Layout from "../../components/common/Layout";
 import CompleteModal from "../../components/common/CompleteModal";
-import ReceiptForm from "../../components/dataInput/ReceiptForm";
+import ReceiptForm from "../../components/DataInput/ReceiptForm";
 import { useCategories } from "../../hooks/common/useCategories";
 import styles from "./ExpenseManualInput.module.css";
 
@@ -120,6 +120,11 @@ const ExpenseManualInput = () => {
   // 内容を消すボタン
   const handleHeaderClear = () => {
     if (window.confirm("入力内容をすべて消去しますか？")) {
+      receiptQueue.forEach((_, index) => {
+        const formIdKey = `manual_receipt_${index}`;
+        localStorage.removeItem(formIdKey);
+        localStorage.removeItem(`kakeibo_tax_mode_${formIdKey}`);
+      });
       // 初期状態にリセット
       setReceiptQueue([null]); 
       localStorage.removeItem(STORAGE_KEY); 
@@ -249,7 +254,8 @@ const ExpenseManualInput = () => {
               onUpdate={handleReceiptUpdate}
               isSubmitting={isSubmitting}
               submitLabel={isSubmitting ? "送信中..." : (receiptQueue.length > 1 ? "この1枚を登録" : "登録する")}
-              typeId={2}/>
+              typeId={2}
+              formId={`manual_receipt_${currentIndex}`}/>
           )}          
           {complete && <CompleteModal />}
         </div>
