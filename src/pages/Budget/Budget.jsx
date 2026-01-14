@@ -199,9 +199,9 @@ const Budget = () => {
 
         setFormData({
           categoryId: String(item.category_id || ""),
-          amount: String(item.budget_limit || ""),
+          amount: String(item.budget_limit || ""),    
           budgetRuleId: targetRuleId ? String(targetRuleId) : "",
-          notificationStatus: Number(item.notification_enable) === 1,
+          notificationStatus: Number(item.notification_enable) === 1, 
           customDays: item.custom_days || (item.rule_name === 'custom' ? item.rule_days : ""),
           fixedCostRuleId: "",
         });
@@ -223,15 +223,15 @@ const Budget = () => {
         }
 
         setFormData({
-          categoryId: String(item.category_id || ""),
-          amount: String(item.cost || item.amount || ""),
+          categoryId: String(item.category_id || ""), 
+          amount: String(item.cost || item.amount || ""), 
           fixedCostRuleId: currentRuleId ? String(currentRuleId) : "",
           budgetRuleId: "",
           notificationStatus: false,
           customDays: "",
         });
 
-        // ルールに応じたタイプ(monthly_fixedなど)をセット
+        //ルールに応じたタイプをセット
         let currentType = "";
         if (currentRuleId) {
           currentType = getFixedRuleTypeById(currentRuleId, fixedCostRules);
@@ -288,18 +288,15 @@ const Budget = () => {
   const handleFixedTypeChangeDropdown = (value) => {
     setFixedRuleType(value);
 
-    // 頻度変更時に、自動的に固定費ルールIDをセットするロジック
-    if (value === 'daily') {
+    if (newType === 'daily') {
       const rule = fixedCostRules.find(r => r.rule_name === 'daily');
-      setFormData(prev => ({ ...prev, fixedCostRuleId: rule ? String(rule.id) : "" }));
+      setFormData(prev => ({ ...prev, fixedCostRuleId: rule ? rule.id : "" }));
     }
-    else if (value === 'last_day') {
+    else if (newType === 'last_day') {
       const rule = fixedCostRules.find(r => r.rule_name === 'last_day');
-      setFormData(prev => ({ ...prev, fixedCostRuleId: rule ? String(rule.id) : "" }));
+      setFormData(prev => ({ ...prev, fixedCostRuleId: rule ? rule.id : "" }));
     }
     else {
-      // monthly_fixed (日付指定) や weekly_fixed (曜日指定) の場合は
-      // ユーザーが次のプルダウンで選択するため、一旦クリア
       setFormData(prev => ({ ...prev, fixedCostRuleId: "" }));
     }
   };
@@ -500,7 +497,11 @@ const Budget = () => {
           {/* カテゴリ */}
           <div className={styles.categoryCard}>
             <label className={styles.categoryLabel}>カテゴリ</label>
-            <Categories categories={categories} selectedCategoryId={formData.categoryId} onSelectedCategory={handleCategorySelect} onAddCategory={handleAddCategory} />
+            <Categories
+              categories={categories}
+              selectedCategoryId={formData.categoryId}
+              onSelectedCategory={handleCategorySelect}
+              onAddCategory={handleAddCategory} />
           </div>
 
           {/* 金額 */}
@@ -508,7 +509,8 @@ const Budget = () => {
             <label className={styles.label}>{activeTab === 'budget' ? '上限額' : '金額'}</label>
             <div className={styles.amountInputWrapper}>
               <span className={styles.yenMark}>¥</span>
-              <input type="text" inputMode="numeric" pattern="\d*" name="amount" value={formData.amount} onChange={handleInputChange} className={styles.amountInput} placeholder="0" />
+              <input type="text" inputMode="numeric" pattern="\d*" name="amount" value={formData.amount}
+                onChange={handleInputChange} className={styles.amountInput} placeholder="0" />
             </div>
           </div>
 
@@ -519,23 +521,23 @@ const Budget = () => {
                 <label className={styles.label}>予算ルール設定</label>
                 <div className={styles.flexRow}>
                   <div className={styles.flexItem}>
-                    <CustomDropdown
+                    <select
+                      name="budgetRuleId"
                       value={formData.budgetRuleId}
-                      onChange={(val) => handleDropdownChange('budgetRuleId', val)}
-                      placeholder="ルールを選択"
-                      options={budgetRules.map(rule => ({
-                        value: rule.id,
-                        label: rule.rule_name_jp
-                      }))}
-                    />
+                      onChange={handleInputChange}
+                      className={styles.selectInput}>
+                      <option value="">選択してください</option>
+                      {budgetRules.map(rule => (
+                        <option key={rule.id} value={rule.id}>{rule.rule_name_jp}</option>
+                      ))}
+                    </select>
                   </div>
 
-                  {/* カスタム日数の入力欄 */}
                   {budgetRules.find(r => String(r.id) === String(formData.budgetRuleId))?.rule_name === 'custom' && (
                     <div className={styles.flexItemSmall}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <input
-                          type="text" inputMode="numeric" pattern="\d*"
+                          type="text" inputmode="numeric" pattern="\d*"
                           name="customDays"
                           value={formData.customDays}
                           onChange={handleInputChange}
@@ -551,12 +553,12 @@ const Budget = () => {
             </>
           )}
 
-          {/* 固定費タブの設定 */}
+          {/* 固定費タブ */}
           {activeTab === 'fixed' && (
             <div className={styles.formGroup}>
               <label className={styles.label}>発生タイミング</label>
               <div className={styles.flexRow}>
-                {/* 左側：頻度選択: CustomDropdown */}
+                {/* 左側: 頻度選択 */}
                 <div className={styles.flexItem}>
                   <CustomDropdown
                     value={fixedRuleType}
@@ -571,7 +573,7 @@ const Budget = () => {
                   />
                 </div>
 
-                {/* 毎月(日付指定) の詳細選択 */}
+                {/* 右側: 毎月 */}
                 {fixedRuleType === 'monthly_fixed' && (
                   <div className={styles.flexItem}>
                     <CustomDropdown
@@ -588,7 +590,7 @@ const Budget = () => {
                   </div>
                 )}
 
-                {/* 毎週(曜日指定) の詳細選択 */}
+                {/* 右側: 毎週 */}
                 {fixedRuleType === 'weekly_fixed' && (
                   <div className={styles.flexItem}>
                     <CustomDropdown
@@ -621,7 +623,9 @@ const Budget = () => {
   const headerContent = (
     <div className={styles.headerWrapper}>
       <h1 className={styles.headerTitle}>予算・固定費</h1>
-      <button onClick={() => handleOpenModal('create')} className={styles.addButton}>追加</button>
+      <button onClick={() => handleOpenModal('create')} className={styles.addButton}>
+        追加
+      </button>
     </div>
   );
 

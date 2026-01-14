@@ -32,7 +32,7 @@ const CategorySettings = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(2);
-  
+
   // フォームデータ
   const [editTargetId, setEditTargetId] = useState(null);
   const [formData, setFormData] = useState({
@@ -89,7 +89,7 @@ const CategorySettings = () => {
   // 削除
   const handleDelete = async () => {
     if (!window.confirm("このカテゴリを削除しますか？")) return;
-    
+
     const success = await deleteCategory(editTargetId, activeTab);
     if (success) {
       await fetchPersonalCategories(activeTab);
@@ -105,17 +105,17 @@ const CategorySettings = () => {
       <div className={styles.modalOverlay} onClick={handleCloseModal}>
         {/* e.stopPropagation() で内部クリック時の閉じる動作を無効化 */}
         <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-          
+
           {/* ヘッダー */}
           <div className={styles.modalHeader}>
             <div className={styles.modalTitleGroup}>
-                <h2>{editTargetId ? "カテゴリ編集" : "カテゴリ追加"}</h2>
-                {/* 編集時のみ削除ボタンを表示 */}
-                {editTargetId && (
-                  <button onClick={handleDelete} className={styles.deleteButton}>
-                    <Trash2 size={18} />
-                  </button>
-                )}
+              <h2>{editTargetId ? "カテゴリ編集" : "カテゴリ追加"}</h2>
+              {/* 編集時のみ削除ボタンを表示 */}
+              {editTargetId && (
+                <button onClick={handleDelete} className={styles.deleteButton}>
+                  <Trash2 size={18} />
+                </button>
+              )}
             </div>
             <button onClick={handleCloseModal} className={styles.closeButton}>
               <X size={24} />
@@ -140,7 +140,7 @@ const CategorySettings = () => {
 
           {/* コンテンツ本体 (スクロール可能エリア) */}
           <div className={styles.modalBody}>
-            
+
             {/* アイコン選択 */}
             <div className={styles.sectionTitle}>アイコン</div>
             <div className={styles.iconGrid}>
@@ -168,7 +168,7 @@ const CategorySettings = () => {
                 </div>
               ))}
             </div>
-            
+
             <div style={{ height: 20 }}></div>
           </div>
 
@@ -194,11 +194,11 @@ const CategorySettings = () => {
 
       <div className={styles.categoryList}>
         {loading && <p className={styles.loading}>読み込み中...</p>}
-        
+
         {!loading && categories.length === 0 && (
-            <div className={styles.emptyState}>
-                <p>オリジナルのカテゴリはありません。<br/>右上のボタンから追加できます。</p>
-            </div>
+          <div className={styles.emptyState}>
+            <p>オリジナルのカテゴリはありません。<br />右上のボタンから追加できます。</p>
+          </div>
         )}
 
         {!loading && categories.map((cat) => {
@@ -219,19 +219,31 @@ const CategorySettings = () => {
     </div>
   );
 
-  return (
-    <Layout
-      headerContent={
-        <div className={styles.headerContainer}>
-        <button className={styles.backButton} onClick={() => navigate("/mypage")}>
+  // ヘッダー
+  const headerContent = (
+    <div className={styles.headerContainer} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      {/* 左側：戻るボタンとタイトル */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <button
+          className={styles.backButton}
+          onClick={() => navigate("/mypage")}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+        >
           <ChevronLeft size={24} />
         </button>
-          <h1 className={styles.headerTitle}>カテゴリ設定</h1>
-          <button onClick={handleCreateClick} className={styles.addButton}>
-            追加
-          </button>
-        </div>
-      }
+        <h1 className={styles.headerTitle} style={{ margin: 0 }}>カテゴリ設定</h1>
+      </div>
+
+      {/* 右側：追加ボタン*/}
+      <button onClick={handleCreateClick} className={styles.addButton}>
+        追加
+      </button>
+    </div>
+  );
+
+  return (
+    <Layout
+      headerContent={headerContent}
       mainContent={
         <div className={styles.container}>
           {renderList()}

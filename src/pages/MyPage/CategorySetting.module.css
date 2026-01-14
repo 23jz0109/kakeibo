@@ -17,6 +17,19 @@
   height: 40px;
 }
 
+.backButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1f2937;
+  z-index: 10;
+  margin-left: 1rem;
+}
+
 .headerTitle {
   position: absolute;
   left: 50%;
@@ -355,3 +368,4 @@
   background-color: #2563eb;
   transform: translateY(1px);
 }
+
