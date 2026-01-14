@@ -1,4 +1,5 @@
 import React, { useEffect, useState, forwardRef, useImperativeHandle } from "react";
+import { createPortal } from "react-dom";
 import { Plus, CircleAlert, X, Trash2 } from "lucide-react";
 import DayPicker from "../../components/dataInput/DayPicker";
 import DropdownModal from "./DropdownModal";
@@ -165,7 +166,6 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
     setFormData({
       ...formData,
       product_name: product.product_name || product.PRODUCT_NAME,
-      // product_price: product.product_price || product.price || formData.product_price,
       category_id: validCategoryId
     });
     setShowSuggestions(false);
@@ -219,25 +219,26 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
     p.product_name && p.product_name.toLowerCase().includes(formData.product_name.toLowerCase())
   );
 
-  // 表示部分生成
-  return (
-    <div className={styles.modalDetail}>
-      <div className={styles.modalHeader}>
-        <span className={styles.modalTitle}>{mode === "edit" ? "商品編集" : "商品追加"}</span>
-        {mode === "edit" && 
-          <button 
-            className={styles.deleteBtn} 
-            onClick={() => { 
-              onDelete(index); 
-              closeModal(); 
-            }}>
-            <Trash2 size={16} />
-          </button>
-        }
-      </div>
-      <div className={styles.staticInputArea}>
-        <div className={styles.modalFlexRow}>
-             <div style={{flex:2}} className={`${styles.modalRow} ${styles.inputGroup}`}>
+  // 表示部分生成 (Portalを使用)
+  return createPortal(
+    <div className={styles.modalOverlay} onClick={closeModal}>
+      <div className={styles.modalDetail} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <span className={styles.modalTitle}>{mode === "edit" ? "商品編集" : "商品追加"}</span>
+          {mode === "edit" && 
+            <button 
+              className={styles.deleteBtn} 
+              onClick={() => { 
+                onDelete(index); 
+                closeModal(); 
+              }}>
+              <Trash2 size={16} />
+            </button>
+          }
+        </div>
+        <div className={styles.staticInputArea}>
+          <div className={styles.modalFlexRow}>
+              <div style={{flex:2}} className={`${styles.modalRow} ${styles.inputGroup}`}>
                 <label className={styles.modalLabel}>商品名</label>
                 <input 
                   className={styles.modalInput} 
@@ -257,57 +258,60 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
                     ))}
                   </ul>
                 )}
-             </div>
-             <div style={{flex:1}} className={styles.modalRow}>
+              </div>
+              <div style={{flex:1}} className={styles.modalRow}>
                 <label className={styles.modalLabel}>個数</label>
                 <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="個数" value={formData.quantity} onChange={e=>setFormData({...formData, quantity:e.target.value})} />
-             </div>
-        </div>
-        <div className={styles.modalFlexRow}>
-             <div style={{flex:2}} className={styles.modalRow}>
+              </div>
+          </div>
+          <div className={styles.modalFlexRow}>
+              <div style={{flex:2}} className={styles.modalRow}>
                 <label className={styles.modalLabel}>単価 ({isInclusive ? "税込" : "税抜"})</label>
                 <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="0円" value={formData.product_price} onChange={e=>setFormData({...formData, product_price:e.target.value})} />
-             </div>
-             <div style={{flex:1}} className={styles.modalRow}>
+              </div>
+              <div style={{flex:1}} className={styles.modalRow}>
                 <label className={styles.modalLabel}>割引</label>
                 <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="0円" value={formData.discount} onChange={e=>setFormData({...formData, discount:e.target.value})} />
-             </div>
+              </div>
+          </div>
+          
+          {/* 税率ボタン */}
+          <div className={styles.modalRow}>
+            <label className={styles.modalLabel}>税率</label>
+            <div className={styles.taxSwitchContainer}>
+              <button
+                type="button"
+                className={`${styles.taxButton} ${String(formData.tax_rate) === "10" ? styles.taxActive : ""}`}
+                onClick={() => setFormData({ ...formData, tax_rate: "10" })}>
+                10%
+              </button>
+              <button
+                type="button"
+                className={`${styles.taxButton} ${String(formData.tax_rate) === "8" ? styles.taxActive : ""}`}
+                onClick={() => setFormData({ ...formData, tax_rate: "8" })}>
+                8%
+              </button>
+            </div>
+          </div>
         </div>
-        
-        {/* 税率ボタン */}
-        <div className={styles.modalRow}>
-           <label className={styles.modalLabel}>税率</label>
-           <div className={styles.taxSwitchContainer}>
-             <button
-               type="button"
-               className={`${styles.taxButton} ${String(formData.tax_rate) === "10" ? styles.taxActive : ""}`}
-               onClick={() => setFormData({ ...formData, tax_rate: "10" })}>
-               10%
-             </button>
-             <button
-               type="button"
-               className={`${styles.taxButton} ${String(formData.tax_rate) === "8" ? styles.taxActive : ""}`}
-               onClick={() => setFormData({ ...formData, tax_rate: "8" })}>
-               8%
-             </button>
-           </div>
-        </div>
-      </div>
 
-      <div className={styles.scrollableCategoryArea}>
         <label className={styles.categoryLabel}>カテゴリ</label>
-        {/* <Categories categories={categories} selectedCategoryId={Number(formData.category_id)} onSelectedCategory={id=>setFormData({...formData, category_id:id})} /> */}
-        <Categories 
+
+        <div className={styles.scrollableCategoryArea}>
+          <Categories 
             categories={categories} 
             selectedCategoryId={Number(formData.category_id)} 
             onSelectedCategory={id=>setFormData({...formData, category_id:id})}
             onAddCategory={handleAddCategory} 
-        />
+          />
+        </div>
+        
+        <div className={styles.modalActions}>
+          <SubmitButton text={mode === "edit" ? "更新" : "追加"} onClick={handleSubmit} style={{flex: 1}}/>
+        </div>
       </div>
-      <div className={styles.modalActions}>
-        <SubmitButton text={mode === "edit" ? "更新" : "追加"} onClick={handleSubmit} style={{flex: 1}}/>
-      </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
