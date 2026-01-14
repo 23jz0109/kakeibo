@@ -46,11 +46,13 @@ export const useNotification = () => {
             ? new Date(timestamp.replace(" ", "T") + "Z")
             : new Date();
 
-          const dbUtcHour = Number(n.notification_hour || n.NOTIFICATION_HOUR || 0);
-          const dbUtcMin = Number(n.notification_min || n.NOTIFICATION_MIN || 0);
+          let dbUtcHour = scheduledDate.getUTCHours()
+          let dbUtcMin = scheduledDate.getUTCMinutes();
+          console.log("UTC time:" + dbUtcHour + ":" + dbUtcMin);
 
           // ローカル時間に変換
           const localTime = getLocalTimeFromUtc(dbUtcHour, dbUtcMin);
+          console.log("JST time:" + localTime.hour + ":" + localTime.min)
 
           return {
             ...n,
@@ -230,16 +232,29 @@ export const useNotification = () => {
   // 補充
   const refillNotification = async (item) => {
     const authToken = getAuthToken();
-    const period = Number(item.notification_period) || 30;
+    const period = Number(item.notification_period);
+    console.log("間隔:" + period);
 
-    // 期間分進む
+    // 設定時間取得
+    let targetLocalHour = item._localHour;
+    let targetLocalMin = item._localMin;
+    console.log("setting time:" + targetLocalHour + ":" + targetLocalMin)
+
+    if (targetLocalHour === undefined) {
+      const utcHour = item._utcHour ?? Number(item.notification_hour) ?? 0;
+      const utcMin = item._utcMin ?? Number(item.notification_min) ?? 0;
+      const tempDate = new Date();
+      tempDate.setUTCHours(utcHour, utcMin, 0, 0);
+      targetLocalHour = tempDate.getHours();
+      targetLocalMin = tempDate.getMinutes();
+    }
+
+    // 2. 期間分の日付を進めます
     let targetDate = new Date();
     targetDate.setDate(targetDate.getDate() + period);
 
-    // ローカル時間をセット
-    const localHour = item._localHour ?? 9;
-    const localMin = item._localMin ?? 0;
-    targetDate.setHours(localHour, localMin, 0, 0);
+    // 新たな日時をセット
+    targetDate.setHours(targetLocalHour, targetLocalMin, 0, 0);
 
     // UTC文字列を作成
     const yyyy = targetDate.getUTCFullYear();
