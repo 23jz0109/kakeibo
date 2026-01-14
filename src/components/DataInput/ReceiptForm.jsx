@@ -469,7 +469,7 @@ const ReceiptForm = forwardRef(({
         )}
       </div>
 
-      <div className={styles.fixedBottomArea} style={{padding: '0 0.5rem'}}>
+      <div className={styles.fixedBottomArea}>
         <SubmitButton text={submitLabel} onClick={handlePressSubmit} disabled={isSubmitting} />
       </div>
     </>
