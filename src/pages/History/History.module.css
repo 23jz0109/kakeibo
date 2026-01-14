@@ -27,6 +27,7 @@
 
 /* タブ */
 .tab {
+  padding: 16px;
   flex-shrink: 0;
   background-color: rgba(249, 250, 251, 0.85);
   z-index: 100;
