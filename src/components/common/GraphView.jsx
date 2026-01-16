@@ -92,7 +92,7 @@ const GraphView = ({ summary }) => {
         </div>
       ) : (
         <div className={styles["empty-state"]}>
-          <p>データがありません</p>
+          <p className={styles["no-data-text"]}>データがありません</p>
         </div>
       )} 
     </div>
