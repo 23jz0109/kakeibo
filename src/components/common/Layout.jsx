@@ -42,8 +42,22 @@ const Layout = ({
 
   
   useEffect(() => {
+    // 初回マウント時にカウント取得
     fetchUnreadCount();
-  }, [location, fetchUnreadCount]);
+
+    // 合図を受け取ったら、再取得する関数
+    const handleUpdate = () => {
+      fetchUnreadCount();
+    };
+
+    // イベントリスナーを登録
+    window.addEventListener("notificationUpdated", handleUpdate);
+
+    //  クリーンアップ（画面を離れるときにリスナーを解除）
+    return () => {
+      window.removeEventListener("notificationUpdated", handleUpdate);
+    };
+  }, [fetchUnreadCount]);
 
   // ナビ以外タップで閉じる
   useEffect(() => { 

@@ -135,7 +135,7 @@ export const useNotification = () => {
   // 補充通知の追加・更新
   const saveNotification = async ({ title, period, hour, min, editTargetId, originalItem }) => {
     const authToken = getAuthToken();
-    
+
     // 日付計算ロジック
     let targetDate;
     if (editTargetId && originalItem && originalItem._scheduledDate) {
@@ -152,7 +152,7 @@ export const useNotification = () => {
     }
 
     targetDate.setHours(Number(hour), Number(min), 0, 0);
-    
+
     // UTC文字列作成
     const yyyy = targetDate.getUTCFullYear();
     const mm = String(targetDate.getUTCMonth() + 1).padStart(2, "0");
@@ -185,7 +185,7 @@ export const useNotification = () => {
         headers,
         body: JSON.stringify(bodyData)
       });
-      
+
       const resData = await response.json();
 
       if (response.ok) {
@@ -346,9 +346,9 @@ export const useNotification = () => {
 
         const formattedList = rawList.map(item => {
           let dateStr = item.created_at;
-          
+
           if (typeof dateStr === 'string' && !dateStr.endsWith('Z')) {
-             dateStr = dateStr.replace(' ', 'T') + 'Z';
+            dateStr = dateStr.replace(' ', 'T') + 'Z';
           }
 
           return {
@@ -372,28 +372,40 @@ export const useNotification = () => {
   // 通知を既読にする
   const markAsRead = async (notificationId) => {
     const authToken = getAuthToken();
-    // UI更新
+    const targetIdStr = String(notificationId);
+
+    console.log(`既読処理開始: Target ID = ${targetIdStr}`);
+
+    // 現在の画面（通知一覧）はすぐに書き換える
     setNotificationHistory(prev => 
-      prev.map(n => String(n.id) === String(notificationId) ? { ...n, is_read: 1 } : n)
+      prev.map(n => {
+        const currentId = String(n.id || n.ID || n._id);
+        if (currentId === targetIdStr) {
+          return { ...n, is_read: 1, IS_READ: 1, notification_read: 1 }; 
+        }
+        return n;
+      })
     );
-    // 未読カウントを引く
-    setUnreadCount(prev => {
-      const newVal = Math.max(0, prev - 1);
-      unread = newVal;
-      return newVal;
-    });
+    setUnreadCount(prev => Math.max(0, prev - 1));
+
 
     try {
+      // APIへ送信
       await fetch(`${API_BASE_URL}/notification/list`, {
         method: "PATCH",
         headers: {
           "Authorization": `Bearer ${authToken}`,
           "Content-Type": "application/json",
-          "X-Notification-ID": String(notificationId)
+          "X-Notification-ID": targetIdStr
         }
       });
-    } 
-    catch (err) {
+
+      //  サーバーの更新が終わってから合図を出す
+      window.dispatchEvent(new Event("notificationUpdated"));
+
+      await fetchNotificationHistory(true); 
+
+    } catch (err) {
       console.error("既読エラー", err);
     }
   };
