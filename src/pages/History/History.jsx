@@ -169,6 +169,7 @@ const History = () => {
               </div>
             </div>
           )}
+          
           <div className={styles.scroll}>
             {/* グラフ/カレンダービュー */}
             {isLoading ? (
