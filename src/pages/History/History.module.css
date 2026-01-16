@@ -30,7 +30,6 @@
   flex-shrink: 0;
   background-color: rgba(249, 250, 251, 0.85);
   z-index: 100;
-  overflow: hidden;
 }
 
 .tabContainer {
@@ -65,7 +64,7 @@
   flex-grow: 1;
   overflow-y: auto;
   background-color: #f9fafb;
-  padding: 45px 16px 0px 16px;
+  padding: 42px 16px 0px 16px;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -145,13 +144,14 @@
 /* グラフ 切り替えスイッチ */
 .switchContainer {
   position: sticky;
+  top: 0;
   display: flex;
   justify-content: center;
   gap: 15px;
   padding: 10px 0;
   background-color: transparent;
   z-index: 80;
-  margin-bottom: -50px;
+  /* margin-bottom: -50px; */
 }
 
 .switchButton {
@@ -175,6 +175,12 @@
   color: #fff;
   border-color: #374151;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.loading-text {
+  padding-top: 2rem;
+  color: #9ca3af;
+  text-align: center;
 }
 
 /* 詳細リスト */

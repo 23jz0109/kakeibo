@@ -111,7 +111,7 @@ export const useFixedCostApi = () => {
 
   // 通知オンオフ
   const toggleFixedCost = useCallback(async (id) => {
-    setLoading(true);
+    // setLoading(true);
     setError(null);
     try {
       const headers = {

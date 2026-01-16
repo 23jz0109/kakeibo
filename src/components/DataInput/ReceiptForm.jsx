@@ -166,7 +166,6 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
     setFormData({
       ...formData,
       product_name: product.product_name || product.PRODUCT_NAME,
-      // product_price: product.product_price || product.price || formData.product_price,
       category_id: validCategoryId
     });
     setShowSuggestions(false);
@@ -220,7 +219,7 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
     p.product_name && p.product_name.toLowerCase().includes(formData.product_name.toLowerCase())
   );
 
-  // 表示部分生成
+  // 表示部分生成 (Portalを使用)
   return createPortal(
     <div className={styles.modalOverlay} onClick={closeModal}>
       <div className={styles.modalDetail} onClick={(e) => e.stopPropagation()}>
@@ -240,39 +239,39 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
         <div className={styles.staticInputArea}>
           <div className={styles.modalFlexRow}>
               <div style={{flex:2}} className={`${styles.modalRow} ${styles.inputGroup}`}>
-                  <label className={styles.modalLabel}>商品名</label>
-                  <input 
-                    className={styles.modalInput} 
-                    value={formData.product_name} 
-                    placeholder="商品名"
-                    onChange={handleNameChange}
-                    onFocus={() => setShowSuggestions(true)}
-                    onBlur={handleBlur}
-                    autoComplete="off"/>
-                  {/* 候補リスト */}
-                  {showSuggestions && formData.product_name && filteredProducts.length > 0 && (
-                    <ul className={styles.suggestionList}>
-                      {filteredProducts.map((p) => (
-                        <li key={p.id || p.ID} className={styles.suggestionItem} onClick={() => selectProduct(p)}>
-                          <span>{p.product_name}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                <label className={styles.modalLabel}>商品名</label>
+                <input 
+                  className={styles.modalInput} 
+                  value={formData.product_name} 
+                  placeholder="商品名"
+                  onChange={handleNameChange}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={handleBlur}
+                  autoComplete="off"/>
+                {/* 候補リスト */}
+                {showSuggestions && formData.product_name && filteredProducts.length > 0 && (
+                  <ul className={styles.suggestionList}>
+                    {filteredProducts.map((p) => (
+                      <li key={p.id || p.ID} className={styles.suggestionItem} onClick={() => selectProduct(p)}>
+                        <span>{p.product_name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
               <div style={{flex:1}} className={styles.modalRow}>
-                  <label className={styles.modalLabel}>個数</label>
-                  <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="個数" value={formData.quantity} onChange={e=>setFormData({...formData, quantity:e.target.value})} />
+                <label className={styles.modalLabel}>個数</label>
+                <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="個数" value={formData.quantity} onChange={e=>setFormData({...formData, quantity:e.target.value})} />
               </div>
           </div>
           <div className={styles.modalFlexRow}>
               <div style={{flex:2}} className={styles.modalRow}>
-                  <label className={styles.modalLabel}>単価 ({isInclusive ? "税込" : "税抜"})</label>
-                  <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="0円" value={formData.product_price} onChange={e=>setFormData({...formData, product_price:e.target.value})} />
+                <label className={styles.modalLabel}>単価 ({isInclusive ? "税込" : "税抜"})</label>
+                <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="0円" value={formData.product_price} onChange={e=>setFormData({...formData, product_price:e.target.value})} />
               </div>
               <div style={{flex:1}} className={styles.modalRow}>
-                  <label className={styles.modalLabel}>割引</label>
-                  <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="0円" value={formData.discount} onChange={e=>setFormData({...formData, discount:e.target.value})} />
+                <label className={styles.modalLabel}>割引</label>
+                <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="0円" value={formData.discount} onChange={e=>setFormData({...formData, discount:e.target.value})} />
               </div>
           </div>
           
@@ -296,16 +295,17 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
           </div>
         </div>
 
+        <label className={styles.categoryLabel}>カテゴリ</label>
+
         <div className={styles.scrollableCategoryArea}>
-          <label className={styles.categoryLabel}>カテゴリ</label>
-          {/* <Categories categories={categories} selectedCategoryId={Number(formData.category_id)} onSelectedCategory={id=>setFormData({...formData, category_id:id})} /> */}
           <Categories 
-              categories={categories} 
-              selectedCategoryId={Number(formData.category_id)} 
-              onSelectedCategory={id=>setFormData({...formData, category_id:id})}
-              onAddCategory={handleAddCategory} 
+            categories={categories} 
+            selectedCategoryId={Number(formData.category_id)} 
+            onSelectedCategory={id=>setFormData({...formData, category_id:id})}
+            onAddCategory={handleAddCategory} 
           />
         </div>
+        
         <div className={styles.modalActions}>
           <SubmitButton text={mode === "edit" ? "更新" : "追加"} onClick={handleSubmit} style={{flex: 1}}/>
         </div>
@@ -322,7 +322,8 @@ const ReceiptForm = forwardRef(({
   onUpdate,
   submitLabel = "登録する",
   isSubmitting = false,
-  formId = "default"
+  formId = "default",
+  onCategoryRefresh
 }, ref) => {
   const storageKey = `kakeibo_tax_mode_${formId}`;
   const persistKey = formId; // 旧: null
@@ -463,7 +464,9 @@ const ReceiptForm = forwardRef(({
                   <ReceiptItemModal
                     mode="edit" item={item} index={index} categories={categories}
                     productList={productList}
-                    priceMode={priceMode} onSubmit={updateItem} onDelete={deleteItem} closeModal={close}/>
+                    priceMode={priceMode} onSubmit={updateItem} onDelete={deleteItem} closeModal={close}
+                    onCategoryRefresh={onCategoryRefresh}
+                  />
                 )}
               </DropdownModal>
             ))}
@@ -474,7 +477,7 @@ const ReceiptForm = forwardRef(({
               </div>
             }>
               {(close) => (
-                <ReceiptItemModal mode="add" categories={categories} productList={productList} priceMode={priceMode} onSubmit={addItem} closeModal={close} />
+                <ReceiptItemModal mode="add" categories={categories} productList={productList} priceMode={priceMode} onSubmit={addItem} closeModal={close} onCategoryRefresh={onCategoryRefresh}/>
               )}
             </DropdownModal>
           </div>
