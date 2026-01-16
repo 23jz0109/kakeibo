@@ -322,7 +322,8 @@ const ReceiptForm = forwardRef(({
   onUpdate,
   submitLabel = "登録する",
   isSubmitting = false,
-  formId = "default"
+  formId = "default",
+  onCategoryRefresh
 }, ref) => {
   const storageKey = `kakeibo_tax_mode_${formId}`;
   const persistKey = formId; // 旧: null
@@ -463,7 +464,9 @@ const ReceiptForm = forwardRef(({
                   <ReceiptItemModal
                     mode="edit" item={item} index={index} categories={categories}
                     productList={productList}
-                    priceMode={priceMode} onSubmit={updateItem} onDelete={deleteItem} closeModal={close}/>
+                    priceMode={priceMode} onSubmit={updateItem} onDelete={deleteItem} closeModal={close}
+                    onCategoryRefresh={onCategoryRefresh}
+                  />
                 )}
               </DropdownModal>
             ))}
@@ -474,7 +477,7 @@ const ReceiptForm = forwardRef(({
               </div>
             }>
               {(close) => (
-                <ReceiptItemModal mode="add" categories={categories} productList={productList} priceMode={priceMode} onSubmit={addItem} closeModal={close} />
+                <ReceiptItemModal mode="add" categories={categories} productList={productList} priceMode={priceMode} onSubmit={addItem} closeModal={close} onCategoryRefresh={onCategoryRefresh}/>
               )}
             </DropdownModal>
           </div>
