@@ -82,18 +82,15 @@
 .loading, 
 .error {
   text-align: center;
-  padding: 40px 20px;
+  padding: 32px 20px;
   color: #999;
   font-size: 0.9rem;
 }
 
 .placeholderBox {
-  background: #fff;
-  border: 1px dashed #ccc;
-  border-radius: 8px;
-  padding: 40px;
+  padding-top: 2rem;
+  color: #9ca3af;
   text-align: center;
-  color: #666;
 }
 
 /* カードデザイン */

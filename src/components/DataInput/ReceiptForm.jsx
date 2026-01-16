@@ -1,9 +1,9 @@
 import React, { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { createPortal } from "react-dom";
 import { Plus, CircleAlert, X, Trash2 } from "lucide-react";
-import DayPicker from "../../components/dataInput/DayPicker";
+import DayPicker from "./DayPicker";
 import DropdownModal from "./DropdownModal";
-import Categories from "../../components/dataInput/Categories";
+import Categories from "./Categories";
 import SubmitButton from "../common/SubmitButton";
 import { useReceiptForm } from "../../hooks/dataInput/useReceiptForm";
 import { useCategories } from "../../hooks/common/useCategories";
@@ -321,10 +321,12 @@ const ReceiptForm = forwardRef(({
   onSubmit,
   onUpdate,
   submitLabel = "登録する",
-  isSubmitting = false
+  isSubmitting = false,
+  formId = "default",
+  onCategoryRefresh
 }, ref) => {
-  
-  const persistKey = null;
+  const storageKey = `kakeibo_tax_mode_${formId}`;
+  const persistKey = formId; // 旧: null
   const authToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
   const [productList, setProductList] = useState([]);
 
@@ -367,24 +369,39 @@ const ReceiptForm = forwardRef(({
 
   // 税率モード保存
   useEffect(() => {
-    const savedMode = localStorage.getItem("kakeibo_price_mode");
+    const savedMode = localStorage.getItem(storageKey);
     if (savedMode === "inclusive" || savedMode === "exclusive") {
       setPriceMode(savedMode);
     }
-  }, [setPriceMode]);
+  }, [setPriceMode, storageKey]);
+  // useEffect(() => {
+  //   const savedMode = localStorage.getItem("kakeibo_price_mode");
+  //   if (savedMode === "inclusive" || savedMode === "exclusive") {
+  //     setPriceMode(savedMode);
+  //   }
+  // }, [setPriceMode]);
 
   // 税率モード変換時も保存する
   const handleSwitchPriceMode = (mode) => {
     setPriceMode(mode);
-    localStorage.setItem("kakeibo_price_mode", mode);
+    // localStorage.setItem("kakeibo_price_mode", mode);
+    localStorage.setItem(storageKey, mode);
   };
 
   // レシート内容変更するたびに保存
   useEffect(() => {
     if (onUpdate) {
-      onUpdate(receipt);
+      onUpdate({ 
+        ...receipt, 
+        price_mode: priceMode 
+      });
     }
-  }, [receipt, onUpdate]);
+  }, [receipt, priceMode, onUpdate]);
+  // useEffect(() => {
+  //   if (onUpdate) {
+  //     onUpdate(receipt);
+  //   }
+  // }, [receipt, onUpdate]);
 
   // クリア
   useImperativeHandle(ref, () => ({
@@ -447,7 +464,9 @@ const ReceiptForm = forwardRef(({
                   <ReceiptItemModal
                     mode="edit" item={item} index={index} categories={categories}
                     productList={productList}
-                    priceMode={priceMode} onSubmit={updateItem} onDelete={deleteItem} closeModal={close}/>
+                    priceMode={priceMode} onSubmit={updateItem} onDelete={deleteItem} closeModal={close}
+                    onCategoryRefresh={onCategoryRefresh}
+                  />
                 )}
               </DropdownModal>
             ))}
@@ -458,7 +477,7 @@ const ReceiptForm = forwardRef(({
               </div>
             }>
               {(close) => (
-                <ReceiptItemModal mode="add" categories={categories} productList={productList} priceMode={priceMode} onSubmit={addItem} closeModal={close} />
+                <ReceiptItemModal mode="add" categories={categories} productList={productList} priceMode={priceMode} onSubmit={addItem} closeModal={close} onCategoryRefresh={onCategoryRefresh}/>
               )}
             </DropdownModal>
           </div>

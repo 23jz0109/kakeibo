@@ -279,6 +279,9 @@
   width: 100vw;
   height: 100dvh;
   background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
   z-index: 1000;
   display: block;
 } 
