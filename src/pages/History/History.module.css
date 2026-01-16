@@ -151,7 +151,7 @@
   padding: 10px 0;
   background-color: transparent;
   z-index: 80;
-  /* margin-bottom: -50px; */
+  margin-bottom: -50px;
 }
 
 .switchButton {

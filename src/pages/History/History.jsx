@@ -17,7 +17,8 @@ const History = () => {
     isLoading,
     calendarDailySum,
     monthlyRecordList,
-    graphCategorySum
+    graphCategorySum,
+    refetch,
   } = useGetRecord(currentDate.getFullYear(), currentDate.getMonth());
 
   // 集計ロジック
@@ -96,6 +97,12 @@ const History = () => {
     setCurrentDate(newDate);
   };
 
+  const handleTabChange = (tab) => {
+    if (activeTab === tab) return;
+    setActiveTab(tab);
+    refetch(); // 最新のデータを再取得
+  };
+
   // ヘッダー
   const headerContent = (
     <div className={styles.headerContainer}>
@@ -114,13 +121,14 @@ const History = () => {
           <div className={styles.tab}>
             <div className={styles.tabContainer}>
               <button
-                className={`${styles.tabButton} ${activeTab === 'graph' ? styles.active : ''}`}
-                onClick={() => setActiveTab('graph')}>
+                className={`${styles.tabButton} ${activeTab === 'graph' ? styles.active : ''}`} 
+                onClick={() => handleTabChange('graph')}>
                 グラフ
               </button>
+
               <button
-                className={`${styles.tabButton} ${activeTab === 'calendar' ? styles.active : ''}`}
-                onClick={() => setActiveTab('calendar')}>
+                className={`${styles.tabButton} ${activeTab === 'calendar' ? styles.active : ''}`} 
+                onClick={() => handleTabChange('calendar')}>
                 カレンダー
               </button>
             </div>
