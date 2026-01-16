@@ -65,7 +65,7 @@
   flex-grow: 1;
   overflow-y: auto;
   background-color: #f9fafb;
-  padding: 45px 16px 0px 16px;
+  padding: 42px 16px 0px 16px;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -145,13 +145,14 @@
 /* グラフ 切り替えスイッチ */
 .switchContainer {
   position: sticky;
+  top: 0;
   display: flex;
   justify-content: center;
   gap: 15px;
   padding: 10px 0;
   background-color: transparent;
   z-index: 80;
-  margin-bottom: -50px;
+  /* margin-bottom: -50px; */
 }
 
 .switchButton {
