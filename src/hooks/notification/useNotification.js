@@ -67,10 +67,15 @@ export const useNotification = () => {
         });
 
         // 日付順 -> 時間順でソート
+        // normalized.sort((a, b) => {
+        //   const dateDiff = a._scheduledDate - b._scheduledDate;
+        //   if (dateDiff !== 0) return dateDiff;
+        //   return a._localHour - b._localHour;
+        // });
+
+        // IDの降順（大きい順）
         normalized.sort((a, b) => {
-          const dateDiff = a._scheduledDate - b._scheduledDate;
-          if (dateDiff !== 0) return dateDiff;
-          return a._localHour - b._localHour;
+          return Number(b._id) - Number(a._id);
         });
 
         setNotifications(normalized);
@@ -376,21 +381,20 @@ export const useNotification = () => {
 
     console.log(`既読処理開始: Target ID = ${targetIdStr}`);
 
-    // 現在の画面（通知一覧）はすぐに書き換える
-    setNotificationHistory(prev => 
+    //  【即時反映】現在の画面（通知一覧）はすぐに書き換える
+    setNotificationHistory(prev =>
       prev.map(n => {
         const currentId = String(n.id || n.ID || n._id);
         if (currentId === targetIdStr) {
-          return { ...n, is_read: 1, IS_READ: 1, notification_read: 1 }; 
+          return { ...n, is_read: 1, IS_READ: 1, notification_read: 1 };
         }
         return n;
       })
     );
     setUnreadCount(prev => Math.max(0, prev - 1));
 
-
     try {
-      // APIへ送信
+      //  APIへ送信
       await fetch(`${API_BASE_URL}/notification/list`, {
         method: "PATCH",
         headers: {
@@ -399,11 +403,11 @@ export const useNotification = () => {
           "X-Notification-ID": targetIdStr
         }
       });
-
-      //  サーバーの更新が終わってから合図を出す
+      
+      // Layout が fetch した時に、減った後の数字が返ってきます。
       window.dispatchEvent(new Event("notificationUpdated"));
 
-      await fetchNotificationHistory(true); 
+      await fetchNotificationHistory(true);
 
     } catch (err) {
       console.error("既読エラー", err);
