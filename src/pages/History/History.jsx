@@ -3,7 +3,6 @@ import Layout from "../../components/common/Layout";
 import MonthPicker from "../../components/common/MonthPicker";
 import CalendarView from "../../components/common/CalendarView";
 import GraphView from "../../components/common/GraphView";
-import Loader from "../../components/common/Loader";
 // import * as Icons from "lucide-react";
 import { getIcon } from "../../constants/categories";
 import { useGetRecord } from "../../hooks/history/useGetRecord";
@@ -173,7 +172,7 @@ const History = () => {
           <div className={styles.scroll}>
             {/* グラフ/カレンダービュー */}
             {isLoading ? (
-              <Loader text="データを読み込み中..." />
+              <p className={styles["loading-text"]}>読み込み中...</p>
             ) : (
               <div className={styles.viewContainer}>
 

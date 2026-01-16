@@ -177,6 +177,12 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.loading-text {
+  padding-top: 2rem;
+  color: #9ca3af;
+  text-align: center;
+}
+
 /* 詳細リスト */
 .detailList {
   margin: 16px 0px 0px 0px;
