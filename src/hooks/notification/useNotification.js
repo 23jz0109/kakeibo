@@ -394,7 +394,7 @@ export const useNotification = () => {
     setUnreadCount(prev => Math.max(0, prev - 1));
 
     try {
-      // 2. APIへ送信
+      //  APIへ送信
       await fetch(`${API_BASE_URL}/notification/list`, {
         method: "PATCH",
         headers: {
@@ -403,8 +403,8 @@ export const useNotification = () => {
           "X-Notification-ID": targetIdStr
         }
       });
-
-      // Layout が fetch した時に、確実に「減った後の数字」が返ってきます。
+      
+      // Layout が fetch した時に、減った後の数字が返ってきます。
       window.dispatchEvent(new Event("notificationUpdated"));
 
       await fetchNotificationHistory(true);

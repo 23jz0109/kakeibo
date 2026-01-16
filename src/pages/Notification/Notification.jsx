@@ -224,8 +224,11 @@ const Notification = () => {
   };
 
   const handleHistoryClick = (item) => {
+    // id, ID, _id のどれが入っていても大丈夫なように取得する
+    const targetId = item.id || item.ID || item._id;
+  
     if (Number(item.is_read) === 0) {
-      markAsRead(item.id);
+      markAsRead(targetId);
     }
   };
 
