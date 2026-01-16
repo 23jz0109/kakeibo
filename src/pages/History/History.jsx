@@ -200,9 +200,9 @@ const History = () => {
                           </div>
                         );
                       })}
-                      {filteredGraphData.length === 0 && (
+                      {/* {filteredGraphData.length === 0 && (
                         <p className={styles.emptyText}>データがありません</p>
-                      )}
+                      )} */}
                     </div>
 
                   </div>
