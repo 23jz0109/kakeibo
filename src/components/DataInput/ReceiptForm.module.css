@@ -283,24 +283,25 @@
   justify-content: center;
   align-items: flex-end;
   z-index: 1000;
-}
+  display: block;
+} 
 
 .modalDetail {
   display: flex;
-  flex-direction: column;  
+  flex-direction: column;   
   position: fixed;
-  top: 50%;  
+  top: 50%;   
   left: 50%;
   transform: translate(-50%, -50%);
   height: 70vh;
-  max-height: 600px;  
+  max-height: 600px;   
   width: 90%;
   max-width: 400px;
   box-sizing: border-box;
   padding: 0.75rem; 
   background-color: #fff;
   gap: 0.5rem; 
-  z-index: 100; 
+  z-index: 1001; 
   border-radius: 12px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
@@ -401,16 +402,11 @@
 }
 
 .scrollableCategoryArea {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  min-height: 0;
-  overflow-y: auto;  
-  border: 1px solid #f3f4f6;
-  border-radius: 0.5rem;
-  padding: 0.5rem;
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.25rem;
+  scrollbar-width: thin;
   background-color: #fafafa;
-  margin-top: 0.25rem;
 }
 
 .categoryLabel {
@@ -418,11 +414,8 @@
   font-size: 0.7rem;
   font-weight: 600;
   color: #6b7280;
-  margin-bottom: 0.25rem;
-  position: sticky;
-  top: 0;
-  background-color: #fafafa;
-  z-index: 1;
+  margin: 0.25rem 0;
+  padding: 0 0.25rem; 
 }
 
 .modalActions {
