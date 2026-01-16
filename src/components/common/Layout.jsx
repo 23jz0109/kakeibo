@@ -40,13 +40,13 @@ const Layout = ({
 
   const isPlusDisabled = disableDataInputButton;
 
-
   useEffect(() => {
     // 初回マウント時にカウント取得
     fetchUnreadCount();
 
-    // 「更新があったよ」という合図を受け取ったら、再取得する関数
+    //  「更新があったよ」という合図を受け取ったら、再取得する関数
     const handleUpdate = () => {
+      console.log("Layout: 通知更新イベントを受信。カウントを更新します。");
       fetchUnreadCount();
     };
 
