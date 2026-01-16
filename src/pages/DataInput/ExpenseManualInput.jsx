@@ -255,7 +255,9 @@ const ExpenseManualInput = () => {
               isSubmitting={isSubmitting}
               submitLabel={isSubmitting ? "送信中..." : (receiptQueue.length > 1 ? "この1枚を登録" : "登録する")}
               typeId={2}
-              formId={`manual_receipt_${currentIndex}`}/>
+              formId={`manual_receipt_${currentIndex}`}
+              onCategoryRefresh={() => { fetchCategories(2) }}
+            />
           )}          
           {complete && <CompleteModal />}
         </div>
