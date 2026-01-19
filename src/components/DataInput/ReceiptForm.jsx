@@ -151,6 +151,14 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
     }
   }, [mode, item, categories]);
 
+  // 数字入力ハンドラ
+  const handleNumericChange = (key, value) => {
+    const halfWidthValue = value.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+    const sanitizedValue = halfWidthValue.replace(/[^0-9]/g, "");
+    
+    setFormData(prev => ({ ...prev, [key]: sanitizedValue }));
+  };
+
   // 商品名変更ハンドラ
   const handleNameChange = (e) => {
     setFormData({ ...formData, product_name: e.target.value });
@@ -261,17 +269,38 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
               </div>
               <div style={{flex:1}} className={styles.modalRow}>
                 <label className={styles.modalLabel}>個数</label>
-                <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="個数" value={formData.quantity} onChange={e=>setFormData({...formData, quantity:e.target.value})} />
+                <input 
+                  className={styles.modalInput} 
+                  type="text" 
+                  inputMode="numeric" 
+                  pattern="\d*" 
+                  placeholder="個数" 
+                  value={formData.quantity} 
+                  onChange={(e) => handleNumericChange("quantity", e.target.value)}/>
               </div>
           </div>
           <div className={styles.modalFlexRow}>
               <div style={{flex:2}} className={styles.modalRow}>
                 <label className={styles.modalLabel}>単価 ({isInclusive ? "税込" : "税抜"})</label>
-                <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="0円" value={formData.product_price} onChange={e=>setFormData({...formData, product_price:e.target.value})} />
+                <input 
+                  className={styles.modalInput} 
+                  type="text" 
+                  inputMode="numeric" 
+                  pattern="\d*" 
+                  placeholder="0円" 
+                  value={formData.product_price} 
+                  onChange={(e) => handleNumericChange("product_price", e.target.value)}/>
               </div>
               <div style={{flex:1}} className={styles.modalRow}>
                 <label className={styles.modalLabel}>割引</label>
-                <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="0円" value={formData.discount} onChange={e=>setFormData({...formData, discount:e.target.value})} />
+                <input 
+                  className={styles.modalInput} 
+                  type="text" 
+                  inputMode="numeric" 
+                  pattern="\d*" 
+                  placeholder="0円" 
+                  value={formData.discount} 
+                  onChange={(e) => handleNumericChange("discount", e.target.value)}/>
               </div>
           </div>
           

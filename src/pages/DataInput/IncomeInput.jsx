@@ -21,6 +21,14 @@ const IncomeInput = () => {
   const [complete, setComplete] = useState(false);
   const { categories, fetchCategories, addCategory } = useCategories(); 
 
+  // 数字チェックハンドラ
+  const handleNumericChange = (value) => {
+    const halfWidthValue = value.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+    const sanitizedValue = halfWidthValue.replace(/[^0-9]/g, "");
+    
+    setAmount(sanitizedValue === "" ? "" : Number(sanitizedValue));
+  };
+
   // 保存データを消す
   const handleClear = () => {
     if (window.confirm("入力内容をすべて消去しますか？")) {
@@ -156,11 +164,7 @@ const IncomeInput = () => {
                   pattern="\d*"
                   placeholder="0"
                   value={amount}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setAmount(val === "" ? "" : Number(val));
-                  }}
-                />
+                  onChange={(e) => handleNumericChange(e.target.value)}/>
               </div>
           </div>
 
