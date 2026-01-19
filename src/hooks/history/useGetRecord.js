@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 // シンプルなメモリ内キャッシュ
 const recordCache = {};
@@ -12,6 +12,9 @@ export const useGetRecord = (year, month) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // 二重リクエスト防止用のフラグ
+  const isFetching = useRef(false);
+
   // YYYY-MM 形式の文字列を作成
   const targetYearMonth = `${year}-${String(month + 1).padStart(2, "0")}`;
 
@@ -19,16 +22,13 @@ export const useGetRecord = (year, month) => {
    * Budget.jsxのloadDataに相当する関数
    * forceRefresh が true の場合はキャッシュを無視してAPIを叩く
    */
-  const fetchHistory = useCallback(async (forceRefresh = false) => {
+  const fetchHistory = useCallback(async () => {
+    // すでに取得中なら何もしない
+    if (isFetching.current) return;
+
+    isFetching.current = true;
     setIsLoading(true);
     setError(null);
-
-    // キャッシュ確認 (強制リフレッシュでない場合のみ)
-    if (!forceRefresh && recordCache[targetYearMonth]) {
-      setData(recordCache[targetYearMonth]);
-      setIsLoading(false);
-      return;
-    }
 
     try {
       const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
@@ -49,15 +49,12 @@ export const useGetRecord = (year, month) => {
 
       const result = await response.json();
 
-      const formattedData = {
+      // 取得したデータをセット
+      setData({
         calendarDailySum: result.calendar_daily_sum || [],
         monthlyRecordList: result.monthly_record_list || [],
         graphCategorySum: result.graph_category_sum || [],
-      };
-
-      // キャッシュに保存
-      recordCache[targetYearMonth] = formattedData;
-      setData(formattedData);
+      });
     }
     catch (err) {
       console.error("履歴取得エラー:", err);
@@ -65,16 +62,26 @@ export const useGetRecord = (year, month) => {
     }
     finally {
       setIsLoading(false);
+      isFetching.current = false;
     }
   }, [targetYearMonth]);
 
   // 初回レンダリング時、または年月が変更された時に実行
   useEffect(() => {
-    fetchHistory(false); // 通常の切り替え時はキャッシュを優先
-  }, [fetchHistory]);
+    fetchHistory(); // 通常の切り替え時はキャッシュを優先
+    // クリーンアップ関数でリセット（必要に応じて）
+    return () => {
+      isFetching.current = false;
+    };
+  }, [fetchHistory]); // fetchHistory の再生成を検知して実行
 
-  // Budget.jsx のように「手動で最新に更新したい」時のためのメソッドを返す
-  const refetch = () => fetchHistory(true);
+  /**
+   * 手動更新用（中身はfetchHistoryと同じだが、明示的に呼び出し可能にする）
+   */
+  const refetch = () => {
+    isFetching.current = false; // 強制的にフラグを戻して実行
+    fetchHistory();
+  };
 
   return { isLoading, error, refetch, ...data };
 };
