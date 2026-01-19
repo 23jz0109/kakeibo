@@ -3,7 +3,6 @@ import Layout from "../../components/common/Layout";
 import MonthPicker from "../../components/common/MonthPicker";
 import CalendarView from "../../components/common/CalendarView";
 import GraphView from "../../components/common/GraphView";
-// import * as Icons from "lucide-react";
 import { getIcon } from "../../constants/categories";
 import { useGetRecord } from "../../hooks/history/useGetRecord";
 import styles from "./History.module.css";
