@@ -1,8 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 
-// シンプルなメモリ内キャッシュ
-const recordCache = {};
-
 export const useGetRecord = (year, month) => {
   const [data, setData] = useState({
     calendarDailySum: [],
@@ -16,19 +13,29 @@ export const useGetRecord = (year, month) => {
   const targetYearMonth = `${year}-${String(month + 1).padStart(2, "0")}`;
 
   /**
-   * Budget.jsxのloadDataに相当する関数
-   * forceRefresh が true の場合はキャッシュを無視してAPIを叩く
+   * データベースの標準時間→ユーザーのローカル時間に変換
+   */
+  const convertUtcToLocalDate = (dateStr, timeStr) => {
+    if (!dateStr) return dateStr;
+    const time = timeStr || "00:00";
+    
+    // "YYYY-MM-DDTHH:mm:00Z" (UTC) としてDateオブジェクトを作成
+    const utcDate = new Date(`${dateStr}T${time}:00Z`);
+    
+    // ユーザーのローカル時間(JSTなど)で年・月・日を取り出す
+    const y = utcDate.getFullYear();
+    const m = String(utcDate.getMonth() + 1).padStart(2, "0");
+    const d = String(utcDate.getDate()).padStart(2, "0");
+    
+    return `${y}-${m}-${d}`;
+  };
+
+  /**
+   * データをAPIから取得する
    */
   const fetchHistory = useCallback(async (forceRefresh = false) => {
     setIsLoading(true);
     setError(null);
-
-    // キャッシュ確認 (強制リフレッシュでない場合のみ)
-    if (!forceRefresh && recordCache[targetYearMonth]) {
-      setData(recordCache[targetYearMonth]);
-      setIsLoading(false);
-      return;
-    }
 
     try {
       const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
@@ -49,14 +56,22 @@ export const useGetRecord = (year, month) => {
 
       const result = await response.json();
 
+      // 時間変換
+      const adjustedRecordList = (result.monthly_record_list || []).map(record => {
+        const localDate = convertUtcToLocalDate(record.record_date, record.record_time);
+        
+        return {
+          ...record,
+          record_date: localDate,
+        };
+      });
+
       const formattedData = {
         calendarDailySum: result.calendar_daily_sum || [],
-        monthlyRecordList: result.monthly_record_list || [],
+        monthlyRecordList: adjustedRecordList,
         graphCategorySum: result.graph_category_sum || [],
       };
 
-      // キャッシュに保存
-      recordCache[targetYearMonth] = formattedData;
       setData(formattedData);
     }
     catch (err) {
@@ -70,10 +85,9 @@ export const useGetRecord = (year, month) => {
 
   // 初回レンダリング時、または年月が変更された時に実行
   useEffect(() => {
-    fetchHistory(false); // 通常の切り替え時はキャッシュを優先
+    fetchHistory();
   }, [fetchHistory]);
 
-  // Budget.jsx のように「手動で最新に更新したい」時のためのメソッドを返す
   const refetch = () => fetchHistory(true);
 
   return { isLoading, error, refetch, ...data };
