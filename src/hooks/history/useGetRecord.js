@@ -83,6 +83,37 @@ export const useGetRecord = (year, month) => {
     }
   }, [targetYearMonth]);
 
+  /**
+   * 収支の詳細表示
+   */
+  const getRecordDetail = useCallback(async (recordID) => {
+    try {
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      if (!token) throw new Error("認証トークンがありません");
+
+      const response = await fetch("https://t08.mydns.jp/kakeibo/public/api/receipt", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+          "X-Record-ID": recordID,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Detail API Error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      return result.receipt_data; 
+
+    } catch (err) {
+      console.error("詳細取得エラー:", err);
+      throw err;
+    }
+  }, []);
+
   // 初回レンダリング時、または年月が変更された時に実行
   useEffect(() => {
     fetchHistory();
@@ -90,5 +121,11 @@ export const useGetRecord = (year, month) => {
 
   const refetch = () => fetchHistory(true);
 
-  return { isLoading, error, refetch, ...data };
+  return {
+    isLoading,
+    error,
+    refetch,
+    getRecordDetail,
+    ...data
+  };
 };
