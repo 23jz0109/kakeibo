@@ -18,7 +18,21 @@ const History = () => {
     monthlyRecordList,
     graphCategorySum,
     refetch,
+    getRecordDetail,
   } = useGetRecord(currentDate.getFullYear(), currentDate.getMonth());
+
+  const handleRecordClick = async (recordId) => {
+    try {
+      console.log(`Fetching detail for Record ID: ${recordId}...`);
+      const detailData = await getRecordDetail(recordId);
+      console.log("【詳細データ取得成功】", detailData);
+      // ここで将来的にモーダルを表示するなどの処理につなげます
+    }
+    catch (error) {
+      console.error("詳細取得に失敗しました", error);
+      alert("詳細データの取得に失敗しました。");
+    }
+  };
 
   // 集計ロジック
   const { totalIncome, totalExpense } = useMemo(() => {
@@ -244,7 +258,7 @@ const History = () => {
                               const isIncome = Number(r.type_id) === 1;
 
                               return (
-                                <div key={r.record_id} className={styles.listItem}>
+                                <div key={r.record_id} className={styles.listItem} onClick={() => handleRecordClick(r.record_id)}>
                                   <div className={styles.listItemLeft}>
                                     <span
                                       className={styles.categoryIcon}
