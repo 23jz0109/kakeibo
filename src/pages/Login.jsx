@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Mail, Lock, Eye, EyeOff, CircleAlert, Cake } from "lucide-react";  // アイコン部品
 import { useNavigate } from "react-router-dom";
-import "./Login.css";
+import styles from "./Login.module.css";
 
 /**
  * 新規登録の年選択パーツ
@@ -37,22 +37,22 @@ function YearSelect({ selectedYear, setSelectedYear }) {
 
   // プルダウンメニュー生成
   return (
-    <div className="custom-select-container" ref={wrapperRef}>
+    <div className={styles.customSelectContainer} ref={wrapperRef}>
       <div
-        className="input-field select-trigger"
+        className={`${styles.inputField} ${styles.selectTrigger}`}
         onClick={() => setIsOpen(!isOpen)}>
-        <span className={!selected ? "placeholder-text" : ""}>
+        <span className={!selected ? styles.placeholderText : ""}>
           {selected ? selected.label : "生年月日 (年・任意)"}
         </span>
-        <span className="arrow">▾</span>
+        <span className={styles.arrow}>▾</span>
       </div>
 
       {isOpen && (
-        <div className="dropdown-list">
+        <div className={styles.dropdownList}>
           {options.map(opt => (
             <div
               key={opt.value}
-              className="dropdown-item"
+              className={styles.dropdownItem}
               onClick={() => handleSelect(opt.value)}>
               {opt.label}
             </div>
@@ -251,66 +251,66 @@ const Login = () => {
   };
 
   return (
-    <div className="login-scroll-root">
-      <div className="login-page-container">
+    <div className={styles.loginScrollRoot}>
+      <div className={styles.loginPageContainer}>
         {/* ログイン・新規登録タブ */}
-        <div className="tab-container">
+        <div className={styles.tabContainer}>
           <button
-            className={`tab-button ${activeTab === "login" ? "active" : ""}`}
+            className={`${styles.tabButton} ${activeTab === "login" ? styles.active : ""}`}
             onClick={() => handleTabChange("login")}>
             ログイン
           </button>
           <button
-            className={`tab-button ${activeTab === "register" ? "active" : ""}`}
+            className={`${styles.tabButton} ${activeTab === "register" ? styles.active : ""}`}
             onClick={() => handleTabChange("register")}>
             新規登録
           </button>
         </div>
 
-        <div className="card-wrapper">
-          <div className="main-container">
+        <div className={styles.cardWrapper}>
+          <div className={styles.mainContainer}>
             {/* 共通表示(システム名) */}
-            <div className="main-inner">
-              <div className="main-header">
+            <div className={styles.mainInner}>
+              <div className={styles.mainHeader}>
                 <h1>23JZ T08</h1>
               </div>
 
               {/* エラーメッセージ表示エリア */}
               {errorMessage && (
-                <div className="error-message-area">
+                <div className={styles.errorMessageArea}>
                   <CircleAlert size={18} />
                   <span>{errorMessage}</span>
                 </div>
               )}
 
               {/* 入力欄 */}
-              <form onSubmit={handleSubmit} className="input-section">
+              <form onSubmit={handleSubmit} className={styles.inputSection}>
                 {/* メール */}
-                <div className="input-wrapper">
-                  <span className="icon"><Mail size={16} /></span>
+                <div className={styles.inputWrapper}>
+                  <span className={styles.icon}><Mail size={16} /></span>
                   <input
                     type="email"
                     placeholder="メールアドレス"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="input-field"
+                    className={styles.inputField}
                   />
                 </div>
 
                 {/* パスワード */}
-                <div className="input-wrapper">
-                  <span className="icon"><Lock size={16} /></span>
+                <div className={styles.inputWrapper}>
+                  <span className={styles.icon}><Lock size={16} /></span>
                   <input
                     type={showPassword ? "text" : "password"}
                     placeholder="パスワード"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="input-field"
+                    className={styles.inputField}
                   />
                   {/* パスワード表示 */}
                   <span
                     onClick={() => setShowPassword(!showPassword)}
-                    className="eye-icon"
+                    className={styles.eyeIcon}
                     style={{ cursor: "pointer" }}
                   >
                     {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
@@ -319,15 +319,15 @@ const Login = () => {
 
                 {/* 新規登録表示部分 / 自動ログインチェックボックス */}
                 {activeTab === "register" ? (
-                  <div className="input-wrapper">
-                    <span className="icon"><Cake size={16} /></span>
+                  <div className={styles.inputWrapper}>
+                    <span className={styles.icon}><Cake size={16} /></span>
                     <YearSelect selectedYear={year} setSelectedYear={setYear} />
                   </div>
                 ) : (
-                  <div className="login-options-row">
+                  <div className={styles.loginOptionsRow}>
                     {/* オートログイン */}
-                    <div className="checkbox-wrapper">
-                      <label className="checkbox-label">
+                    <div className={styles.checkboxWrapper}>
+                      <label className={styles.checkboxLabel}>
                         <input
                           type="checkbox"
                           checked={rememberMe}
@@ -337,7 +337,7 @@ const Login = () => {
                     </div>
 
                     {/* パスワード忘れ */}
-                    <button type="button" className="forgot-password">
+                    <button type="button" className={styles.forgotPassword}>
                       パスワードを忘れた方
                     </button>
                   </div>
@@ -346,7 +346,7 @@ const Login = () => {
                 {/* 送信ボタン */}
                 <button
                   type="submit"
-                  className="submit-button"
+                  className={styles.submitButton}
                   disabled={isLoading}>
                   {activeTab === "login" ? "ログイン" : "登録する"}
                 </button>
