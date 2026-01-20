@@ -23,10 +23,11 @@ const History = () => {
 
   const handleRecordClick = async (recordId) => {
     try {
-      console.log(`Fetching detail for Record ID: ${recordId}...`);
       const detailData = await getRecordDetail(recordId);
-      console.log("【詳細データ取得成功】", detailData);
-      // ここで将来的にモーダルを表示するなどの処理につなげます
+      console.log(
+        "【詳細データ取得成功】",
+        JSON.stringify(detailData, null, 2)
+      );
     }
     catch (error) {
       console.error("詳細取得に失敗しました", error);
