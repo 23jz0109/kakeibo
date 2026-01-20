@@ -91,14 +91,6 @@ const History = () => {
   const handleMonthChange = (offset) => {
     const newDate = new Date(currentDate);
     newDate.setMonth(newDate.getMonth() + offset);
-
-    const today = new Date();
-    const currentMonthStart = new Date(newDate.getFullYear(), newDate.getMonth(), 1);
-    const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-
-    if (currentMonthStart > thisMonthStart) {
-      return;
-    }
     setCurrentDate(newDate);
   };
 
@@ -151,7 +143,9 @@ const History = () => {
               selectedMonth={currentDate}
               onMonthChange={handleMonthChange}
               onMonthSelect={handleMonthSelect}
-              isDisabled={isLoading} />
+              maxDate={new Date()}
+              isDisabled={isLoading} 
+            />
 
             {/* 収支サマリー */}
             <div className={styles.financeSummary}>
