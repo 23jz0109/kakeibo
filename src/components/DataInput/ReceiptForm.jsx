@@ -38,10 +38,20 @@ const ReceiptHeader = ({ receipt, updateReceiptInfo }) => (
 );
 
 // 小計・消費税・合計表示部分
-const ReceiptSummary = ({ calculated, priceMode, setPriceMode }) => {
+const ReceiptSummary = ({ calculated, priceMode, setPriceMode, pointsUsage, onPointsChange }) => {
   const tax8 = calculated.taxByRate["8"] || 0;
   const tax10 = calculated.taxByRate["10"] || 0;
+  const points = Number(pointsUsage) || 0;
   const displaySubTotal = calculated.totalAmount - (tax8 + tax10);
+  const finalPaymentAmount = Math.max(0, calculated.totalAmount - points);
+  
+  // 数値入力ハンドラ
+  const handlePointsChange = (e) => {
+    const value = e.target.value;
+    const halfWidthValue = value.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+    const sanitizedValue = halfWidthValue.replace(/[^0-9]/g, "");
+    onPointsChange(sanitizedValue);
+  };
 
   // 表示部分生成
   return (
@@ -61,9 +71,35 @@ const ReceiptSummary = ({ calculated, priceMode, setPriceMode }) => {
           <span>消費税 (10%)</span><span>¥{tax10.toLocaleString()}</span>
         </div>
       )}
+
+      {/* ポイント利用入力欄 */}
+      <div className={styles.summaryRow} style={{ alignItems: "center" }}>
+        <span>ポイント利用</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+          <span style={{ fontSize: "14px", color: "#ef4444" }}>-</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="\d*"
+            placeholder="0"
+            value={pointsUsage || ""}
+            onChange={handlePointsChange}
+            className={styles.cleanInput}
+            style={{ 
+              textAlign: "right", 
+              width: "80px", 
+              fontSize: "16px", 
+              padding: "4px",
+              borderBottom: "1px solid #e5e7eb" 
+            }}
+          />
+          <span style={{ fontSize: "14px" }}>P</span>
+        </div>
+      </div>
+
       <div className={styles.summaryTotalRow}>
         <span>合計金額</span>
-        <span className={styles.summaryTotalAmount}>¥{calculated.totalAmount.toLocaleString()}</span>
+        <span className={styles.summaryTotalAmount}>¥{finalPaymentAmount.toLocaleString()}</span>
       </div>
       <div className={styles.modeSwitchContainer}>
         <button
@@ -483,7 +519,13 @@ const ReceiptForm = forwardRef(({
       </div>
 
       <div className={styles.scrollArea}>
-        <ReceiptSummary calculated={calculated} priceMode={priceMode} setPriceMode={handleSwitchPriceMode} />
+        <ReceiptSummary
+          calculated={calculated}
+          priceMode={priceMode}
+          setPriceMode={handleSwitchPriceMode}
+          pointsUsage={receipt.point_usage}
+          onPointsChange={(val) => updateReceiptInfo("point_usage", val)}
+        />
         
         <div className={styles.itemContainer}>
           <div className={styles.itemList}>
