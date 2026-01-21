@@ -60,8 +60,8 @@ const History = () => {
     // monthlyRecordListから「カテゴリ名 -> type_id」のマップを作る
     const categoryTypeMap = {};
     monthlyRecordList.forEach(r => {
-      if (r.main_category) {
-        categoryTypeMap[r.main_category] = Number(r.type_id);
+      if (r.category) {
+        categoryTypeMap[r.category] = Number(r.type_id);
       }
     });
 
