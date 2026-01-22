@@ -74,7 +74,7 @@
   background-color: #f9fafb;
   padding: 8px;
   border-radius: 12px;
-  margin: 8px 0 0px 0;
+  margin: 8px 0 0 0;
   border: 1px solid #e5e7eb;
 }
 
@@ -270,13 +270,11 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-  margin-bottom: 8px;
 }
 
 .dateHeader {
   font-size: 0.85rem;
   color: #6b7280;
-  font-weight: 600;
 }
 
 .emptyText {
@@ -375,10 +373,6 @@
   color: #ef4444;
 }
 
-.dailyGroup {
-  margin-bottom: 24px;
-}
-
 .dateLabel {
   font-size: 0.85rem;
   font-weight: bold;
@@ -408,7 +402,7 @@
 }
 
 .cardHeader {
-  padding: 1rem;
+  padding: 0.8rem;
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -437,6 +431,7 @@
 }
 
 .cardTitle {
+  font-size: 0.9rem;
   color: #1f2937;
   margin: 0 0 0.25rem 0;
   white-space: nowrap;
@@ -445,11 +440,12 @@
 }
 
 .infoText {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: #6b7280;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: 300;
 }
 
 .amountBadge {

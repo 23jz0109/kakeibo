@@ -347,16 +347,11 @@ const History = () => {
                                                             }
                                                           </span>
                                                           {p.discount > 0 && (
-                                                            <span className={styles.discountLabel}>
-                                                              (引 -¥{p.discount})
-                                                            </span>
+                                                            <span className={styles.discountLabel}> - ¥{p.discount}</span>
                                                           )}
                                                         </div>
                                                       </div>
-                                                      <div className={styles.productPrice}>
-                                                        ¥{subTotal.toLocaleString()}
-                                                      </div>
-
+                                                      <div className={styles.productPrice}>¥{subTotal.toLocaleString()}</div>
                                                     </div>
                                                   );
                                                 })}

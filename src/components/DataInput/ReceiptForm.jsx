@@ -120,11 +120,12 @@ const ReceiptSummary = ({ calculated, priceMode, setPriceMode, pointsUsage, onPo
 };
 
 // レシート項目表示部分
-const ReceiptItemPreview = ({ item, categories }) => {
+const ReceiptItemPreview = ({ item, categories, onToggleTax }) => {
   const unitPrice = Number(item.product_price) || 0;
   const quantity = Number(item.quantity) || 1;
   const discount = Number(item.discount) || 0;
   const finalPrice = (unitPrice * quantity) - discount;
+  const taxRate = Number(item.tax_rate) || 10;
 
   let categoryData = item.category;
   if (!categoryData && item.category_id && categories.length > 0) {
@@ -137,8 +138,18 @@ const ReceiptItemPreview = ({ item, categories }) => {
   // 表示部分生成
   return (
     <div className={styles.previewContainer}>
-      <div className={styles.categoryIcon} style={{ backgroundColor: catColor }}>
-        <IconComponent size={16} />
+      {/* <div className={styles.categoryIcon} style={{ backgroundColor: catColor }}> */}
+        {/* <IconComponent size={16} /> */}
+      <div 
+        className={styles.iconContainer} 
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleTax(e);
+        }}>
+        <div className={styles.categoryIcon} style={{ backgroundColor: catColor }}>
+          <IconComponent size={16} />
+        </div>
+        {taxRate === 8 && (<span className={styles.taxBadge}>8%</span>)}
       </div>
       <div className={styles.info}>
         <span className={styles.productName}>
@@ -453,6 +464,13 @@ const ReceiptForm = forwardRef(({
     localStorage.setItem(storageKey, mode);
   };
 
+  const toggleTaxRate = (e, index) => {
+    const currentItem = receipt.products[index];
+    const currentRate = currentItem.tax_rate ?? 10; 
+    const newRate = currentRate === 10 ? 8 : 10;
+    updateItem(index, { ...currentItem, tax_rate: newRate });
+  };
+
   // レシート内容変更するたびに保存
   useEffect(() => {
     if (onUpdate) {
@@ -530,7 +548,15 @@ const ReceiptForm = forwardRef(({
         <div className={styles.itemContainer}>
           <div className={styles.itemList}>
             {receipt.products.map((item, index) => (
-              <DropdownModal key={index} title={<ReceiptItemPreview item={item} categories={categories} />}>
+              <DropdownModal
+                key={index}
+                title={
+                  <ReceiptItemPreview
+                    item={item}
+                    categories={categories} 
+                    onToggleTax={(e) => toggleTaxRate(e, index)}/>
+                }
+              >
                 {(close) => (
                   <ReceiptItemModal
                     mode="edit" item={item} index={index} categories={categories}
