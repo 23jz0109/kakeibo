@@ -299,3 +299,125 @@
     transform: translateY(0);
   }
 }
+
+/* 詳細展開エリア */
+.detailArea {
+  background-color: #fff;       /* 白背景 */
+  border: 1px solid #e5e7eb;    /* 薄い枠線 */
+  border-radius: 8px;           /* 角丸 */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* 影を追加 */
+  margin-top: 8px;              /* リストアイテムとの間隔 */
+  margin-bottom: 16px;
+  padding: 16px;
+  animation: slideDown 0.2s ease-out;
+  position: relative;
+}
+
+/* 吹き出しの矢印（オプション: 上向きの突起をつける場合） */
+.detailArea::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 24px; /* アイコンの下あたりに矢印が来るように調整 */
+  width: 12px;
+  height: 12px;
+  background-color: #fff;
+  border-left: 1px solid #e5e7eb;
+  border-top: 1px solid #e5e7eb;
+  transform: rotate(45deg);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.detailLoading {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #6b7280;
+  padding: 10px;
+}
+
+/* レシートブロック */
+.receiptBlock {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed #d1d5db;
+}
+
+.receiptBlock:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.detailShopName {
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+}
+
+/* 商品リスト */
+.productList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.productItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: 0.9rem;
+  padding: 4px 0;
+}
+
+.productInfo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin-right: 12px;
+}
+
+.productName {
+  color: #374151;
+  font-weight: 500;
+}
+
+.productMeta {
+  color: #6b7280;
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
+
+.productPriceArea {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.productTotal {
+  font-weight: bold;
+  color: #1f2937;
+  font-family: monospace, sans-serif;
+}
+
+.discountLabel {
+  display: block;
+  font-size: 0.75rem;
+  color: #ef4444;
+}
+
+/* メモ */
+.memoArea {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: #4b5563;
+  background-color: #f9fafb;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #f3f4f6;
+}

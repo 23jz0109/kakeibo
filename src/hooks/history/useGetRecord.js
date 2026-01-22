@@ -106,9 +106,10 @@ export const useGetRecord = (year, month) => {
 
       const result = await response.json();
       
-      return result.receipt_data; 
+      return result.data; 
 
-    } catch (err) {
+    }
+    catch (err) {
       console.error("詳細取得エラー:", err);
       throw err;
     }

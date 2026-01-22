@@ -12,6 +12,10 @@ const History = () => {
   const [activeTab, setActiveTab] = useState("graph");
   const [transactionType, setTransactionType] = useState("expense");
 
+  const [expandedRecordId, setExpandedRecordId] = useState(null);
+  const [detailsCache, setDetailsCache] = useState({});
+  const [loadingDetailId, setLoadingDetailId] = useState(null);
+
   const {
     isLoading,
     calendarDailySum,
@@ -21,19 +25,55 @@ const History = () => {
     getRecordDetail,
   } = useGetRecord(currentDate.getFullYear(), currentDate.getMonth());
 
+  // const handleRecordClick = async (recordId) => {
+  //   try {
+  //     const detailData = await getRecordDetail(recordId);
+  //     console.log(
+  //       "【詳細データ取得成功】",
+  //       JSON.stringify(detailData, null, 2)
+  //     );
+  //   }
+  //   catch (error) {
+  //     console.error("詳細取得に失敗しました", error);
+  //     alert("詳細データの取得に失敗しました。");
+  //   }
+  // };
   const handleRecordClick = async (recordId) => {
+    // 既に開いているなら閉じる
+    if (expandedRecordId === recordId) {
+      setExpandedRecordId(null);
+      return;
+    }
+
+    // 開く
+    setExpandedRecordId(recordId);
+
+    // キャッシュにあればAPIを呼ばない
+    if (detailsCache[recordId]) {
+      return;
+    }
+
+    // API取得
     try {
+      setLoadingDetailId(recordId);
       const detailData = await getRecordDetail(recordId);
-      console.log(
-        "【詳細データ取得成功】",
-        JSON.stringify(detailData, null, 2)
-      );
+      console.log("【詳細データ】", detailData);
+      
+      setDetailsCache((prev) => ({
+        ...prev,
+        [recordId]: detailData
+      }));
     }
     catch (error) {
       console.error("詳細取得に失敗しました", error);
+      setExpandedRecordId(null);
       alert("詳細データの取得に失敗しました。");
     }
+    finally {
+      setLoadingDetailId(null);
+    }
   };
+
 
   // 集計ロジック
   const { totalIncome, totalExpense } = useMemo(() => {
@@ -216,9 +256,6 @@ const History = () => {
                           </div>
                         );
                       })}
-                      {/* {filteredGraphData.length === 0 && (
-                        <p className={styles.emptyText}>データがありません</p>
-                      )} */}
                     </div>
 
                   </div>
@@ -252,24 +289,85 @@ const History = () => {
                               const Icon = getIcon(r.icon_name);
                               const isIncome = Number(r.type_id) === 1;
 
+                              const isExpanded = expandedRecordId === r.record_id;
+                              const detailData = detailsCache[r.record_id];
+                              const isDetailLoading = loadingDetailId === r.record_id;
+
                               return (
-                                <div key={r.record_id} className={styles.listItem} onClick={() => handleRecordClick(r.record_id)}>
-                                  <div className={styles.listItemLeft}>
-                                    <span
-                                      className={styles.categoryIcon}
-                                      style={{ backgroundColor: r.category_color || "#ccc" }}>
-                                      <Icon size={18} color="#fff" />
-                                    </span>
-                                    <div className={styles.recordInfo}>
-                                      <span className={styles.record}>履歴{index + 1}</span>
-                                      <span className={styles.shopName}>{r.shop_name}</span>
-                                      <span className={styles.productNames}>{r.product_names}</span>
+                                <React.Fragment key={r.record_id || index}>
+                                  <div 
+                                    className={styles.listItem} 
+                                    onClick={() => handleRecordClick(r.record_id)}
+                                    style={isExpanded ? { borderBottom: "none", paddingBottom: "8px" } : {}}>
+                                    <div className={styles.listItemLeft}>
+                                      <span
+                                        className={styles.categoryIcon}
+                                        style={{ backgroundColor: r.category_color || "#ccc" }}>
+                                        <Icon size={18} color="#fff" />
+                                      </span>
+                                      <div className={styles.recordInfo}>
+                                        <span className={styles.record}>履歴{index + 1}</span>
+                                        <span className={styles.shopName}>{r.shop_name}</span>
+                                        <span className={styles.productNames}>{r.product_names}</span>
+                                      </div>
                                     </div>
+                                    <span className={`${styles.recordPrice} ${isIncome ? styles.textIncome : styles.textExpense}`}>
+                                      ¥{Number(r.total_amount).toLocaleString()}
+                                    </span>
                                   </div>
-                                  <span className={`${styles.recordPrice} ${isIncome ? styles.textIncome : styles.textExpense}`}>
-                                    ¥{Number(r.total_amount).toLocaleString()}
-                                  </span>
-                                </div>
+
+                                  {/* 詳細展開 */}
+                                  {isExpanded && (
+                                    <div className={styles.detailArea}>
+                                      {isDetailLoading ? (
+                                        <div className={styles.detailLoading}>読み込み中...</div>
+                                      ) : (
+                                        detailData?.receipts?.map((receipt, rIdx) => (
+                                          <div key={rIdx} className={styles.receiptBlock}>
+                                            <div className={styles.detailShopName}>{receipt.shop_name}</div>
+                                            
+                                            <div className={styles.productList}>
+                                              {receipt.products.map((prod, pIdx) => {
+                                                  const price = Number(prod.product_price);
+                                                  const qty = Number(prod.quantity);
+                                                  const discount = Number(prod.discount || 0);
+                                                  const subTotal = (price * qty) - discount;
+                                                  return (
+                                                    <div key={pIdx} className={styles.productItem}>
+                                                      <div className={styles.productInfo}>
+                                                        <span className={styles.productName}>{prod.product_name}</span>
+                                                        <span className={styles.productMeta}>
+                                                          @{price.toLocaleString()} × {qty}
+                                                        </span>
+                                                      </div>
+                                                      <div className={styles.productPriceArea}>
+                                                        <span className={styles.productTotal}>
+                                                          ¥{subTotal.toLocaleString()}
+                                                        </span>
+                                                        {discount > 0 && (
+                                                          <span className={styles.discountLabel}>
+                                                            引 -¥{discount}
+                                                          </span>
+                                                        )}
+                                                      </div>
+                                                    </div>
+                                                  );
+                                              })}
+                                            </div>
+                                            {receipt.memo && (
+                                              <div className={styles.memoArea}>
+                                                Memo: {receipt.memo}
+                                              </div>
+                                            )}
+                                          </div>
+                                        ))
+                                      )}
+                                      {!isDetailLoading && (!detailData || !detailData.receipts) && (
+                                          <div className={styles.detailLoading}>詳細情報がありません</div>
+                                      )}
+                                    </div>
+                                  )}
+                                </React.Fragment>
                               );
                             })}
                           </div>
@@ -281,7 +379,6 @@ const History = () => {
                     </div>
                   </div>
                 )}
-
               </div>
             )}
           </div>
