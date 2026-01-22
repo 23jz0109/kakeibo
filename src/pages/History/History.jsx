@@ -13,6 +13,7 @@ const SwipeableItem = ({ children, onDelete, disabled, id, openSwipeId, setOpenS
   const [offsetX, setOffsetX] = useState(0);
   const startX = useRef(0);
   const isSwiping = useRef(false);
+  const hasTriggeredSwipe = useRef(false);
   const deleteBtnWidth = 60; // 削除ボタンの幅(スワイプ量)
 
   // 他のアイテムが開かれたら、自分を閉じる監視処理
@@ -25,16 +26,13 @@ const SwipeableItem = ({ children, onDelete, disabled, id, openSwipeId, setOpenS
   const onTouchStart = (e) => {
     if (disabled) return;
 
-    if (onSwipeStart) {
-      onSwipeStart();
-    }
-
     if (openSwipeId !== null && openSwipeId !== id) {
       setOpenSwipeId(null);
     }
 
     startX.current = e.touches[0].clientX;
     isSwiping.current = true;
+    hasTriggeredSwipe.current = false;
   };
 
   const onTouchMove = (e) => {
@@ -42,7 +40,13 @@ const SwipeableItem = ({ children, onDelete, disabled, id, openSwipeId, setOpenS
     const currentX = e.touches[0].clientX;
     const diff = currentX - startX.current;
 
-    // 左スワイプ
+    if (Math.abs(diff) > 5 && !hasTriggeredSwipe.current) {
+      hasTriggeredSwipe.current = true;
+      if (onSwipeStart) {
+        onSwipeStart();
+      }
+    }
+
     if (diff < 0 && diff > -deleteBtnWidth * 1.5) {
       setOffsetX(diff);
     }
@@ -151,6 +155,11 @@ const History = () => {
   const handleRecordClick = async (recordId) => {
     // スワイプを閉じる
     setOpenSwipeId(null);
+
+    if (openSwipeId === recordId) {
+      setOpenSwipeId(null);
+      return;
+    }
 
     // 既に開いているなら閉じる
     if (expandedRecordId === recordId) {
