@@ -309,9 +309,9 @@ const History = () => {
                                     
                                     {/* タイトルとサブテキスト */}
                                     <div className={styles.cardContent}>
-                                      <h3 className={styles.cardTitle}>
+                                      <p className={styles.cardTitle}>
                                         {r.shop_name || (isIncome ? "臨時収入" : "店舗未登録")}
-                                      </h3>
+                                      </p>
                                       <div className={styles.infoText}>
                                         {r.product_names || "詳細なし"}
                                       </div>
@@ -341,13 +341,9 @@ const History = () => {
                                                         <div className={styles.productName}>{p.product_name}</div>
                                                         <div className={styles.productMetaContainer}>
                                                           <span className={styles.productMeta}>
-                                                            {Number(p.product_price).toLocaleString()} × {p.quantity}
-                                                          </span>
-
-                                                          <span className={styles.productMeta}>
                                                             {p.quantity > 1 
-                                                              ? `${Number(p.product_price).toLocaleString()} × ${p.quantity}` 
-                                                              : `${Number(p.product_price).toLocaleString()}`
+                                                              ? `¥${Number(p.product_price).toLocaleString()} × ${p.quantity}` 
+                                                              : `¥${Number(p.product_price).toLocaleString()}`
                                                             }
                                                           </span>
                                                           {p.discount > 0 && (
