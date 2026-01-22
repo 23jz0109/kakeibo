@@ -31,7 +31,7 @@ export const useGetRecord = (year, month) => {
   };
 
   /**
-   * データをAPIから取得する
+   * グラフデータ取得
    */
   const fetchHistory = useCallback(async (forceRefresh = false) => {
     setIsLoading(true);
@@ -115,6 +115,45 @@ export const useGetRecord = (year, month) => {
     }
   }, []);
 
+  /**
+   * 記録削除
+   */
+  const deleteRecord = useCallback(async (recordID) => {
+    try {
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      if (!token) throw new Error("認証トークンがありません");
+
+      const response = await fetch("https://t08.mydns.jp/kakeibo/public/api/records", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+          "X-Record-ID": recordID,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Detail API Error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.status === 'success') {
+        fetchHistory();
+        return true;
+      }
+      else {
+        throw new Error(result.message || "削除に失敗しました");
+      }
+
+    }
+    catch (err) {
+      console.error("削除エラー:", err);
+      alert(err.message);
+      return false;
+    }
+  }, [fetchHistory]);
+
   // 初回レンダリング時、または年月が変更された時に実行
   useEffect(() => {
     fetchHistory();
@@ -127,6 +166,7 @@ export const useGetRecord = (year, month) => {
     error,
     refetch,
     getRecordDetail,
+    deleteRecord,
     ...data
   };
 };
