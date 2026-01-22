@@ -325,7 +325,7 @@ const History = () => {
 
                                   {/* 展開部分 */}
                                   {isExpanded && (
-                                    <div className={styles.cardFooter} onClick={(e) => e.stopPropagation()}>
+                                    <div className={styles.cardFooter}>
                                       {isDetailLoading ? (
                                         <div className={styles.detailLoading}>読み込み中...</div>
                                       ) : (
@@ -337,14 +337,30 @@ const History = () => {
                                                   const subTotal = p.product_price * p.quantity - (p.discount || 0);
                                                   return (
                                                     <div key={pIdx} className={styles.productRow}>
-                                                      <div style={{flex: 1}}>
-                                                        <span className={styles.productName}>{p.product_name}</span>
-                                                        <span className={styles.productMeta}>@{Number(p.product_price).toLocaleString()} × {p.quantity}</span>
+                                                      <div className={styles.productInfoLeft}>
+                                                        <div className={styles.productName}>{p.product_name}</div>
+                                                        <div className={styles.productMetaContainer}>
+                                                          <span className={styles.productMeta}>
+                                                            {Number(p.product_price).toLocaleString()} × {p.quantity}
+                                                          </span>
+
+                                                          <span className={styles.productMeta}>
+                                                            {p.quantity > 1 
+                                                              ? `${Number(p.product_price).toLocaleString()} × ${p.quantity}` 
+                                                              : `${Number(p.product_price).toLocaleString()}`
+                                                            }
+                                                          </span>
+                                                          {p.discount > 0 && (
+                                                            <span className={styles.discountLabel}>
+                                                              (引 -¥{p.discount})
+                                                            </span>
+                                                          )}
+                                                        </div>
                                                       </div>
                                                       <div className={styles.productPrice}>
-                                                        <div>¥{subTotal.toLocaleString()}</div>
-                                                        {p.discount > 0 && <span className={styles.discountLabel}>引 -¥{p.discount}</span>}
+                                                        ¥{subTotal.toLocaleString()}
                                                       </div>
+
                                                     </div>
                                                   );
                                                 })}
