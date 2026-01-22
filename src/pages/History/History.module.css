@@ -59,7 +59,6 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-/* 収支サマリー */
 .scroll {
   flex-grow: 1;
   overflow-y: auto;
@@ -68,6 +67,7 @@
   -webkit-overflow-scrolling: touch;
 }
 
+/* 収支サマリー */
 .financeSummary {
   display: flex;
   justify-content: space-between;
@@ -132,7 +132,6 @@
 .calendarWrapper {
   animation: fadeIn 0.3s ease;
 }
-
 
 .calendarContainer {
   width: 100%;
@@ -300,38 +299,6 @@
   }
 }
 
-/* 詳細展開エリア */
-.detailArea {
-  background-color: #fff;       /* 白背景 */
-  border: 1px solid #e5e7eb;    /* 薄い枠線 */
-  border-radius: 8px;           /* 角丸 */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* 影を追加 */
-  margin-top: 8px;              /* リストアイテムとの間隔 */
-  margin-bottom: 16px;
-  padding: 16px;
-  animation: slideDown 0.2s ease-out;
-  position: relative;
-}
-
-/* 吹き出しの矢印（オプション: 上向きの突起をつける場合） */
-.detailArea::before {
-  content: "";
-  position: absolute;
-  top: -6px;
-  left: 24px; /* アイコンの下あたりに矢印が来るように調整 */
-  width: 12px;
-  height: 12px;
-  background-color: #fff;
-  border-left: 1px solid #e5e7eb;
-  border-top: 1px solid #e5e7eb;
-  transform: rotate(45deg);
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 .detailLoading {
   text-align: center;
   font-size: 0.85rem;
@@ -411,13 +378,157 @@
   color: #ef4444;
 }
 
-/* メモ */
-.memoArea {
-  margin-top: 12px;
+.dailyGroup {
+  margin-bottom: 24px;
+}
+
+.dateLabel {
   font-size: 0.85rem;
-  color: #4b5563;
-  background-color: #f9fafb;
-  padding: 8px 12px;
-  border-radius: 6px;
+  font-weight: bold;
+  color: #6b7280;
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+
+/* カード本体 */
+.card {
+  background-color: white;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  border-radius: 12px;
+  margin-bottom: 1rem;
   border: 1px solid #f3f4f6;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.card:active {
+  transform: scale(0.995);
+}
+
+.cardExpanded {
+  border-color: #bfdbfe; /* 薄い青 */
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.cardHeader {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  background: #fff;
+}
+
+/* アイコン部分 */
+.iconWrapper {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* テキスト情報エリア */
+.cardContent {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.25rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.infoText {
+  font-size: 0.85rem;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.amountBadge {
+  font-size: 1rem;
+  font-weight: bold;
+  font-family: monospace, sans-serif;
+  flex-shrink: 0;
+}
+.textIncome { color: #10b981; }
+.textExpense { color: #ef4444; }
+
+
+.cardFooter {
+  background-color: #f8fafc;
+  border-top: 1px solid #e5e7eb;
+  padding: 1rem;
+}
+
+/* フッター内の詳細スタイル */
+.detailLoading {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #6b7280;
+  padding: 8px;
+}
+
+.receiptBlock {
+  margin-bottom: 12px;
+}
+.receiptBlock:last-child { margin-bottom: 0; }
+
+.detailShopName {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #374151;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px dashed #e5e7eb;
+}
+
+.productRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+}
+.productName {
+  color: #374151; flex: 1; 
+  margin-right: 8px;
+}
+
+.productMeta { 
+  font-size: 0.75rem; 
+  color: #9ca3af; 
+}
+
+.productPrice { 
+  text-align: right; 
+  font-weight: 500; 
+  color: #1f2937; 
+}
+
+.discountLabel { 
+  font-size: 0.7rem; 
+  color: #ef4444; 
+  display: block; 
+  text-align: right; 
+}
+
+.memoBox {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 8px;
+  border-radius: 4px;
 }

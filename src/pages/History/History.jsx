@@ -4,6 +4,7 @@ import MonthPicker from "../../components/common/MonthPicker";
 import CalendarView from "../../components/common/CalendarView";
 import GraphView from "../../components/common/GraphView";
 import { getIcon } from "../../constants/categories";
+import { FolderInput, FolderOutput } from "lucide-react";
 import { useGetRecord } from "../../hooks/history/useGetRecord";
 import styles from "./History.module.css";
 
@@ -286,88 +287,79 @@ const History = () => {
                             </div>
 
                             {records.map((r, index) => {
-                              const Icon = getIcon(r.icon_name);
                               const isIncome = Number(r.type_id) === 1;
+                              const IconComponent = isIncome ? FolderInput : FolderOutput;
+                              const iconBgColor = isIncome ? "#d1fae5" : "#fee2e2"; 
+                              const iconColor = isIncome ? "#10b981" : "#ef4444";
 
                               const isExpanded = expandedRecordId === r.record_id;
                               const detailData = detailsCache[r.record_id];
                               const isDetailLoading = loadingDetailId === r.record_id;
 
                               return (
-                                <React.Fragment key={r.record_id || index}>
-                                  <div 
-                                    className={styles.listItem} 
-                                    onClick={() => handleRecordClick(r.record_id)}
-                                    style={isExpanded ? { borderBottom: "none", paddingBottom: "8px" } : {}}>
-                                    <div className={styles.listItemLeft}>
-                                      <span
-                                        className={styles.categoryIcon}
-                                        style={{ backgroundColor: r.category_color || "#ccc" }}>
-                                        <Icon size={18} color="#fff" />
-                                      </span>
-                                      <div className={styles.recordInfo}>
-                                        <span className={styles.record}>履歴{index + 1}</span>
-                                        <span className={styles.shopName}>{r.shop_name}</span>
-                                        <span className={styles.productNames}>{r.product_names}</span>
+                                <div
+                                  key={r.record_id || index}
+                                  className={`${styles.card} ${isExpanded ? styles.cardExpanded : ''}`}
+                                  onClick={() => handleRecordClick(r.record_id)}>
+                                  <div className={styles.cardHeader}>
+                                    {/* アイコン */}
+                                    <div className={styles.iconWrapper} style={{ backgroundColor: iconBgColor, color: iconColor }}>
+                                      <IconComponent size={24} />
+                                    </div>
+                                    
+                                    {/* タイトルとサブテキスト */}
+                                    <div className={styles.cardContent}>
+                                      <h3 className={styles.cardTitle}>
+                                        {r.shop_name || (isIncome ? "臨時収入" : "店舗未登録")}
+                                      </h3>
+                                      <div className={styles.infoText}>
+                                        {r.product_names || "詳細なし"}
                                       </div>
                                     </div>
-                                    <span className={`${styles.recordPrice} ${isIncome ? styles.textIncome : styles.textExpense}`}>
+
+                                    {/* 金額 */}
+                                    <span className={`${styles.amountBadge} ${isIncome ? styles.textIncome : styles.textExpense}`}>
                                       ¥{Number(r.total_amount).toLocaleString()}
                                     </span>
                                   </div>
 
-                                  {/* 詳細展開 */}
+                                  {/* 展開部分 */}
                                   {isExpanded && (
-                                    <div className={styles.detailArea}>
+                                    <div className={styles.cardFooter} onClick={(e) => e.stopPropagation()}>
                                       {isDetailLoading ? (
                                         <div className={styles.detailLoading}>読み込み中...</div>
                                       ) : (
-                                        detailData?.receipts?.map((receipt, rIdx) => (
-                                          <div key={rIdx} className={styles.receiptBlock}>
-                                            <div className={styles.detailShopName}>{receipt.shop_name}</div>
-                                            
-                                            <div className={styles.productList}>
-                                              {receipt.products.map((prod, pIdx) => {
-                                                  const price = Number(prod.product_price);
-                                                  const qty = Number(prod.quantity);
-                                                  const discount = Number(prod.discount || 0);
-                                                  const subTotal = (price * qty) - discount;
+                                        <>
+                                          {detailData?.receipts?.map((receipt, rIdx) => (
+                                            <div key={rIdx} className={styles.receiptBlock}>                                           
+                                              <div className={styles.productList}>
+                                                {receipt.products.map((p, pIdx) => {
+                                                  const subTotal = p.product_price * p.quantity - (p.discount || 0);
                                                   return (
-                                                    <div key={pIdx} className={styles.productItem}>
-                                                      <div className={styles.productInfo}>
-                                                        <span className={styles.productName}>{prod.product_name}</span>
-                                                        <span className={styles.productMeta}>
-                                                          @{price.toLocaleString()} × {qty}
-                                                        </span>
+                                                    <div key={pIdx} className={styles.productRow}>
+                                                      <div style={{flex: 1}}>
+                                                        <span className={styles.productName}>{p.product_name}</span>
+                                                        <span className={styles.productMeta}>@{Number(p.product_price).toLocaleString()} × {p.quantity}</span>
                                                       </div>
-                                                      <div className={styles.productPriceArea}>
-                                                        <span className={styles.productTotal}>
-                                                          ¥{subTotal.toLocaleString()}
-                                                        </span>
-                                                        {discount > 0 && (
-                                                          <span className={styles.discountLabel}>
-                                                            引 -¥{discount}
-                                                          </span>
-                                                        )}
+                                                      <div className={styles.productPrice}>
+                                                        <div>¥{subTotal.toLocaleString()}</div>
+                                                        {p.discount > 0 && <span className={styles.discountLabel}>引 -¥{p.discount}</span>}
                                                       </div>
                                                     </div>
                                                   );
-                                              })}
-                                            </div>
-                                            {receipt.memo && (
-                                              <div className={styles.memoArea}>
-                                                Memo: {receipt.memo}
+                                                })}
                                               </div>
-                                            )}
-                                          </div>
-                                        ))
-                                      )}
-                                      {!isDetailLoading && (!detailData || !detailData.receipts) && (
-                                          <div className={styles.detailLoading}>詳細情報がありません</div>
+                                              {receipt.memo && <div className={styles.memoBox}>メモ:<br/>{receipt.memo}</div>}
+                                            </div>
+                                          ))}
+                                          {(!detailData || !detailData.receipts) && (
+                                            <div className={styles.detailLoading}>詳細情報がありません</div>
+                                          )}
+                                        </>
                                       )}
                                     </div>
                                   )}
-                                </React.Fragment>
+                                </div>
                               );
                             })}
                           </div>
