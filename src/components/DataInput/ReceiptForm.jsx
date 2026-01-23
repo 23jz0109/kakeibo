@@ -8,6 +8,7 @@ import SubmitButton from "../common/SubmitButton";
 import { useReceiptForm } from "../../hooks/dataInput/useReceiptForm";
 import { useCategories } from "../../hooks/common/useCategories";
 import { getIcon } from "../../constants/categories";
+import { useSuggestion } from "../../hooks/dataInput/useSuggestion"; 
 import styles from "./ReceiptForm.module.css";
 
 const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
@@ -404,29 +405,34 @@ const ReceiptForm = forwardRef(({
   const storageKey = `kakeibo_tax_mode_${formId}`;
   const persistKey = formId; // 旧: null
   const authToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-  const [productList, setProductList] = useState([]);
+  // const [productList, setProductList] = useState([]);  
+
+  // useEffect(() => {
+  //   const fetchProductCandidates = async () => {
+  //     if (!authToken) return;
+  //     try {
+  //       const response = await fetch(`${API_BASE_URL}/product`, {
+  //         method: "GET",
+  //         headers: { "Authorization": `Bearer ${authToken}` }
+  //       });
+  //       if (response.ok) {
+  //         const data = await response.json();
+  //         if (data.status === 'success' && Array.isArray(data.products)) {
+  //           setProductList(data.products);
+  //         }
+  //       }
+  //     } catch (err) {
+  //       console.error("候補取得エラー", err);
+  //     }
+  //   };
+  //   fetchProductCandidates();
+  // }, [authToken]);
+
+  const { productList, fetchProductCandidates } = useSuggestion();
 
   useEffect(() => {
-    const fetchProductCandidates = async () => {
-      if (!authToken) return;
-      try {
-        const response = await fetch(`${API_BASE_URL}/product`, {
-          method: "GET",
-          headers: { "Authorization": `Bearer ${authToken}` }
-        });
-        if (response.ok) {
-          const data = await response.json();
-          if (data.status === 'success' && Array.isArray(data.products)) {
-            setProductList(data.products);
-          }
-        }
-      } catch (err) {
-        console.error("候補取得エラー", err);
-      }
-    };
-
     fetchProductCandidates();
-  }, [authToken]);
+  }, [fetchProductCandidates]);
 
   
   const {
