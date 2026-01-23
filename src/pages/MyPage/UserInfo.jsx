@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { ChevronLeft, X, Lock, Calendar, LogOut } from "lucide-react";
 import Layout from "../../components/common/Layout";
 import styles from "./UserInfo.module.css";
+// バリデーション関数と定数をインポート
+import { VALIDATION_LIMITS, validateAlphanumeric } from "../../constants/validationsLimits";
 
 // 年選択
 function YearSelect({ selectedYear, setSelectedYear }) {
@@ -73,11 +75,18 @@ function UserInfo() {
   const [tempCurrentPassword, setTempCurrentPassword] = useState("");
   const [tempNewPassword, setTempNewPassword] = useState("");
   const [tempNewPasswordConfirm, setTempNewPasswordConfirm] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  
+  // エラー状態管理
+  const [errors, setErrors] = useState({
+    currentPassword: "",
+    newPassword: "",
+    newPasswordConfirm: "",
+    birthYear: ""
+  });
+
   const [passwordMessage, setPasswordMessage] = useState("");
 
   const [tempBirthYear, setTempBirthYear] = useState("");
-  const [birthYearError, setBirthYearError] = useState("");
   const [birthYearMessage, setBirthYearMessage] = useState("");
 
   // ユーザー情報取得
@@ -98,7 +107,6 @@ function UserInfo() {
         // 取得成功
         if (response.ok) {
           const data = await response.json();
-        //   console.log("ユーザー情報取得:", data.id, data.mail_address);
           setUserData({
             birthYear: data.year_of_born || data.YEAR_OF_BORN || null,
           });
@@ -107,9 +115,6 @@ function UserInfo() {
         // 取得失敗
         else {
           console.error("ユーザー情報の取得に失敗:", response.status);
-          if (response.status === 401) {
-            console.error("認証トークンが無効です");
-          }
         }
       }
       // 取得失敗
@@ -121,26 +126,76 @@ function UserInfo() {
     fetchUserInfo();
   }, [authToken]);
 
+  // バリデーション関数
+  const validateField = (name, value, relatedValue = null) => {
+    let error = "";
+    switch (name) {
+      case "currentPassword":
+        if (!value) error = "現在のパスワードを入力してください";
+        break;
+      case "newPassword":
+        const { MIN, MAX } = VALIDATION_LIMITS.TEXT.PASSWORD;
+        if (!value) {
+          error = "新しいパスワードを入力してください";
+        } else if (value.length < MIN || value.length > MAX) {
+          error = `${MIN}文字以上${MAX}文字以内で入力してください`;
+        } else if (!validateAlphanumeric(value)) {
+          error = "半角英数字で入力してください";
+        }
+        break;
+      case "newPasswordConfirm":
+        if (value !== relatedValue) {
+          error = "パスワードが一致しません";
+        }
+        break;
+      default:
+        break;
+    }
+    setErrors(prev => ({ ...prev, [name]: error }));
+    return error === "";
+  };
+
+  // 入力ハンドラ（バリデーション付き）
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    
+    if (name === "currentPassword") {
+      setTempCurrentPassword(value);
+      validateField(name, value);
+    } else if (name === "newPassword") {
+      setTempNewPassword(value);
+      validateField(name, value);
+      // 確認用フィールドも再チェック
+      if (tempNewPasswordConfirm) {
+        validateField("newPasswordConfirm", tempNewPasswordConfirm, value);
+      }
+    } else if (name === "newPasswordConfirm") {
+      setTempNewPasswordConfirm(value);
+      validateField(name, value, tempNewPassword);
+    }
+    
+    setPasswordMessage("");
+  };
+
   // ポップアップを閉じる処理
   const closeModals = () => {
     setIsPasswordModalOpen(false);
     setIsYearModalOpen(false);
-    setPasswordMessage(""); setPasswordError("");
-    setBirthYearMessage(""); setBirthYearError("");
+    setPasswordMessage("");
+    setBirthYearMessage("");
+    setErrors({}); // エラーリセット
     setTempCurrentPassword(""); setTempNewPassword(""); setTempNewPasswordConfirm("");
     setTempBirthYear(userData.birthYear); 
   };
 
   // パスワード更新
   const updatePassword = async () => {
-    if (!tempCurrentPassword) {
-      setPasswordError("現在のパスワードを入力してください");
-      return;
-    }
-    if (!tempNewPassword || tempNewPassword !== tempNewPasswordConfirm) {
-      setPasswordError("新しいパスワードが一致しません");
-      return;
-    }
+    // 最終チェック
+    const isCurrentValid = validateField("currentPassword", tempCurrentPassword);
+    const isNewValid = validateField("newPassword", tempNewPassword);
+    const isConfirmValid = validateField("newPasswordConfirm", tempNewPasswordConfirm, tempNewPassword);
+
+    if (!isCurrentValid || !isNewValid || !isConfirmValid) return;
 
     try {
       const res = await fetch(`${API_BASE_URL}/user`, {
@@ -165,16 +220,16 @@ function UserInfo() {
           closeModals();
         }, 1500);
       }
-      
       // 変更失敗
       else {
-        setPasswordError(data.message || "更新に失敗しました");
+        // サーバーサイドエラーの表示
+        setErrors(prev => ({ ...prev, currentPassword: data.message || "更新に失敗しました" }));
       }
     }
     // DBエラー
     catch (e) {
       console.error(e);
-      setPasswordError("サーバーエラーが発生しました");
+      setErrors(prev => ({ ...prev, currentPassword: "サーバーエラーが発生しました" }));
     }
   };
 
@@ -206,12 +261,14 @@ function UserInfo() {
       
       // 更新失敗
       else {
-        setBirthYearError(data.message || "更新に失敗しました");
+        // エラー表示（アラートまたはメッセージ）
+        setBirthYearMessage("");
+        alert(data.message || "更新に失敗しました");
       }
     }
     // DBエラー
     catch (e) {
-      setBirthYearError("サーバーエラーが発生しました");
+      alert("サーバーエラーが発生しました");
     }
   };
 
@@ -261,6 +318,15 @@ function UserInfo() {
     </div>
   );
 
+  // パスワード変更モーダルの保存ボタン有効無効判定
+  const isPasswordFormValid = 
+    tempCurrentPassword && 
+    tempNewPassword && 
+    tempNewPasswordConfirm && 
+    !errors.currentPassword && 
+    !errors.newPassword && 
+    !errors.newPasswordConfirm;
+
   // メインコンテンツ
   return (
     <Layout
@@ -279,7 +345,10 @@ function UserInfo() {
                 <span className={styles.valueText}>********</span>
                 <button 
                   className={styles.actionButton} 
-                  onClick={() => setIsPasswordModalOpen(true)}>
+                  onClick={() => {
+                    setErrors({});
+                    setIsPasswordModalOpen(true);
+                  }}>
                   変更
                 </button>
               </div>
@@ -326,29 +395,43 @@ function UserInfo() {
                 <div className={styles.modalBody}>
                     <input
                       type="password"
+                      name="currentPassword"
                       placeholder="現在のパスワード"
                       value={tempCurrentPassword}
-                      className={styles.inputLarge}
-                      onChange={(e) => { setTempCurrentPassword(e.target.value); setPasswordMessage(""); setPasswordError(""); }}
+                      className={`${styles.inputLarge} ${errors.currentPassword ? styles.inputErrorBorder : ''}`}
+                      onChange={handleInputChange}
                     />
+                    {errors.currentPassword && <p className={styles.errorText}>{errors.currentPassword}</p>}
+
                     <input
                       type="password"
+                      name="newPassword"
                       placeholder="新しいパスワード"
                       value={tempNewPassword}
-                      className={styles.inputLarge}
-                      onChange={(e) => { setTempNewPassword(e.target.value); setPasswordMessage(""); setPasswordError(""); }}
+                      className={`${styles.inputLarge} ${errors.newPassword ? styles.inputErrorBorder : ''}`}
+                      onChange={handleInputChange}
                     />
+                    {errors.newPassword && <p className={styles.errorText}>{errors.newPassword}</p>}
+
                     <input
                       type="password"
+                      name="newPasswordConfirm"
                       placeholder="新しいパスワード（確認）"
                       value={tempNewPasswordConfirm}
-                      className={styles.inputLarge}
-                      onChange={(e) => { setTempNewPasswordConfirm(e.target.value); setPasswordMessage(""); setPasswordError(""); }}
+                      className={`${styles.inputLarge} ${errors.newPasswordConfirm ? styles.inputErrorBorder : ''}`}
+                      onChange={handleInputChange}
                     />
-                    {passwordError && <p className={styles.errorMessage}>{passwordError}</p>}
+                    {errors.newPasswordConfirm && <p className={styles.errorText}>{errors.newPasswordConfirm}</p>}
+                    
                     {passwordMessage && <p className={styles.successMessage}>{passwordMessage}</p>}
                     
-                    <button className={styles.updateButton} onClick={updatePassword}>更新する</button>
+                    <button 
+                      className={styles.updateButton} 
+                      onClick={updatePassword}
+                      disabled={!isPasswordFormValid}
+                    >
+                      更新する
+                    </button>
                 </div>
               </div>
             </div>
@@ -365,7 +448,6 @@ function UserInfo() {
                 <div className={styles.modalBody}>
                     <YearSelect selectedYear={tempBirthYear} setSelectedYear={setTempBirthYear} />
                     
-                    {birthYearError && <div className={styles.errorMessage}>{birthYearError}</div>}
                     {birthYearMessage && <div className={styles.successMessage}>{birthYearMessage}</div>}
                     
                     <button className={styles.updateButton} onClick={updateBirthYear}>更新する</button>
