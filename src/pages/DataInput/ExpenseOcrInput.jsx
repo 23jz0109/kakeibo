@@ -91,7 +91,10 @@ const ExpenseOcrInput = () => {
       // API送信
       const response = await fetch(`${API_BASE_URL}/analyze-receipt`, {
         method: "POST",
-        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/json"
+        },
         body: formData,
       });
 
@@ -160,7 +163,7 @@ const ExpenseOcrInput = () => {
 
   return (
     <Layout
-      headerContent={<h1 style={headerStyle}>カメラ</h1>}
+      headerContent={<h1 style={headerStyle}>撮影</h1>}
       mainContent={
         <div className={styles.container}>
           {error ? (

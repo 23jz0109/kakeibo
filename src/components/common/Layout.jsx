@@ -143,7 +143,7 @@ const Layout = ({
               navigate("/input/ocr", { state: { autoCamera: true } });
             }}>
               <Camera size={20} />
-              <span>OCR</span>
+              <span>撮影</span>
             </button>
 
             {/* 支出(手動入力) */}
