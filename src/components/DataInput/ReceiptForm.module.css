@@ -554,3 +554,40 @@
   line-height: 1;
 }
 
+.inputErrorBorder {
+  border-bottom: 1px solid #ef4444 !important; /* Red-500 */
+  border-color: #ef4444 !important;
+}
+
+.errorText {
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  font-weight: 500;
+  width: 100%;
+}
+
+.charCount {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  margin-left: auto;
+  text-align: right;
+  display: block;
+}
+
+.countError {
+  color: #ef4444;
+}
+
+.modalErrorText {
+  color: #ef4444;
+  font-size: 0.7rem;
+  position: absolute;
+  bottom: -18px;
+  left: 0;
+}
+
+.inputGroup {
+  position: relative;
+  margin-bottom: 0.5rem;
+}

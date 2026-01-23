@@ -546,10 +546,6 @@
   border-bottom: 1px solid #f3f4f6;
 }
 
-.dropdownItem:last-child { 
-  border-bottom: none; 
-}
-
 .dropdownItem:hover { 
   background-color: #eff6ff; 
   color: #2563eb; 
@@ -559,4 +555,27 @@
   background-color: #eff6ff; 
   color: #2563eb; 
   font-weight: bold; 
+}
+
+.helperText {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 4px;
+  text-align: right;
+}
+
+/* バリデーション用追加スタイル */
+.errorText {
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+.inputErrorBorder {
+  border: none !important;
+  border-bottom: 1px solid !important;
+  border-color: #ef4444 !important;
+  border-width: 1px;
+  border-style: solid;
 }

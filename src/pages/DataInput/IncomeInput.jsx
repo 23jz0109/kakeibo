@@ -9,6 +9,13 @@ import styles from "./IncomeInput.module.css";
 import { useCategories } from "../../hooks/common/useCategories";
 import { useFormPersist } from "../../hooks/common/useFormPersist";
 import { useAuthFetch } from "../../hooks/useAuthFetch"; 
+// [追加] バリデーション定数とヘルパー関数のインポート
+import { 
+  VALIDATION_LIMITS, 
+  validateAmount, 
+  validateTextLength, 
+  sanitizeNumericInput 
+} from "../../constants/validationsLimits";
 
 const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
 
@@ -18,6 +25,9 @@ const IncomeInput = () => {
   const [amount, setAmount, removeAmount] = useFormPersist("income_amount", "");
   const [memo, setMemo, removeMemo] = useFormPersist("income_memo", "");
   const [categoryId, setCategoryId, removeCategory] = useFormPersist("income_category", null);
+
+  const [errors, setErrors] = useState({ amount: "", memo: "" });
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [complete, setComplete] = useState(false);
   const { categories, fetchCategories, addCategory } = useCategories(); 
@@ -25,12 +35,40 @@ const IncomeInput = () => {
   // 【追加】フック呼び出し
   const authFetch = useAuthFetch();
 
-  // 数字チェックハンドラ
+  // バリデーション実行関数
+  const validateField = (name, value) => {
+    let error = "";
+    if (name === "amount") {
+      if (value !== "" && !validateAmount(value)) {
+        error = `金額は0〜${VALIDATION_LIMITS.AMOUNT.MAX.toLocaleString()}円の範囲で入力してください`;
+      }
+    }
+    if (name === "memo") {
+      if (!validateTextLength(value, VALIDATION_LIMITS.TEXT.MEMO)) {
+        error = `メモは${VALIDATION_LIMITS.TEXT.MEMO}文字以内で入力してください`;
+      }
+    }
+    setErrors(prev => ({ ...prev, [name]: error }));
+    return error === "";
+  };
+
+  // [変更] 数字チェックハンドラ（サニタイズとバリデーション適用）
   const handleNumericChange = (value) => {
-    const halfWidthValue = value.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
-    const sanitizedValue = halfWidthValue.replace(/[^0-9]/g, "");
+    // 全角→半角、非数字除去
+    const sanitizedValue = sanitizeNumericInput(value);
     
+    // 値の更新
     setAmount(sanitizedValue === "" ? "" : Number(sanitizedValue));
+    
+    // バリデーション実行
+    validateField("amount", sanitizedValue);
+  };
+
+  // [追加] メモ変更ハンドラ
+  const handleMemoChange = (e) => {
+    const value = e.target.value;
+    setMemo(value);
+    validateField("memo", value);
   };
 
   // 保存データを消す
@@ -40,6 +78,7 @@ const IncomeInput = () => {
       removeAmount();
       removeMemo();
       removeCategory();
+      setErrors({}); // [追加] エラーもクリア
     }
   };
 
@@ -58,25 +97,42 @@ const IncomeInput = () => {
     if (!authFetch) return;
 
     // バリデーション
+    // [変更] バリデーションチェック（送信前にも再確認）
+    const isAmountValid = validateField("amount", amount);
+    const isMemoValid = validateField("memo", memo);
+
     if (!amount || !categoryId) {
       alert("金額とカテゴリを入力してください");
       return;
     }
 
+    // [追加] エラーがある場合は送信中止
+    if (!isAmountValid || !isMemoValid || Object.values(errors).some(e => e)) {
+      alert("入力内容にエラーがあります。修正してください。");
+      return;
+    }
+
+    // トークン取得
+    const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+    if (!token) {
+      alert("ログイン情報がありません。再度ログインしてください。");
+      navigate("/"); 
+      return;
+    }
 
     // 送信データ作成
     const payload = [
       {
         shop_name: "収入",
         shop_address: "",
-        purchase_day: date, // JSON化の際にISO文字列に自動変換されます
+        purchase_day: date, 
         total_amount: amount,
         memo: memo,
         products: [
           {
             product_name: "収入",
             product_price: amount,
-            quantity: 1,
+            quantity: 1, // [確認] 定数 QUANTITY.MIN 準拠
             category_id: categoryId
           }
         ]
@@ -117,6 +173,7 @@ const IncomeInput = () => {
       removeAmount();
       removeMemo();
       removeCategory();
+      setErrors({}); // [追加]
       
       // 完了後の処理 (1.5秒後に遷移)
       setTimeout(() => {
@@ -161,7 +218,8 @@ const IncomeInput = () => {
         <div className={styles.compactInputSection}>
           <div className={styles.inputRow}>
               <label className={styles.label}>金額</label>
-              <div className={styles.amountInputWrapper}>
+              {/* [変更] エラー時のスタイル適用 */}
+              <div className={`${styles.amountInputWrapper} ${errors.amount ? styles.inputErrorBorder : ''}`}>
                 <span className={styles.yenMark}>¥</span>
                 <input
                   className={styles.amountInput}
@@ -170,8 +228,12 @@ const IncomeInput = () => {
                   pattern="\d*"
                   placeholder="0"
                   value={amount}
-                  onChange={(e) => handleNumericChange(e.target.value)}/>
+                  onChange={(e) => handleNumericChange(e.target.value)}
+                  onBlur={() => validateField("amount", amount)} // [追加] Blur時バリデーション
+                />
               </div>
+              {/* [追加] エラーメッセージ表示 */}
+              {errors.amount && <p className={styles.errorText}>{errors.amount}</p>}
           </div>
 
           <div className={styles.divider} />
@@ -179,11 +241,19 @@ const IncomeInput = () => {
           <div className={styles.inputRow}>
               <label className={styles.label}>メモ</label>
               <textarea
-                className={styles.memoInput}
+                className={`${styles.memoInput} ${errors.memo ? styles.inputErrorBorder : ''}`}
                 placeholder="備考"
                 value={memo}
-                onChange={(e) => setMemo(e.target.value)}
+                onChange={handleMemoChange} // [変更] 専用ハンドラを使用
+                onBlur={() => validateField("memo", memo)} // [追加]
               />
+              {/* [追加] エラーメッセージと文字数カウンタ */}
+              <div className={styles.memoFooter}>
+                {errors.memo && <p className={styles.errorText}>{errors.memo}</p>}
+                <span className={`${styles.charCount} ${memo.length > VALIDATION_LIMITS.TEXT.MEMO ? styles.countError : ''}`}>
+                  {memo.length}/{VALIDATION_LIMITS.TEXT.MEMO}
+                </span>
+              </div>
           </div>
         </div>
       </div>
@@ -204,7 +274,9 @@ const IncomeInput = () => {
         <SubmitButton
           text={isSubmitting ? "送信中..." : "登録する"}
           onClick={handleSubmit}
-          disabled={isSubmitting}/>
+          // [変更] エラーがある場合はボタンを無効化
+          disabled={isSubmitting || Object.values(errors).some(e => e !== "")} 
+        />
       </div>
 
       {complete && <CompleteModal />}
