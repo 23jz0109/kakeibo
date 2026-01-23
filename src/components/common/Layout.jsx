@@ -44,13 +44,12 @@ const Layout = ({
     // 初回マウント時にカウント取得
     fetchUnreadCount();
 
-    //  「更新があったよ」という合図を受け取ったら、再取得する関数
+    // 合図を受け取ったら、再取得する関数
     const handleUpdate = () => {
-      console.log("Layout: 通知更新イベントを受信。カウントを更新します。");
       fetchUnreadCount();
     };
 
-    //  イベントリスナーを登録
+    // イベントリスナーを登録
     window.addEventListener("notificationUpdated", handleUpdate);
 
     //  クリーンアップ（画面を離れるときにリスナーを解除）
@@ -59,6 +58,7 @@ const Layout = ({
     };
   }, [fetchUnreadCount]);
 
+  
   // ナビ以外タップで閉じる
   useEffect(() => {
     const handleMouseDown = (e) => {
@@ -143,7 +143,7 @@ const Layout = ({
               navigate("/input/ocr", { state: { autoCamera: true } });
             }}>
               <Camera size={20} />
-              <span>OCR</span>
+              <span>撮影</span>
             </button>
 
             {/* 支出(手動入力) */}

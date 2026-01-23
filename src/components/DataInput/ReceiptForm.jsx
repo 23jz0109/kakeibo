@@ -14,44 +14,99 @@ import {
   validateTextLength, 
   sanitizeNumericInput 
 } from "../../constants/validationsLimits";
+import { useSuggestion } from "../../hooks/dataInput/useSuggestion"; 
 import styles from "./ReceiptForm.module.css";
 
 const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
 
-const ReceiptHeader = ({ receipt, updateReceiptInfo, errors, validateField }) => (
-  <div className={styles.inputSection}>
-    <div className={styles.inputRow}>
-      <label className={styles.label}>店舗名</label>
-      <input
-        type="text"
-        className={`${styles.cleanInput} ${errors.shop_name ? styles.inputErrorBorder : ''}`}
-        placeholder="未入力"
-        value={receipt.shop_name}
-        onChange={(e) => updateReceiptInfo("shop_name", e.target.value)}
-        onBlur={(e) => validateField("shop_name", e.target.value)}
-      />
-      {errors.shop_name && <p className={styles.errorText}>{errors.shop_name}</p>}
-      <span className={`${styles.charCount} ${receipt.shop_name.length > VALIDATION_LIMITS.TEXT.SHOP_NAME ? styles.countError : ''}`}>
-        {receipt.shop_name.length}/{VALIDATION_LIMITS.TEXT.SHOP_NAME}
-      </span>
+// 店舗名・メモの入力部分（サジェスト機能 + バリデーション機能の統合版）
+const ReceiptHeader = ({ receipt, updateReceiptInfo, shopList = [], errors, validateField }) => {
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // 候補選択ハンドラ
+  const selectShop = (shopName) => {
+    updateReceiptInfo("shop_name", shopName);
+    setShowSuggestions(false);
+    // 候補選択時にもバリデーションを実行（エラーがあれば消すため）
+    validateField("shop_name", shopName);
+  };
+
+  // ブラー時のハンドラ（サジェスト非表示 と バリデーション を両立）
+  const handleBlur = (e) => {
+    // 1. サジェストを遅延して閉じる
+    setTimeout(() => setShowSuggestions(false), 200);
+    // 2. バリデーション実行
+    validateField("shop_name", e.target.value);
+  };
+
+  const filteredShops = shopList.filter(shop => {
+    const name = shop.shop_name || shop.name || "";
+    return name.toLowerCase().includes((receipt.shop_name || "").toLowerCase());
+  });
+
+  return (
+    <div className={styles.inputSection}>
+      <div className={styles.inputRow}>
+        <label className={styles.label}>店舗名</label>
+        <div className={styles.relativeInputArea}>
+          {/* 入力欄 */}
+          <input
+            type="text"
+            // クラス名：基本スタイル + エラー時の赤枠
+            className={`${styles.cleanInput} ${errors.shop_name ? styles.inputErrorBorder : ''}`}
+            placeholder="未入力"
+            value={receipt.shop_name}
+            onChange={(e) => {
+              updateReceiptInfo("shop_name", e.target.value);
+              setShowSuggestions(true);
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={handleBlur}
+            autoComplete="off"
+          />
+          {/* 候補表示 */}
+          {showSuggestions && receipt.shop_name && filteredShops.length > 0 && (
+            <ul className={styles.suggestionList}>
+              {filteredShops.map((shop, idx) => (
+                <li 
+                  key={shop.id || idx} 
+                  className={styles.suggestionItem} 
+                  onClick={() => selectShop(shop.shop_name || shop.name)}
+                >
+                  {shop.shop_name || shop.name}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        {/* エラーメッセージ表示 */}
+        {errors.shop_name && <p className={styles.errorText}>{errors.shop_name}</p>}
+        {/* 文字数カウント */}
+        <span className={`${styles.charCount} ${receipt.shop_name.length > VALIDATION_LIMITS.TEXT.SHOP_NAME ? styles.countError : ''}`}>
+          {receipt.shop_name.length}/{VALIDATION_LIMITS.TEXT.SHOP_NAME}
+        </span>
+      </div>
+
+      <div className={styles.divider}></div>
+      
+      {/* メモ欄 */}
+      <div className={styles.inputRow}>
+        <label className={styles.label}>メモ</label>
+        <textarea
+          className={`${styles.memoInput} ${errors.memo ? styles.inputErrorBorder : ''}`}
+          placeholder="備考"
+          value={receipt.memo}
+          onChange={(e) => updateReceiptInfo("memo", e.target.value)}
+          onBlur={(e) => validateField("memo", e.target.value)}
+        />
+        {errors.memo && <p className={styles.errorText}>{errors.memo}</p>}
+        <span className={`${styles.charCount} ${receipt.memo.length > VALIDATION_LIMITS.TEXT.MEMO ? styles.countError : ''}`}>
+          {receipt.memo.length}/{VALIDATION_LIMITS.TEXT.MEMO}
+        </span>
+      </div>
     </div>
-    <div className={styles.divider}></div>
-    <div className={styles.inputRow}>
-      <label className={styles.label}>メモ</label>
-      <textarea
-        className={`${styles.memoInput} ${errors.memo ? styles.inputErrorBorder : ''}`}
-        placeholder="備考"
-        value={receipt.memo}
-        onChange={(e) => updateReceiptInfo("memo", e.target.value)}
-        onBlur={(e) => validateField("memo", e.target.value)}
-      />
-      {errors.memo && <p className={styles.errorText}>{errors.memo}</p>}
-      <span className={`${styles.charCount} ${receipt.memo.length > VALIDATION_LIMITS.TEXT.MEMO ? styles.countError : ''}`}>
-        {receipt.memo.length}/{VALIDATION_LIMITS.TEXT.MEMO}
-      </span>
-    </div>
-  </div>
-);
+  );
+};
 
 const ReceiptSummary = ({ calculated, priceMode, setPriceMode, pointsUsage, onPointsChange, errors, validateField }) => {
   const tax8 = calculated.taxByRate["8"] || 0;
@@ -132,7 +187,7 @@ const ReceiptSummary = ({ calculated, priceMode, setPriceMode, pointsUsage, onPo
   );
 };
 
-// レシート項目表示部分（変更なし）
+// レシート項目表示部分
 const ReceiptItemPreview = ({ item, categories, onToggleTax }) => {
   const unitPrice = Number(item.product_price) || 0;
   const quantity = Number(item.quantity) || 1;
@@ -183,13 +238,13 @@ const ReceiptItemPreview = ({ item, categories, onToggleTax }) => {
   );
 };
 
-// [変更] レシート項目入力モーダル（バリデーション追加）
+// レシート項目入力モーダル
 const ReceiptItemModal = ({ mode, item, index, categories, productList = [], priceMode, onSubmit, onDelete, closeModal, onCategoryRefresh, typeId = 2 }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [formData, setFormData] = useState({
     product_name: "", product_price: "", quantity: 1, category_id: "", tax_rate: "10", discount: "",
   });
-  // [追加] モーダル内ローカルエラー
+  // モーダル内ローカルエラー
   const [localErrors, setLocalErrors] = useState({});
 
   const { addCategory } = useCategories(); 
@@ -210,7 +265,7 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
     }
   }, [mode, item, categories]);
 
-  // [追加] モーダル内バリデーション
+  // モーダル内バリデーション
   const validateModalField = (name, value) => {
     let error = "";
     switch (name) {
@@ -229,7 +284,6 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
         break;
       case "discount":
         if (value && !validateAmount(value)) error = "金額が不正です";
-        // 割引が単価×個数を超えていないか等のチェックはsubmit時に行うのが安全
         break;
       default:
         break;
@@ -261,7 +315,7 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
       product_name: product.product_name || product.PRODUCT_NAME,
       category_id: validCategoryId
     });
-    setLocalErrors(prev => ({ ...prev, product_name: "" })); // 選択したらエラー消去
+    setLocalErrors(prev => ({ ...prev, product_name: "" }));
     setShowSuggestions(false);
   };
 
@@ -454,38 +508,24 @@ const ReceiptForm = forwardRef(({
   onCategoryRefresh
 }, ref) => {
   const storageKey = `kakeibo_tax_mode_${formId}`;
-  const persistKey = formId; 
-  const authToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-  const [productList, setProductList] = useState([]);
+  const persistKey = formId;
+
+  // useSuggestionフック（データ取得）とエラー管理（バリデーション）の統合
+  const { productList, shopList, fetchProductCandidates, fetchShopCandidates } = useSuggestion();
   
-  // [追加] 全体のエラー状態管理
+  // バリデーション用のエラー状態管理
   const [errors, setErrors] = useState({
     shop_name: "",
     memo: "",
     point_usage: ""
   });
 
+  // フック経由でデータを取得
   useEffect(() => {
-    const fetchProductCandidates = async () => {
-      if (!authToken) return;
-      try {
-        const response = await fetch(`${API_BASE_URL}/product`, {
-          method: "GET",
-          headers: { "Authorization": `Bearer ${authToken}` }
-        });
-        if (response.ok) {
-          const data = await response.json();
-          if (data.status === 'success' && Array.isArray(data.products)) {
-            setProductList(data.products);
-          }
-        }
-      } catch (err) {
-        console.error("候補取得エラー", err);
-      }
-    };
     fetchProductCandidates();
-  }, [authToken]);
-
+    fetchShopCandidates();
+  }, [fetchProductCandidates, fetchShopCandidates]);
+  
   const {
     receipt,
     priceMode,
@@ -541,7 +581,7 @@ const ReceiptForm = forwardRef(({
     }
   }));
 
-  // [追加] バリデーション実行関数
+  // バリデーション実行関数
   const validateField = (name, value) => {
     let error = "";
     if (name === "shop_name") {
@@ -558,15 +598,13 @@ const ReceiptForm = forwardRef(({
       if (value !== "" && !validateAmount(value)) {
         error = "ポイントは数値で入力してください";
       }
-      // ポイントが合計金額を超えているかのチェックはここで行うか、submit時に行う
-      // リアルタイムだと金額が増減するため、ここでは数値形式のみチェックが安全
     }
     setErrors(prev => ({ ...prev, [name]: error }));
     return error === "";
   };
 
   const handlePressSubmit = async () => {
-    // [追加] 送信前バリデーション
+    // 送信前バリデーション
     const isShopValid = validateField("shop_name", receipt.shop_name);
     const isMemoValid = validateField("memo", receipt.memo);
     const isPointValid = validateField("point_usage", receipt.point_usage);
@@ -606,17 +644,17 @@ const ReceiptForm = forwardRef(({
     <>
       <div className={styles.fixedTopArea}>
         <DayPicker date={receipt.purchase_day} onChange={(d) => updateReceiptInfo("purchase_day", d)} />
-        {/* [変更] エラーと検証関数を渡す */}
+        {/* サジェストリストとバリデーション関数の両方を渡す */}
         <ReceiptHeader 
           receipt={receipt} 
           updateReceiptInfo={updateReceiptInfo} 
+          shopList={shopList}
           errors={errors}
           validateField={validateField}
         />
       </div>
 
       <div className={styles.scrollArea}>
-        {/* [変更] エラーと検証関数を渡す */}
         <ReceiptSummary
           calculated={calculated}
           priceMode={priceMode}
@@ -683,7 +721,7 @@ const ReceiptForm = forwardRef(({
         <SubmitButton 
           text={submitLabel} 
           onClick={handlePressSubmit} 
-          // [変更] 送信中またはエラーが存在する場合は無効化
+          // 送信中またはエラーが存在する場合は無効化
           disabled={isSubmitting || Object.values(errors).some(e => e !== "")} 
         />
       </div>

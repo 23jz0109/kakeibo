@@ -4,6 +4,7 @@ import Layout from '../../components/common/Layout';
 import { Trash2, Search, CheckCircle, Edit2, X } from 'lucide-react';
 import styles from './Notification.module.css';
 import { useNotification } from '../../hooks/notification/useNotification';
+import { useSuggestion } from '../../hooks/dataInput/useSuggestion';
 
 // 時間選択用の汎用プルダウンコンポーネント
 const TimeDropdown = ({ value, options, onChange }) => {
@@ -61,12 +62,10 @@ const Notification = () => {
     notificationHistory,
     notifications,
     loading,
-    productList,
     suggestedPeriod,
     setSuggestedPeriod,
     fetchNotificationHistory,
     fetchNotifications,
-    fetchProductCandidates,
     fetchSuggestedInterval,
     markAsRead,
     deleteHistoryItem,
@@ -76,6 +75,7 @@ const Notification = () => {
     deleteNotification
   } = useNotification();
 
+  const { productList, fetchProductCandidates } = useSuggestion();
   const [expandedId, setExpandedId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editTargetId, setEditTargetId] = useState(null);
@@ -263,7 +263,11 @@ const Notification = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  deleteHistoryItem(item.id, e)
+                  // 未読の場合は、削除と同時に既読処理(バッジ減少)も呼ぶ
+                  if (isUnread) {
+                    markAsRead(item.id);
+                  }
+                  deleteHistoryItem(item.id, e);
                 }}
                 className={styles.deleteBtnMini}
                 title="削除">
