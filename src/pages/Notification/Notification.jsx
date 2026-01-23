@@ -50,7 +50,7 @@ const TimeDropdown = ({ value, options, onChange }) => {
 
 /* 時間選択のオプション定義 */
 const hourOptions = Array.from({ length: 24 }, (_, i) => i);
-const minOptions = [0, 15, 30, 45]; 
+const minOptions = [0, 15, 30, 45];
 
 const Notification = () => {
   const navigate = useNavigate();
@@ -260,7 +260,11 @@ const Notification = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  deleteHistoryItem(item.id, e)
+                  // 未読の場合は、削除と同時に既読処理(バッジ減少)も呼ぶ
+                  if (isUnread) {
+                    markAsRead(item.id);
+                  }
+                  deleteHistoryItem(item.id, e);
                 }}
                 className={styles.deleteBtnMini}
                 title="削除">
@@ -353,7 +357,7 @@ const Notification = () => {
       }
       mainContent={
         <div className={styles.mainContainer}>
-          
+
           {/* タブ切り替えエリア */}
           <div className={styles.tabContainer}>
             <button
@@ -370,7 +374,7 @@ const Notification = () => {
 
           {/* ローディング */}
           {loading && <p className={styles.loadingText}>読み込み中...</p>}
-          
+
           {/* 表示 */}
           {!loading && (
             <div className={styles.viewContainer}>
@@ -384,7 +388,7 @@ const Notification = () => {
               {/* 補充通知設定 */}
               {activeTab === 'settings' && (
                 <div className={styles.contentWrapper}>
-                   {renderRefillNotificationSettingList()}
+                  {renderRefillNotificationSettingList()}
                 </div>
               )}
             </div>
@@ -469,8 +473,8 @@ const Notification = () => {
             </div>
           )}
         </div>
-      }/>
-    );
-  };
+      } />
+  );
+};
 
 export default Notification;

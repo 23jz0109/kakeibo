@@ -225,7 +225,7 @@ function Setting() {
 
     const targetId = item._id || item.id || item.ID;
 
-    // 1. FCMトークンを取得 (プロパティ名は大文字・小文字両方を想定)
+    // FCMトークンを取得 (プロパティ名は大文字・小文字両方を想定)
     const fcmToken = item.fcm_token || item.FCM_TOKEN;
 
     // トークンがない場合に備えてチェック
@@ -238,7 +238,7 @@ function Setting() {
     const currentVal = Number(item.DEVICE_NOTIFICATION_ENABLE ?? item.device_notification_enable);
     const nextVal = currentVal === 1 ? 0 : 1;
 
-    // 2. 楽観的UI更新
+    // UI更新
     const originalList = [...devices];
     setDevices(prev => prev.map(d => {
       const dId = d._id || d.id || d.ID;

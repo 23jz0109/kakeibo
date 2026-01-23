@@ -38,8 +38,8 @@ function YearSelect({ selectedYear, setSelectedYear }) {
   // プルダウンメニュー生成
   return (
     <div className="custom-select-container" ref={wrapperRef}>
-      <div 
-        className="input-field select-trigger" 
+      <div
+        className="input-field select-trigger"
         onClick={() => setIsOpen(!isOpen)}>
         <span className={!selected ? "placeholder-text" : ""}>
           {selected ? selected.label : "生年月日 (年・任意)"}
@@ -88,7 +88,7 @@ const Login = () => {
   // エラーメッセージとローディング
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // 保存されたメールアドレスを復元
   useEffect(() => {
     const savedEmail = localStorage.getItem("savedEmail");
@@ -111,10 +111,10 @@ const Login = () => {
     // ログイン成功
     if (response.ok && data.status === "success") {
       console.log("ログイン成功:", data);
-      
+
       // メールを保存(何度も入力することを防ぐ)
       localStorage.setItem("savedEmail", loginEmail);
-            
+
       // 自動ログインをチェックした場合はlocalStorageにアクセストークンを保存する
       if (rememberMe) {
         localStorage.setItem("authToken", data.token);
@@ -128,7 +128,7 @@ const Login = () => {
       // 画面遷移
       navigate("/history", { replace: true });
       return true;
-    } 
+    }
     // ログイン失敗
     else {
       console.error("ログイン失敗:", data);
@@ -137,13 +137,13 @@ const Login = () => {
     }
   };
 
-  // ログイン処理
+  // 新規登録処理
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // エラーメッセージをリセット
     setErrorMessage("");
-    
+
     // バリデーション(空欄チェック)
     if (!email || !password) {
       setErrorMessage("メールアドレスとパスワードを入力してください");
@@ -171,7 +171,7 @@ const Login = () => {
         // バックエンド通信設定
         const response = await fetch(`${API_BASE_URL}/user`, {
           method: "POST",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
             "Accept": "application/json"
           },
@@ -187,9 +187,9 @@ const Login = () => {
 
           // 登録成功の場合はそのままログインする
           const loginResult = await performLogin(email, password);
-          
+
           // 万が一ログインだけ失敗した場合
-          if (!loginResult) {            
+          if (!loginResult) {
             setActiveTab("login");
             setErrorMessage("登録は成功 | ログイン失敗、もう一度やり直してください。");
           }
@@ -209,18 +209,18 @@ const Login = () => {
               else {
                 setErrorMessage(msg);
               }
-            } 
+            }
             else if (data.errors.password) {
               setErrorMessage(data.errors.password[0]);
-            } 
+            }
             else {
               const errorValues = Object.values(data.errors).flat();
               setErrorMessage(errorValues[0] || "入力内容を確認してください。");
             }
-          } 
+          }
           // バリデーション以外のエラーメッセージ
           else if (data.message) {
-             setErrorMessage(data.message);
+            setErrorMessage(data.message);
           }
           // それ以外
           else {
@@ -240,109 +240,120 @@ const Login = () => {
     }
   };
 
+  // タブを切り替えた時に入力をリセットする
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setEmail("");
+    setPassword("");
+    setErrorMessage("");
+    setYear(null);
+  };
+
   return (
     <div className="login-scroll-root">
-    <div className="login-page-container">      
-      {/* ログイン・新規登録タブ */}
-      <div className="tab-container">
-        <button 
-          className={`tab-button ${activeTab === "login" ? "active" : ""}`}
-          onClick={() => setActiveTab("login")}>ログイン
-        </button>
-        <button 
-          className={`tab-button ${activeTab === "register" ? "active" : ""}`}
-          onClick={() => setActiveTab("register")}>新規登録
-        </button>
-      </div>
+      <div className="login-page-container">
+        {/* ログイン・新規登録タブ */}
+        <div className="tab-container">
+          <button
+            className={`tab-button ${activeTab === "login" ? "active" : ""}`}
+            onClick={() => handleTabChange("login")}>
+            ログイン
+          </button>
+          <button
+            className={`tab-button ${activeTab === "register" ? "active" : ""}`}
+            onClick={() => handleTabChange("register")}>
+            新規登録
+          </button>
+        </div>
 
-      <div className="card-wrapper">
-        <div className="main-container">
-        {/* 共通表示(システム名) */}
-          <div className="main-inner">
-            <div className="main-header">
-              <h1>23JZ T08</h1>
-            </div>
-
-            {/* エラーメッセージ表示エリア */}
-            {errorMessage && (
-              <div className="error-message-area">
-                <CircleAlert size={18} />
-                <span>{errorMessage}</span>
-              </div>
-            )}
-            
-            {/* 入力欄 */}
-            <form onSubmit={handleSubmit} className="input-section">
-              {/* メール */}
-              <div className="input-wrapper">
-                <span className="icon"><Mail size={16} /></span>
-                <input 
-                  type="email"
-                  placeholder="メールアドレス" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="input-field"
-                />
+        <div className="card-wrapper">
+          <div className="main-container">
+            {/* 共通表示(システム名) */}
+            <div className="main-inner">
+              <div className="main-header">
+                <h1>23JZ T08</h1>
               </div>
 
-              {/* パスワード */}
-              <div className="input-wrapper">
-                <span className="icon"><Lock size={16} /></span>
-                <input 
-                  type={showPassword ? "text" : "password"}
-                  placeholder="パスワード"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="input-field"
-                />
-                {/* パスワード表示 */}
-                <span
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="eye-icon"
-                  style={{ cursor: "pointer" }}
-                >
-                  {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
-                </span>
-              </div>
-
-              {/* 新規登録表示部分 / 自動ログインチェックボックス */}
-              {activeTab === "register" ? (
-                <div className="input-wrapper">
-                  <span className="icon"><Cake size={16} /></span>
-                  <YearSelect selectedYear={year} setSelectedYear={setYear} />
-                </div>
-              ) : (
-                <div className="login-options-row">                  
-                  {/* オートログイン */}
-                  <div className="checkbox-wrapper">
-                    <label className="checkbox-label">
-                      <input 
-                        type="checkbox" 
-                        checked={rememberMe}
-                        onChange={(e) => setRememberMe(e.target.checked)}/>
-                      次回から自動ログイン
-                    </label>
-                  </div>
-
-                  {/* パスワード忘れ */}
-                  <button type="button" className="forgot-password">
-                    パスワードを忘れた方
-                  </button>
+              {/* エラーメッセージ表示エリア */}
+              {errorMessage && (
+                <div className="error-message-area">
+                  <CircleAlert size={18} />
+                  <span>{errorMessage}</span>
                 </div>
               )}
 
-              {/* 送信ボタン */}
-              <button 
-                type="submit" 
-                className="submit-button"
-                disabled={isLoading}>
-                {activeTab === "login" ? "ログイン" : "登録する"}
-              </button>
-            </form>
+              {/* 入力欄 */}
+              <form onSubmit={handleSubmit} className="input-section">
+                {/* メール */}
+                <div className="input-wrapper">
+                  <span className="icon"><Mail size={16} /></span>
+                  <input
+                    type="email"
+                    placeholder="メールアドレス"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="input-field"
+                  />
+                </div>
+
+                {/* パスワード */}
+                <div className="input-wrapper">
+                  <span className="icon"><Lock size={16} /></span>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="パスワード"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="input-field"
+                  />
+                  {/* パスワード表示 */}
+                  <span
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="eye-icon"
+                    style={{ cursor: "pointer" }}
+                  >
+                    {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
+                  </span>
+                </div>
+
+                {/* 新規登録表示部分 / 自動ログインチェックボックス */}
+                {activeTab === "register" ? (
+                  <div className="input-wrapper">
+                    <span className="icon"><Cake size={16} /></span>
+                    <YearSelect selectedYear={year} setSelectedYear={setYear} />
+                  </div>
+                ) : (
+                  <div className="login-options-row">
+                    {/* オートログイン */}
+                    <div className="checkbox-wrapper">
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={rememberMe}
+                          onChange={(e) => setRememberMe(e.target.checked)} />
+                        次回から自動ログイン
+                      </label>
+                    </div>
+
+                    {/* パスワード忘れ */}
+                    <button type="button" className="forgot-password">
+                      パスワードを忘れた方
+                    </button>
+                  </div>
+                )}
+
+                {/* 送信ボタン */}
+                <button
+                  type="submit"
+                  className="submit-button"
+                  disabled={isLoading}>
+                  {activeTab === "login" ? "ログイン" : "登録する"}
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </div>
   );
 };

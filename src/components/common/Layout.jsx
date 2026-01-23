@@ -20,11 +20,11 @@ const Layout = ({
   const location = useLocation();
   const navigate = useNavigate();
   const [isPlusOpen, setIsPlusOpen] = useState(false);  // 「＋」ボタンの開閉状態
-  
+
   const plusRef = useRef(null);
   const plusButtonRef = useRef(null);
   const mouseDownOutsideRef = useRef(false);
-  
+
   const { unreadCount, fetchUnreadCount } = useNotification();
   // console.log("Layout: unreadCount =", unreadCount);
 
@@ -40,13 +40,27 @@ const Layout = ({
 
   const isPlusDisabled = disableDataInputButton;
 
-  
   useEffect(() => {
+    // 初回マウント時にカウント取得
     fetchUnreadCount();
-  }, [location, fetchUnreadCount]);
 
+    // 合図を受け取ったら、再取得する関数
+    const handleUpdate = () => {
+      fetchUnreadCount();
+    };
+
+    // イベントリスナーを登録
+    window.addEventListener("notificationUpdated", handleUpdate);
+
+    //  クリーンアップ（画面を離れるときにリスナーを解除）
+    return () => {
+      window.removeEventListener("notificationUpdated", handleUpdate);
+    };
+  }, [fetchUnreadCount]);
+
+  
   // ナビ以外タップで閉じる
-  useEffect(() => { 
+  useEffect(() => {
     const handleMouseDown = (e) => {
       // expandInner の中 → outside ではない
       if (plusRef.current && plusRef.current.contains(e.target)) {
@@ -62,20 +76,19 @@ const Layout = ({
       mouseDownOutsideRef.current = true;
     };
 
-    const handleClick = () => { 
-      if (mouseDownOutsideRef.current) 
-        { setIsPlusOpen(false); mouseDownOutsideRef.current = false; } 
+    const handleClick = () => {
+      if (mouseDownOutsideRef.current) { setIsPlusOpen(false); mouseDownOutsideRef.current = false; }
     };
-    
-    if (isPlusOpen) { 
-      document.addEventListener("mousedown", handleMouseDown); 
-      document.addEventListener("click", handleClick); 
-    } 
-    
-    return () => { 
-      document.removeEventListener("mousedown", handleMouseDown); 
-      document.removeEventListener("click", handleClick); 
-    }; 
+
+    if (isPlusOpen) {
+      document.addEventListener("mousedown", handleMouseDown);
+      document.addEventListener("click", handleClick);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleMouseDown);
+      document.removeEventListener("click", handleClick);
+    };
   }, [isPlusOpen]);
 
   // 画面生成(枠)
@@ -165,7 +178,7 @@ const Layout = ({
             <div className={styles["nav-item-center"]}>
               <button
                 ref={plusButtonRef}
-                className={`${styles["navigate-datainput"]} ${ isPlusOpen ? styles.close : "" }`}
+                className={`${styles["navigate-datainput"]} ${isPlusOpen ? styles.close : ""}`}
                 disabled={isPlusDisabled}
                 onClick={() => { if (!isPlusDisabled) setIsPlusOpen((prev) => !prev); }}>
                 {isPlusOpen ? <X size={20} /> : <Plus size={20} />}
