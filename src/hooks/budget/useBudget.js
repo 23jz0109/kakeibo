@@ -111,7 +111,7 @@ export const useBudgetApi = () => {
 
   // 通知オンオフ
   const toggleBudget = useCallback(async (id) => {
-    setLoading(true);
+    // setLoading(true);
     setError(null);
     try {
       const headers = {

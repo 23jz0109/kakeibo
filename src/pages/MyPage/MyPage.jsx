@@ -16,7 +16,7 @@ const MyPage = () => {
   // 時間判定
   useEffect(() => {
     const hour = new Date().getHours();
-    console.log(hour);
+    console.log("ローカルタイム: " + hour + "時");
 
     // 0500 - 1100
     if (hour >= 5 && hour < 11) {
@@ -38,7 +38,8 @@ const MyPage = () => {
       const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
       if (!token) return;
 
-      // /meからユーザー情報を取得 **localstorageからでもよさそう
+      // meからユーザー情報を取得 
+      // ** 2回目以降はlocalstorage/sessionからでもよさそう **
       try {
         const response = await fetch(`${API_BASE_URL}/me`, {
           method: "GET",

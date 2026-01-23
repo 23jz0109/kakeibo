@@ -67,10 +67,15 @@ export const useNotification = () => {
         });
 
         // 日付順 -> 時間順でソート
+        // normalized.sort((a, b) => {
+        //   const dateDiff = a._scheduledDate - b._scheduledDate;
+        //   if (dateDiff !== 0) return dateDiff;
+        //   return a._localHour - b._localHour;
+        // });
+
+        // IDの降順（大きい順）
         normalized.sort((a, b) => {
-          const dateDiff = a._scheduledDate - b._scheduledDate;
-          if (dateDiff !== 0) return dateDiff;
-          return a._localHour - b._localHour;
+          return Number(b._id) - Number(a._id);
         });
 
         setNotifications(normalized);
@@ -389,6 +394,7 @@ export const useNotification = () => {
     setUnreadCount(prev => Math.max(0, prev - 1));
 
     try {
+      // APIへ送信
       await fetch(`${API_BASE_URL}/notification/list`, {
         method: "PATCH",
         headers: {

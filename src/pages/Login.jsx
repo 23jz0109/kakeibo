@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Mail, Lock, Eye, EyeOff, CircleAlert, Cake } from "lucide-react";  // アイコン部品
 import { useNavigate } from "react-router-dom";
-import "./Login.css";
+import styles from "./Login.module.css";
 
 /**
  * 新規登録の年選択パーツ
@@ -41,18 +41,18 @@ function YearSelect({ selectedYear, setSelectedYear }) {
       <div
         className="input-field select-trigger"
         onClick={() => setIsOpen(!isOpen)}>
-        <span className={!selected ? "placeholder-text" : ""}>
+        <span className={!selected ? styles.placeholderText : ""}>
           {selected ? selected.label : "生年月日 (年・任意)"}
         </span>
-        <span className="arrow">▾</span>
+        <span className={styles.arrow}>▾</span>
       </div>
 
       {isOpen && (
-        <div className="dropdown-list">
+        <div className={styles.dropdownList}>
           {options.map(opt => (
             <div
               key={opt.value}
-              className="dropdown-item"
+              className={styles.dropdownItem}
               onClick={() => handleSelect(opt.value)}>
               {opt.label}
             </div>

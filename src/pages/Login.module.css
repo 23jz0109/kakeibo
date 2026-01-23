@@ -1,13 +1,13 @@
-/* src/pages/Login.css */
-
-html,
-body {
+:global(html),
+:global(body) {
   height: 100%;
   overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 /* スクロール専用ルート */
-.login-scroll-root {
+.loginScrollRoot {
   height: 100dvh;
   width: 100%;
   overflow: hidden;
@@ -18,7 +18,7 @@ body {
 }
 
 /* スクロール制御 */
-.login-page-container {
+.loginPageContainer {
   height: 100%;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -29,7 +29,7 @@ body {
 }
 
 /* タブ部分 */
-.tab-container {
+.tabContainer {
   display: flex;
   width: 100%;
   background-color: white;
@@ -41,7 +41,7 @@ body {
   z-index: 100;
 }
 
-.tab-button {
+.tabButton {
   flex: 1;
   padding: 1.2rem 0;
   border: none;
@@ -55,14 +55,15 @@ body {
   border-radius: 0; 
 }
 
-.tab-button.active {
+/* アクティブな状態 */
+.active {
   color: #2563eb;
   border-bottom: 3px solid #2563eb;
   background-color: rgba(37, 99, 235, 0.05);
 }
 
 /* ラッパー */
-.card-wrapper {
+.cardWrapper {
   width: 100%;
   flex: 1;
   display: flex;
@@ -80,7 +81,7 @@ body {
 }
 
 /* カード本体 */
-.main-container {
+.mainContainer {
   display: flex;
   flex-direction: column;
   width: 90%;
@@ -91,12 +92,12 @@ body {
   z-index: 1;
 }
 
-.main-inner {
+.mainInner {
   width: 100%;
 }
 
 /* ヘッダー */
-.main-header {
+.mainHeader {
   background-color: #3b82f6;
   color: white;
   text-align: center;
@@ -105,14 +106,14 @@ body {
   border-top-right-radius: 0.5rem;
 }
 
-.main-header h1 {
+.mainHeader h1 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: bold;
 }
 
 /* エラーメッセージエリア */
-.error-message-area {
+.errorMessageArea {
   background-color: #fef2f2;
   color: #dc2626;
   padding: 0.75rem;
@@ -126,7 +127,7 @@ body {
 }
 
 /* 入力フォーム */
-.input-section {
+.inputSection {
   padding: 1.5rem;
   background-color: white;
   display: flex;
@@ -136,14 +137,13 @@ body {
   border-bottom-right-radius: 0.5rem;
 }
 
-.input-wrapper {
+.inputWrapper {
   position: relative;
 }
 
 /* 入力欄のデザイン（高さ固定） */
-.input-field {
+.inputField {
   width: 100%;
-  /* 高さ固定 */
   height: 3.6rem;  
   padding: 0 1rem 0 2.8rem;  
   display: flex;
@@ -158,13 +158,13 @@ body {
 }
 
 /* inputタグ特有のリセット */
-input.input-field {
+input.inputField {
   line-height: normal; 
   padding-top: 1rem;
   padding-bottom: 1rem;
 }
 
-.input-field:focus {
+.inputField:focus {
   border-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
@@ -180,7 +180,7 @@ input.input-field {
 }
 
 /* パスワード表示切替アイコン */
-.eye-icon {
+.eyeIcon {
   position: absolute;
   right: 1rem;
   top: 50%;
@@ -189,8 +189,8 @@ input.input-field {
   cursor: pointer;
 }
 
-/* --- 送信ボタン --- */
-.submit-button {
+/* 送信ボタン */
+.submitButton {
   width: 100%;
   padding: 0.8rem;
   background-color: #3b82f6;
@@ -203,34 +203,31 @@ input.input-field {
   margin-top: 0; 
 }
 
-.submit-button:hover {
+.submitButton:hover {
   background-color: #2563eb;
 }
 
 /* 年選択（入力欄と高さを合わせる） */
-.custom-select-container {
+.customSelectContainer {
   position: relative;
   width: 100%;
 }
 
-.select-trigger {
+.selectTrigger {
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
   width: 100%;
-  
-  /* 入力欄と同じ高さ設定 */
   height: 3.6rem;
   padding: 0 1rem 0 2.8rem;
-  
   border: 1px solid #d1d5db;
   border-radius: 0.5rem;
   background-color: white;
   box-sizing: border-box;
 }
 
-.dropdown-list {
+.dropdownList {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
@@ -244,23 +241,22 @@ input.input-field {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-.dropdown-item {
+.dropdownItem {
   padding: 10px 12px;
   cursor: pointer;
 }
 
-.dropdown-item:hover { 
+.dropdownItem:hover { 
   background-color: #f0f0f0; 
 }
 
 /* ログイン */
-.login-options-row {
+.loginOptionsRow {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
   width: 100%;
-  /* 高さはログイン・新規登録を合わせる */
   height: 3.6rem; 
   margin-top: 0;
   margin-bottom: 0;  
@@ -268,14 +264,14 @@ input.input-field {
 }
 
 /* チェックボックス */
-.checkbox-wrapper {
+.checkboxWrapper {
   display: flex;
   align-items: center;
   padding-left: 0.5rem; 
   width: 100%;
 }
 
-.checkbox-label {
+.checkboxLabel {
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -283,7 +279,7 @@ input.input-field {
   color: #555;        
 }
 
-.checkbox-label input {
+.checkboxLabel input {
   margin-right: 0.4rem;
   width: 0.9rem;
   height: 0.9rem;
@@ -292,7 +288,7 @@ input.input-field {
 }
 
 /* パスワード忘れ */
-.forgot-password {
+.forgotPassword {
   width: 100%;
   border: none;
   background: none;
@@ -300,17 +296,23 @@ input.input-field {
   cursor: pointer;
   font-size: 0.85rem;
   padding: 0;
-  
-  /* 左端をチェックボックスと揃える */
   padding-left: 0.5rem; 
   margin: 0;
-    
   text-align: left;  
   transition: color 0.2s;
   display: block; 
 }
 
-.forgot-password:hover {
+.forgotPassword:hover {
   color: #2563eb;
   text-decoration: underline;
+}
+
+/* プレースホルダーの文字色調整用 (CSS側に追加) */
+.placeholderText {
+    color: #9ca3af; /* グレー系 */
+}
+
+.arrow {
+    margin-right: 0.5rem;
 }

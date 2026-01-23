@@ -13,7 +13,8 @@ export const useReceiptForm = (initialData = null, persistKey = null) => {
     shop_address: "",
     purchase_day: new Date(),
     memo: "",
-    products: [], 
+    point_usage: 0,
+    products: [],
   };
 
   // Stateの初期化

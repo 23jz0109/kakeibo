@@ -146,8 +146,10 @@ const ExpenseManualInput = () => {
       shop_name: receipt.shop_name || "不明",
       shop_address: "",
       purchase_day: receipt.purchase_day,
-      total_amount: calculated.totalAmount,
+      // total_amount: calculated.totalAmount,
+      total_amount: calculated.totalAmount - (Number(receipt.point_usage) || 0),
       memo: receipt.memo,
+      point_usage: Number(receipt.point_usage) || 0,
       products: receipt.products.map(p => ({
         product_name: p.product_name,
         product_price: Number(p.product_price),
@@ -255,7 +257,9 @@ const ExpenseManualInput = () => {
               isSubmitting={isSubmitting}
               submitLabel={isSubmitting ? "送信中..." : (receiptQueue.length > 1 ? "この1枚を登録" : "登録する")}
               typeId={2}
-              formId={`manual_receipt_${currentIndex}`}/>
+              formId={`manual_receipt_${currentIndex}`}
+              onCategoryRefresh={() => { fetchCategories(2) }}
+            />
           )}          
           {complete && <CompleteModal />}
         </div>

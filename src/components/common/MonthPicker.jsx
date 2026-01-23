@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./MonthPicker.module.css";
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useRef } from "react";
 
-const MonthPicker = ({ selectedMonth, onMonthChange, onMonthSelect, isDisabled = false}) => {
+const MonthPicker = ({ selectedMonth, onMonthChange, onMonthSelect, maxDate, isDisabled = false}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMonth, setModalMonth] = useState(() => new Date(selectedMonth));
 
@@ -42,8 +42,24 @@ const MonthPicker = ({ selectedMonth, onMonthChange, onMonthSelect, isDisabled =
     return `${year}年${month}月`;
   };
 
+  /* 渡された日付が今日より未来かどうかを判定 */
+  const isFutureMonth = (date) => {
+    if(!maxDate) return false;
+    const targetDate = new Date(date.getFullYear(), date.getMonth(), 1);
+    const maxDateStart = new Date(maxDate.getFullYear(), maxDate.getMonth(), 1);
+    return targetDate > maxDateStart;
+  }
+  
+  /* 「次へ」ボタンを無効化すべきか判定 */
+  const isNextDisabled = useMemo(() => {
+    const nextMonth = new Date(selectedMonth);
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    return isFutureMonth(nextMonth);
+  }, [selectedMonth, maxDate]);
+
   const handleChangeMonth = (offset) => {
     if (isDisabled) return;
+    if (offset > 0 && isNextDisabled) return;
     onMonthChange(offset);
   }
 
@@ -61,9 +77,16 @@ const MonthPicker = ({ selectedMonth, onMonthChange, onMonthSelect, isDisabled =
     );
   }
 
-  const changeYear = (year) => {
+  const isNextYearDisabled = useMemo(() => {
+    if(!maxDate) return false;
+    return modalMonth.getFullYear() >= maxDate.getFullYear();
+  }, [modalMonth, maxDate]);
+
+  const changeYear = (offset) => {
+    if(offset > 0 && isNextYearDisabled) return;
+
     const newYear = new Date(modalMonth);
-    newYear.setFullYear(newYear.getFullYear() + year);
+    newYear.setFullYear(newYear.getFullYear() + offset);
     setModalMonth(newYear);
   };
 
@@ -98,7 +121,11 @@ const MonthPicker = ({ selectedMonth, onMonthChange, onMonthSelect, isDisabled =
         <button
           type="button"
           onClick={() => handleChangeMonth(1)}
-          className={styles["btn-navigate"]}
+          className={`
+            ${styles["btn-navigate"]}
+            ${isNextDisabled ? styles["navigate-disabled"] : ""}
+          `} 
+          disabled={isNextDisabled}
         >
           <ChevronRight size={20}/>
         </button>
@@ -110,7 +137,15 @@ const MonthPicker = ({ selectedMonth, onMonthChange, onMonthSelect, isDisabled =
           <div className={styles["modal-year-navigation"]}>
             <button onClick={() => changeYear(-1)} className={styles["modal-month-navigate"]}><ChevronLeft size={20}/></button>
             <button className={styles["modal-year"]}>{modalMonth.getFullYear()}年</button>
-            <button onClick={() => changeYear(1)} className={styles["modal-month-navigate"]}><ChevronRight size={20}/></button>
+            <button onClick={() => changeYear(1)} 
+              className={`
+                ${styles["modal-month-navigate"]}
+                ${isNextYearDisabled ? styles["navigate-disabled"] : ""}
+              `}
+              disabled={isNextYearDisabled}
+            >
+              <ChevronRight size={20}/>
+            </button>
           </div>
           <button type="button" className={styles["modal-close-button"]} onClick={toggleModal}>
             <X size={20}/>
@@ -118,11 +153,18 @@ const MonthPicker = ({ selectedMonth, onMonthChange, onMonthSelect, isDisabled =
         </div>
         <div className={styles["modal-month-grid"]}>
           {months.map((month, index) => {
+            const targetDateInModal = new Date(modalMonth.getFullYear(), index, 1);
+            const isDisabledMonth = isFutureMonth(targetDateInModal);
             return (
               <button
                 key={index}
-                onClick={() => handleSelectMonth(index)}
-                className={`${styles["month-button"]} ${isSelectedMonth(index) ? styles["current-month"] : ""}`}
+                onClick={() => !isDisabledMonth && handleSelectMonth(index)}
+                className={`
+                  ${styles["month-button"]} 
+                  ${isSelectedMonth(index) ? styles["current-month"] : ""}
+                  ${isDisabledMonth ? styles["month-disabled"] : ""}
+                `}
+                disabled={isDisabledMonth}
               >
                 {month}
               </button>

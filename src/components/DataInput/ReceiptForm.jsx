@@ -8,21 +8,62 @@ import SubmitButton from "../common/SubmitButton";
 import { useReceiptForm } from "../../hooks/dataInput/useReceiptForm";
 import { useCategories } from "../../hooks/common/useCategories";
 import { getIcon } from "../../constants/categories";
+import { useSuggestion } from "../../hooks/dataInput/useSuggestion"; 
 import styles from "./ReceiptForm.module.css";
 
 const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
 
 // 店舗名・メモの入力部分
-const ReceiptHeader = ({ receipt, updateReceiptInfo }) => (
-  <div className={styles.inputSection}>
+const ReceiptHeader = ({ receipt, updateReceiptInfo, shopList = [] }) => {
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // 候補選択ハンドラ
+  const selectShop = (shopName) => {
+    updateReceiptInfo("shop_name", shopName);
+    setShowSuggestions(false);
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => setShowSuggestions(false), 200);
+  };
+
+  const filteredShops = shopList.filter(shop => {
+    const name = shop.shop_name || shop.name || "";
+    return name.toLowerCase().includes((receipt.shop_name || "").toLowerCase());
+  });
+
+  return (
+    <div className={styles.inputSection}>
     <div className={styles.inputRow}>
       <label className={styles.label}>店舗名</label>
-      <input
-        type="text"
-        className={styles.cleanInput}
-        placeholder="未入力"
-        value={receipt.shop_name}
-        onChange={(e) => updateReceiptInfo("shop_name", e.target.value)}/>
+      <div className={styles.relativeInputArea}>
+        {/* 入力欄 */}
+        <input
+          type="text"
+          className={styles.cleanInput}
+          placeholder="未入力"
+          value={receipt.shop_name}
+          onChange={(e) => {
+            updateReceiptInfo("shop_name", e.target.value);
+            setShowSuggestions(true);
+          }}
+          onFocus={() => setShowSuggestions(true)}
+          onBlur={handleBlur}
+          autoComplete="off"/>
+        {/* 候補表示 */}
+        {showSuggestions && receipt.shop_name && filteredShops.length > 0 && (
+          <ul className={styles.suggestionList}>
+            {filteredShops.map((shop, idx) => (
+              <li 
+                key={shop.id || idx} 
+                className={styles.suggestionItem} 
+                onClick={() => selectShop(shop.shop_name || shop.name)}>
+                {shop.shop_name || shop.name}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>      
     </div>
     <div className={styles.divider}></div>
     <div className={styles.inputRow}>
@@ -35,13 +76,24 @@ const ReceiptHeader = ({ receipt, updateReceiptInfo }) => (
       />
     </div>
   </div>
-);
+  );
+};
 
 // 小計・消費税・合計表示部分
-const ReceiptSummary = ({ calculated, priceMode, setPriceMode }) => {
+const ReceiptSummary = ({ calculated, priceMode, setPriceMode, pointsUsage, onPointsChange }) => {
   const tax8 = calculated.taxByRate["8"] || 0;
   const tax10 = calculated.taxByRate["10"] || 0;
+  const points = Number(pointsUsage) || 0;
   const displaySubTotal = calculated.totalAmount - (tax8 + tax10);
+  const finalPaymentAmount = Math.max(0, calculated.totalAmount - points);
+  
+  // 数値入力ハンドラ
+  const handlePointsChange = (e) => {
+    const value = e.target.value;
+    const halfWidthValue = value.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+    const sanitizedValue = halfWidthValue.replace(/[^0-9]/g, "");
+    onPointsChange(sanitizedValue);
+  };
 
   // 表示部分生成
   return (
@@ -61,9 +113,35 @@ const ReceiptSummary = ({ calculated, priceMode, setPriceMode }) => {
           <span>消費税 (10%)</span><span>¥{tax10.toLocaleString()}</span>
         </div>
       )}
+
+      {/* ポイント利用入力欄 */}
+      <div className={styles.summaryRow} style={{ alignItems: "center" }}>
+        <span>ポイント利用</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+          <span style={{ fontSize: "14px", color: "#ef4444" }}>-</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="\d*"
+            placeholder="0"
+            value={pointsUsage || ""}
+            onChange={handlePointsChange}
+            className={styles.cleanInput}
+            style={{ 
+              textAlign: "right", 
+              width: "80px", 
+              fontSize: "16px", 
+              padding: "4px",
+              borderBottom: "1px solid #e5e7eb" 
+            }}
+          />
+          <span style={{ fontSize: "14px" }}>P</span>
+        </div>
+      </div>
+
       <div className={styles.summaryTotalRow}>
         <span>合計金額</span>
-        <span className={styles.summaryTotalAmount}>¥{calculated.totalAmount.toLocaleString()}</span>
+        <span className={styles.summaryTotalAmount}>¥{finalPaymentAmount.toLocaleString()}</span>
       </div>
       <div className={styles.modeSwitchContainer}>
         <button
@@ -84,11 +162,12 @@ const ReceiptSummary = ({ calculated, priceMode, setPriceMode }) => {
 };
 
 // レシート項目表示部分
-const ReceiptItemPreview = ({ item, categories }) => {
+const ReceiptItemPreview = ({ item, categories, onToggleTax }) => {
   const unitPrice = Number(item.product_price) || 0;
   const quantity = Number(item.quantity) || 1;
   const discount = Number(item.discount) || 0;
   const finalPrice = (unitPrice * quantity) - discount;
+  const taxRate = Number(item.tax_rate) || 10;
 
   let categoryData = item.category;
   if (!categoryData && item.category_id && categories.length > 0) {
@@ -101,8 +180,18 @@ const ReceiptItemPreview = ({ item, categories }) => {
   // 表示部分生成
   return (
     <div className={styles.previewContainer}>
-      <div className={styles.categoryIcon} style={{ backgroundColor: catColor }}>
-        <IconComponent size={16} />
+      {/* <div className={styles.categoryIcon} style={{ backgroundColor: catColor }}> */}
+        {/* <IconComponent size={16} /> */}
+      <div 
+        className={styles.iconContainer} 
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleTax(e);
+        }}>
+        <div className={styles.categoryIcon} style={{ backgroundColor: catColor }}>
+          <IconComponent size={16} />
+        </div>
+        {taxRate === 8 && (<span className={styles.taxBadge}>8%</span>)}
       </div>
       <div className={styles.info}>
         <span className={styles.productName}>
@@ -151,6 +240,14 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
     }
   }, [mode, item, categories]);
 
+  // 数字入力ハンドラ
+  const handleNumericChange = (key, value) => {
+    const halfWidthValue = value.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+    const sanitizedValue = halfWidthValue.replace(/[^0-9]/g, "");
+    
+    setFormData(prev => ({ ...prev, [key]: sanitizedValue }));
+  };
+
   // 商品名変更ハンドラ
   const handleNameChange = (e) => {
     setFormData({ ...formData, product_name: e.target.value });
@@ -166,7 +263,6 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
     setFormData({
       ...formData,
       product_name: product.product_name || product.PRODUCT_NAME,
-      // product_price: product.product_price || product.price || formData.product_price,
       category_id: validCategoryId
     });
     setShowSuggestions(false);
@@ -220,7 +316,7 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
     p.product_name && p.product_name.toLowerCase().includes(formData.product_name.toLowerCase())
   );
 
-  // 表示部分生成
+  // 表示部分生成 (Portalを使用)
   return createPortal(
     <div className={styles.modalOverlay} onClick={closeModal}>
       <div className={styles.modalDetail} onClick={(e) => e.stopPropagation()}>
@@ -240,39 +336,60 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
         <div className={styles.staticInputArea}>
           <div className={styles.modalFlexRow}>
               <div style={{flex:2}} className={`${styles.modalRow} ${styles.inputGroup}`}>
-                  <label className={styles.modalLabel}>商品名</label>
-                  <input 
-                    className={styles.modalInput} 
-                    value={formData.product_name} 
-                    placeholder="商品名"
-                    onChange={handleNameChange}
-                    onFocus={() => setShowSuggestions(true)}
-                    onBlur={handleBlur}
-                    autoComplete="off"/>
-                  {/* 候補リスト */}
-                  {showSuggestions && formData.product_name && filteredProducts.length > 0 && (
-                    <ul className={styles.suggestionList}>
-                      {filteredProducts.map((p) => (
-                        <li key={p.id || p.ID} className={styles.suggestionItem} onClick={() => selectProduct(p)}>
-                          <span>{p.product_name}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                <label className={styles.modalLabel}>商品名</label>
+                <input 
+                  className={styles.modalInput} 
+                  value={formData.product_name} 
+                  placeholder="商品名"
+                  onChange={handleNameChange}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={handleBlur}
+                  autoComplete="off"/>
+                {/* 候補リスト */}
+                {showSuggestions && formData.product_name && filteredProducts.length > 0 && (
+                  <ul className={styles.suggestionList}>
+                    {filteredProducts.map((p) => (
+                      <li key={p.id || p.ID} className={styles.suggestionItem} onClick={() => selectProduct(p)}>
+                        <span>{p.product_name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
               <div style={{flex:1}} className={styles.modalRow}>
-                  <label className={styles.modalLabel}>個数</label>
-                  <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="個数" value={formData.quantity} onChange={e=>setFormData({...formData, quantity:e.target.value})} />
+                <label className={styles.modalLabel}>個数</label>
+                <input 
+                  className={styles.modalInput} 
+                  type="text" 
+                  inputMode="numeric" 
+                  pattern="\d*" 
+                  placeholder="個数" 
+                  value={formData.quantity} 
+                  onChange={(e) => handleNumericChange("quantity", e.target.value)}/>
               </div>
           </div>
           <div className={styles.modalFlexRow}>
               <div style={{flex:2}} className={styles.modalRow}>
-                  <label className={styles.modalLabel}>単価 ({isInclusive ? "税込" : "税抜"})</label>
-                  <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="0円" value={formData.product_price} onChange={e=>setFormData({...formData, product_price:e.target.value})} />
+                <label className={styles.modalLabel}>単価 ({isInclusive ? "税込" : "税抜"})</label>
+                <input 
+                  className={styles.modalInput} 
+                  type="text" 
+                  inputMode="numeric" 
+                  pattern="\d*" 
+                  placeholder="0円" 
+                  value={formData.product_price} 
+                  onChange={(e) => handleNumericChange("product_price", e.target.value)}/>
               </div>
               <div style={{flex:1}} className={styles.modalRow}>
-                  <label className={styles.modalLabel}>割引</label>
-                  <input className={styles.modalInput} type="text" inputMode="numeric" pattern="\d*" placeholder="0円" value={formData.discount} onChange={e=>setFormData({...formData, discount:e.target.value})} />
+                <label className={styles.modalLabel}>割引</label>
+                <input 
+                  className={styles.modalInput} 
+                  type="text" 
+                  inputMode="numeric" 
+                  pattern="\d*" 
+                  placeholder="0円" 
+                  value={formData.discount} 
+                  onChange={(e) => handleNumericChange("discount", e.target.value)}/>
               </div>
           </div>
           
@@ -296,16 +413,17 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
           </div>
         </div>
 
+        <label className={styles.categoryLabel}>カテゴリ</label>
+
         <div className={styles.scrollableCategoryArea}>
-          <label className={styles.categoryLabel}>カテゴリ</label>
-          {/* <Categories categories={categories} selectedCategoryId={Number(formData.category_id)} onSelectedCategory={id=>setFormData({...formData, category_id:id})} /> */}
           <Categories 
-              categories={categories} 
-              selectedCategoryId={Number(formData.category_id)} 
-              onSelectedCategory={id=>setFormData({...formData, category_id:id})}
-              onAddCategory={handleAddCategory} 
+            categories={categories} 
+            selectedCategoryId={Number(formData.category_id)} 
+            onSelectedCategory={id=>setFormData({...formData, category_id:id})}
+            onAddCategory={handleAddCategory} 
           />
         </div>
+        
         <div className={styles.modalActions}>
           <SubmitButton text={mode === "edit" ? "更新" : "追加"} onClick={handleSubmit} style={{flex: 1}}/>
         </div>
@@ -322,35 +440,41 @@ const ReceiptForm = forwardRef(({
   onUpdate,
   submitLabel = "登録する",
   isSubmitting = false,
-  formId = "default"
+  formId = "default",
+  onCategoryRefresh
 }, ref) => {
   const storageKey = `kakeibo_tax_mode_${formId}`;
   const persistKey = formId; // 旧: null
-  const authToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-  const [productList, setProductList] = useState([]);
+  // const authToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+  // const [productList, setProductList] = useState([]);  
+
+  // useEffect(() => {
+  //   const fetchProductCandidates = async () => {
+  //     if (!authToken) return;
+  //     try {
+  //       const response = await fetch(`${API_BASE_URL}/product`, {
+  //         method: "GET",
+  //         headers: { "Authorization": `Bearer ${authToken}` }
+  //       });
+  //       if (response.ok) {
+  //         const data = await response.json();
+  //         if (data.status === 'success' && Array.isArray(data.products)) {
+  //           setProductList(data.products);
+  //         }
+  //       }
+  //     } catch (err) {
+  //       console.error("候補取得エラー", err);
+  //     }
+  //   };
+  //   fetchProductCandidates();
+  // }, [authToken]);
+
+  const { productList, shopList, fetchProductCandidates, fetchShopCandidates } = useSuggestion();
 
   useEffect(() => {
-    const fetchProductCandidates = async () => {
-      if (!authToken) return;
-      try {
-        const response = await fetch(`${API_BASE_URL}/product`, {
-          method: "GET",
-          headers: { "Authorization": `Bearer ${authToken}` }
-        });
-        if (response.ok) {
-          const data = await response.json();
-          if (data.status === 'success' && Array.isArray(data.products)) {
-            setProductList(data.products);
-          }
-        }
-      } catch (err) {
-        console.error("候補取得エラー", err);
-      }
-    };
-
     fetchProductCandidates();
-  }, [authToken]);
-
+    fetchShopCandidates();
+  }, [fetchProductCandidates, fetchShopCandidates]);
   
   const {
     receipt,
@@ -385,6 +509,13 @@ const ReceiptForm = forwardRef(({
     setPriceMode(mode);
     // localStorage.setItem("kakeibo_price_mode", mode);
     localStorage.setItem(storageKey, mode);
+  };
+
+  const toggleTaxRate = (e, index) => {
+    const currentItem = receipt.products[index];
+    const currentRate = currentItem.tax_rate ?? 10; 
+    const newRate = currentRate === 10 ? 8 : 10;
+    updateItem(index, { ...currentItem, tax_rate: newRate });
   };
 
   // レシート内容変更するたびに保存
@@ -449,21 +580,37 @@ const ReceiptForm = forwardRef(({
     <>
       <div className={styles.fixedTopArea}>
         <DayPicker date={receipt.purchase_day} onChange={(d) => updateReceiptInfo("purchase_day", d)} />
-        <ReceiptHeader receipt={receipt} updateReceiptInfo={updateReceiptInfo} />
+        <ReceiptHeader receipt={receipt} updateReceiptInfo={updateReceiptInfo} shopList={shopList} />
       </div>
 
       <div className={styles.scrollArea}>
-        <ReceiptSummary calculated={calculated} priceMode={priceMode} setPriceMode={handleSwitchPriceMode} />
+        <ReceiptSummary
+          calculated={calculated}
+          priceMode={priceMode}
+          setPriceMode={handleSwitchPriceMode}
+          pointsUsage={receipt.point_usage}
+          onPointsChange={(val) => updateReceiptInfo("point_usage", val)}
+        />
         
         <div className={styles.itemContainer}>
           <div className={styles.itemList}>
             {receipt.products.map((item, index) => (
-              <DropdownModal key={index} title={<ReceiptItemPreview item={item} categories={categories} />}>
+              <DropdownModal
+                key={index}
+                title={
+                  <ReceiptItemPreview
+                    item={item}
+                    categories={categories} 
+                    onToggleTax={(e) => toggleTaxRate(e, index)}/>
+                }
+              >
                 {(close) => (
                   <ReceiptItemModal
                     mode="edit" item={item} index={index} categories={categories}
                     productList={productList}
-                    priceMode={priceMode} onSubmit={updateItem} onDelete={deleteItem} closeModal={close}/>
+                    priceMode={priceMode} onSubmit={updateItem} onDelete={deleteItem} closeModal={close}
+                    onCategoryRefresh={onCategoryRefresh}
+                  />
                 )}
               </DropdownModal>
             ))}
@@ -474,7 +621,7 @@ const ReceiptForm = forwardRef(({
               </div>
             }>
               {(close) => (
-                <ReceiptItemModal mode="add" categories={categories} productList={productList} priceMode={priceMode} onSubmit={addItem} closeModal={close} />
+                <ReceiptItemModal mode="add" categories={categories} productList={productList} priceMode={priceMode} onSubmit={addItem} closeModal={close} onCategoryRefresh={onCategoryRefresh}/>
               )}
             </DropdownModal>
           </div>

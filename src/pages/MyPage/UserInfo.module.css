@@ -25,7 +25,8 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 16px; /* MyPageと同じ間隔 */
+  gap: 16px;
+  /* MyPageと同じ間隔 */
   padding: 0;
 }
 
@@ -35,7 +36,7 @@
   background: white;
   padding: 16px 20px;
   border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -68,7 +69,8 @@
   padding: 6px 12px;
   border: none;
   border-radius: 6px;
-  background: #f3f4f6; /* 薄いグレーで控えめに */
+  background: #f3f4f6;
+  /* 薄いグレーで控えめに */
   color: #4b5563;
   cursor: pointer;
   font-size: 0.9rem;
@@ -87,7 +89,7 @@
   padding: 16px 20px;
   border: none;
   border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   display: flex;
   justify-content: flex-start;
@@ -101,7 +103,7 @@
 
 .withdrawButton:active {
   transform: scale(0.99);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 /* --- 以下、モーダル用スタイル (変更なし) --- */
@@ -126,15 +128,22 @@
   max-width: 400px;
   padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   position: relative;
   animation: fadeIn 0.2s ease-out;
   cursor: default;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .closeButton {
@@ -219,9 +228,17 @@
   font-size: 1rem;
 }
 
-.selectedText { color: #333; }
-.selectedText.unselected { color: #888; }
-.arrow { color: #666; }
+.selectedText {
+  color: #333;
+}
+
+.selectedText.unselected {
+  color: #888;
+}
+
+.arrow {
+  color: #666;
+}
 
 .dropdownList {
   position: absolute;
@@ -234,7 +251,7 @@
   border-radius: 6px;
   background-color: white;
   z-index: 101;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .dropdownItem {

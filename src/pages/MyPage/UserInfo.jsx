@@ -289,7 +289,7 @@ function UserInfo() {
             <li className={styles.infoItem}>
               <div className={styles.label}>
                 <Calendar size={18} />
-                <span>生まれた年</span>
+                <span>生年月日(年)</span>
               </div>
               <div className={styles.rightContent}>
                 <span className={styles.valueText}>
