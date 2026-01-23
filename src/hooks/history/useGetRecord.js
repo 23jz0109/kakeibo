@@ -1,4 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
+import { useAuthFetch } from "../useAuthFetch";
+
+const BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
 
 export const useGetRecord = (year, month) => {
   const [data, setData] = useState({
@@ -8,6 +11,9 @@ export const useGetRecord = (year, month) => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // useAuthFetch フックを使用
+  const authFetch = useAuthFetch();
 
   // YYYY-MM 形式の文字列を作成
   const targetYearMonth = `${year}-${String(month + 1).padStart(2, "0")}`;
@@ -33,22 +39,25 @@ export const useGetRecord = (year, month) => {
   /**
    * グラフデータ取得
    */
-  const fetchHistory = useCallback(async (forceRefresh = false) => {
+  const fetchHistory = useCallback(async () => {
+    // authFetchがまだ準備できていない、または認証中の場合はスキップ
+    if (!authFetch) return;
+
     setIsLoading(true);
     setError(null);
 
     try {
-      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-      if (!token) throw new Error("認証トークンがありません");
-
-      const response = await fetch("https://t08.mydns.jp/kakeibo/public/api/records", {
+      const response = await authFetch(`${BASE_URL}/records`, {
         method: "GET",
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+          // authFetchが自動でAuthorizationヘッダーを付与しますが、
+          // 独自のカスタムヘッダーはここで追加する必要があります
           "X-YearMonth": targetYearMonth,
         },
       });
+
+      // authFetchがリダイレクト処理などをした場合、responseがnullになる可能性があります
+      if (!response) return; 
 
       if (!response.ok) {
         throw new Error(`API Error: ${response.status}`);
@@ -59,7 +68,6 @@ export const useGetRecord = (year, month) => {
       // 時間変換
       const adjustedRecordList = (result.monthly_record_list || []).map(record => {
         const localDate = convertUtcToLocalDate(record.record_date, record.record_time);
-        
         return {
           ...record,
           record_date: localDate,
@@ -76,36 +84,37 @@ export const useGetRecord = (year, month) => {
     }
     catch (err) {
       console.error("履歴取得エラー:", err);
-      setError(err.message);
+      // リダイレクトのエラーでなければエラー表示
+      if (err.message !== "Redirecting...") {
+        setError(err.message);
+      }
     }
     finally {
       setIsLoading(false);
     }
-  }, [targetYearMonth]);
+  }, [authFetch, targetYearMonth]);
 
   /**
    * 収支の詳細表示
    */
   const getRecordDetail = useCallback(async (recordID) => {
-    try {
-      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-      if (!token) throw new Error("認証トークンがありません");
+    if (!authFetch) return null;
 
-      const response = await fetch("https://t08.mydns.jp/kakeibo/public/api/receipt", {
+    try {
+      const response = await authFetch(`${BASE_URL}/receipt`, {
         method: "GET",
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
           "X-Record-ID": recordID,
         },
       });
+
+      if (!response) return null;
 
       if (!response.ok) {
         throw new Error(`Detail API Error: ${response.status}`);
       }
 
       const result = await response.json();
-      
       return result.data; 
 
     }
@@ -113,32 +122,32 @@ export const useGetRecord = (year, month) => {
       console.error("詳細取得エラー:", err);
       throw err;
     }
-  }, []);
+  }, [authFetch]);
 
   /**
    * 記録削除
    */
   const deleteRecord = useCallback(async (recordID) => {
-    try {
-      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-      if (!token) throw new Error("認証トークンがありません");
+    if (!authFetch) return false;
 
-      const response = await fetch("https://t08.mydns.jp/kakeibo/public/api/records", {
+    try {
+      const response = await authFetch(`${BASE_URL}/records`, {
         method: "DELETE",
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
           "X-Record-ID": recordID,
         },
       });
 
+      if (!response) return false;
+
       if (!response.ok) {
-        throw new Error(`Detail API Error: ${response.status}`);
+        throw new Error(`Delete API Error: ${response.status}`);
       }
 
       const result = await response.json();
       
       if (result.status === 'success') {
+        // 削除成功したらリストを再取得
         fetchHistory();
         return true;
       }
@@ -152,14 +161,15 @@ export const useGetRecord = (year, month) => {
       alert(err.message);
       return false;
     }
-  }, [fetchHistory]);
+  }, [authFetch, fetchHistory]);
 
   // 初回レンダリング時、または年月が変更された時に実行
   useEffect(() => {
     fetchHistory();
   }, [fetchHistory]);
 
-  const refetch = () => fetchHistory(true);
+  // 手動更新用
+  const refetch = () => fetchHistory();
 
   return {
     isLoading,

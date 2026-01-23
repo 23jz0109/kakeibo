@@ -8,6 +8,7 @@ import CompleteModal from "../../components/common/CompleteModal";
 import styles from "./IncomeInput.module.css";
 import { useCategories } from "../../hooks/common/useCategories";
 import { useFormPersist } from "../../hooks/common/useFormPersist";
+import { useAuthFetch } from "../../hooks/useAuthFetch"; 
 
 const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
 
@@ -20,6 +21,9 @@ const IncomeInput = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [complete, setComplete] = useState(false);
   const { categories, fetchCategories, addCategory } = useCategories(); 
+  
+  // 【追加】フック呼び出し
+  const authFetch = useAuthFetch();
 
   // 数字チェックハンドラ
   const handleNumericChange = (value) => {
@@ -50,19 +54,15 @@ const IncomeInput = () => {
   }, [categories, categoryId, setCategoryId]);
 
   const handleSubmit = async () => {
+    // authFetchの準備確認
+    if (!authFetch) return;
+
     // バリデーション
     if (!amount || !categoryId) {
       alert("金額とカテゴリを入力してください");
       return;
     }
 
-    // トークン取得
-    const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-    if (!token) {
-      alert("ログイン情報がありません。再度ログインしてください。");
-      navigate("/"); 
-      return;
-    }
 
     // 送信データ作成
     const payload = [
@@ -86,17 +86,20 @@ const IncomeInput = () => {
     setIsSubmitting(true);
 
     try {
-      // サーバーへ送信
-      const response = await fetch(`${API_BASE_URL}/receipt`, {
+      // authFetchを使用
+      const response = await authFetch(`${API_BASE_URL}/receipt`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          // Authorizationヘッダーは自動付与されるため不要
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "X-Type-ID": "1"
+          "X-Type-ID": "1" // カスタムヘッダーは維持
         },
         body: JSON.stringify(payload)
       });
+
+      // リダイレクト等の場合は response が null になる
+      if (!response) return;
 
       // エラー判定
       if (!response.ok) {
@@ -122,8 +125,11 @@ const IncomeInput = () => {
       }, 1500);
 
     } catch (error) {
-      console.error("通信エラー:", error);
-      alert("エラーが発生しました: " + error.message);
+      // リダイレクトのエラーでなければアラート表示
+      if (error.message !== "Redirecting...") {
+        console.error("通信エラー:", error);
+        alert("エラーが発生しました: " + error.message);
+      }
     } finally {
       setIsSubmitting(false);
     }

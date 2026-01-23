@@ -181,19 +181,13 @@
 
 .updateButton {
   width: 100%;
-  padding: 12px;
-  border-radius: 6px;
-  border: none;
-  background: #656ac6;
+  background-color: #3b82f6;
   color: white;
-  font-size: 1rem;
-  font-weight: bold;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
   cursor: pointer;
-  margin-top: 8px;
-}
-
-.updateButton:hover {
-  opacity: 0.9;
+  font-weight: 600;
 }
 
 .errorMessage {

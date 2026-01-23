@@ -515,7 +515,3 @@
   cursor: pointer;
   transition: background-color 0.2s;
 }
-
-.submitButton:hover { 
-  background-color: #2563eb; 
-}
