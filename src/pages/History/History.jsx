@@ -4,7 +4,7 @@ import MonthPicker from "../../components/common/MonthPicker";
 import CalendarView from "../../components/common/CalendarView";
 import GraphView from "../../components/common/GraphView";
 import { getIcon } from "../../constants/categories";
-import { FolderInput, FolderOutput, Trash2 } from "lucide-react";
+import { FileInput, FileOutput, Trash2 } from "lucide-react";
 import { useGetRecord } from "../../hooks/history/useGetRecord";
 import styles from "./History.module.css";
 
@@ -12,6 +12,7 @@ import styles from "./History.module.css";
 const SwipeableItem = ({ children, onDelete, disabled, id, openSwipeId, setOpenSwipeId, onSwipeStart }) => {
   const [offsetX, setOffsetX] = useState(0);
   const startX = useRef(0);
+  const startY = useRef(0)
   const isSwiping = useRef(false);
   const hasTriggeredSwipe = useRef(false);
   const deleteBtnWidth = 60; // 削除ボタンの幅(スワイプ量)
@@ -30,27 +31,43 @@ const SwipeableItem = ({ children, onDelete, disabled, id, openSwipeId, setOpenS
       setOpenSwipeId(null);
     }
 
+    // 開始位置
     startX.current = e.touches[0].clientX;
+    startY.current = e.touches[0].clientY;
+
     isSwiping.current = true;
     hasTriggeredSwipe.current = false;
   };
 
   const onTouchMove = (e) => {
     if (!isSwiping.current || disabled) return;
-    const currentX = e.touches[0].clientX;
-    const diff = currentX - startX.current;
 
-    if (Math.abs(diff) > 5 && !hasTriggeredSwipe.current) {
+    // 現在位置
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+
+    // 移動量
+    const diffX = currentX - startX.current;
+    const diffY = currentY - startY.current;
+
+    // 移動量(縦>横)はスクロールのみ
+    if (Math.abs(diffY) > Math.abs(diffX)) {
+      return; 
+    }
+
+    // 感度 (閾値15)
+    if (diffX < -15 && !hasTriggeredSwipe.current) {
       hasTriggeredSwipe.current = true;
       if (onSwipeStart) {
         onSwipeStart();
       }
     }
 
-    if (diff < 0 && diff > -deleteBtnWidth * 1.5) {
-      setOffsetX(diff);
+    // 左スワイプのみ
+    if (diffX < 0 && diffX > -deleteBtnWidth * 1.5) {
+      setOffsetX(diffX);
     }
-    else if (diff >= 0) {
+    else if (diffX >= 0) {
       setOffsetX(0);
     }
   };
@@ -119,6 +136,22 @@ const History = () => {
     getRecordDetail,
     deleteRecord,
   } = useGetRecord(currentDate.getFullYear(), currentDate.getMonth());
+
+  useEffect(() => {
+    if (expandedRecordId) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`record-${expandedRecordId}`);
+        if (element) {
+          element.scrollIntoView({ 
+            behavior: "smooth", 
+            block: "start" 
+          });
+        }
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [expandedRecordId]);
 
   const handleSwipeStart = () => {
     setExpandedRecordId(null);
@@ -410,7 +443,7 @@ const History = () => {
 
                             {records.map((r, index) => {
                               const isIncome = Number(r.type_id) === 1;
-                              const IconComponent = isIncome ? FolderInput : FolderOutput;
+                              const IconComponent = isIncome ? FileInput : FileOutput;
                               const iconBgColor = isIncome ? "#d1fae5" : "#fee2e2"; 
                               const iconColor = isIncome ? "#10b981" : "#ef4444";
 
@@ -428,11 +461,12 @@ const History = () => {
                                   onDelete={() => handleDeleteRecord(r.record_id)}>
                                   <div
                                     key={r.record_id || index}
+                                    id={`record-${r.record_id}`}
                                     className={`${styles.card} ${isExpanded ? styles.cardExpanded : ''}`}
                                     onClick={() => handleRecordClick(r.record_id)}>
                                     <div className={styles.cardHeader}>
                                       {/* アイコン */}
-                                      <div className={styles.iconWrapper} style={{ backgroundColor: iconBgColor, color: iconColor }}>
+                                      <div className={styles.iconWrapper} style={{ color: iconColor }}>
                                         <IconComponent size={24} />
                                       </div>
                                       

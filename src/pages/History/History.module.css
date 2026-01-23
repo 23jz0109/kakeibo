@@ -419,6 +419,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  background: #f8f8f8;
 }
 
 /* テキスト情報エリア */
