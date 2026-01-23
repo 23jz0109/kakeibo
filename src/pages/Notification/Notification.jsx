@@ -263,7 +263,11 @@ const Notification = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  deleteHistoryItem(item.id, e)
+                  // 未読の場合は、削除と同時に既読処理(バッジ減少)も呼ぶ
+                  if (isUnread) {
+                    markAsRead(item.id);
+                  }
+                  deleteHistoryItem(item.id, e);
                 }}
                 className={styles.deleteBtnMini}
                 title="削除">

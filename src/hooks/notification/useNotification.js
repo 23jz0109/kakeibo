@@ -377,11 +377,10 @@ export const useNotification = () => {
   // 通知を既読にする
   const markAsRead = async (notificationId) => {
     const authToken = getAuthToken();
+    // UI更新
     const targetIdStr = String(notificationId);
 
-    console.log(`既読処理開始: Target ID = ${targetIdStr}`);
-
-    // 【即時反映】現在の画面（通知一覧）はすぐに書き換える
+    // 現在の画面（通知一覧）はすぐに書き換える
     setNotificationHistory(prev =>
       prev.map(n => {
         const currentId = String(n.id || n.ID || n._id);
@@ -391,6 +390,7 @@ export const useNotification = () => {
         return n;
       })
     );
+    // 未読カウントを引く
     setUnreadCount(prev => Math.max(0, prev - 1));
 
     try {
@@ -403,8 +403,7 @@ export const useNotification = () => {
           "X-Notification-ID": targetIdStr
         }
       });
-
-      //  Layout が fetch した時に、減った後の数字が返ってきます。
+      //  サーバーの更新が終わってから合図を出す
       window.dispatchEvent(new Event("notificationUpdated"));
 
       await fetchNotificationHistory(true);
