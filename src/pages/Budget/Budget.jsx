@@ -8,12 +8,15 @@ import { getIcon } from "../../constants/categories";
 import { useBudgetApi } from "../../hooks/budget/useBudget";
 import { useFixedCostApi } from "../../hooks/budget/useFixedCost";
 import { useCategories } from "../../hooks/common/useCategories";
+// [追加] バリデーション関連のインポート
+import { 
+  VALIDATION_LIMITS, 
+  validateAmount, 
+  sanitizeNumericInput 
+} from "../../constants/validationsLimits";
 
-/* 入力制限のための定数 */
-const MAX_AMOUNT = 9999999; // 金額最大値 (7桁)
-const MAX_DAYS = 365;       // 日数最大値
-
-const CustomDropdown = ({ value, options, onChange, placeholder = "選択してください" }) => {
+// [変更] hasError プロパティを受け取れるように変更
+const CustomDropdown = ({ value, options, onChange, placeholder = "選択してください", hasError }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState({});
   const triggerRef = useRef(null);
@@ -89,7 +92,8 @@ const CustomDropdown = ({ value, options, onChange, placeholder = "選択して�
     <>
       <div 
         ref={triggerRef}
-        className={styles.dropdownValue}
+        // [変更] エラー時に赤枠スタイルを適用
+        className={`${styles.dropdownValue} ${hasError ? styles.inputErrorBorder : ''}`} 
         onClick={handleToggle}
       >
         <span 
@@ -115,12 +119,13 @@ const Budget = () => {
   const [budgetRules, setBudgetRules] = useState([]);
   const [fixedCostRules, setFixedCostRules] = useState([]);
 
-  const handleDropdownChange = (name, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  // [追加] エラー状態管理
+  const [errors, setErrors] = useState({
+    amount: "",
+    customDays: "",
+    budgetRuleId: "",
+    fixedCostRuleId: ""
+  });
 
   const [formData, setFormData] = useState({
     categoryId: "",
@@ -190,26 +195,57 @@ const Budget = () => {
     }
   }, [transactionType, fetchCategories, isModalOpen]);
 
+  // [追加] バリデーション関数
+  const validateField = (name, value) => {
+    let error = "";
+    switch (name) {
+      case "amount":
+        if (value === "") error = ""; // 入力中は空文字許容（保存時にチェック）
+        else if (!validateAmount(value)) error = `金額は${VALIDATION_LIMITS.AMOUNT.MAX.toLocaleString()}円以下にしてください`;
+        break;
+      case "customDays":
+        if (value !== "") {
+          const days = Number(value);
+          if (days < VALIDATION_LIMITS.DAYS.MIN || days > VALIDATION_LIMITS.DAYS.MAX) {
+            error = `${VALIDATION_LIMITS.DAYS.MIN}〜${VALIDATION_LIMITS.DAYS.MAX}日の間で入力してください`;
+          }
+        }
+        break;
+      case "budgetRuleId":
+        if (!value && activeTab === 'budget') error = "ルールを選択してください";
+        break;
+      case "fixedCostRuleId":
+        if (!value && activeTab === 'fixed' && fixedRuleType !== 'daily' && fixedRuleType !== 'last_day') {
+          error = "日付・曜日を選択してください";
+        }
+        break;
+      default:
+        break;
+    }
+    setErrors(prev => ({ ...prev, [name]: error }));
+    return error === "";
+  };
+
+  const handleDropdownChange = (name, value) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+    validateField(name, value); // 変更時にチェック
+  };
+
   const getFixedRuleTypeById = (id, rules) => {
     const found = rules.find(r => String(r.id) === String(id));
     return found ? found.rule_name : "";
   };
 
+  // ... handleToggle, renderBudgetItem, renderFixedItem などは変更なし ...
   const handleToggle = async (item) => {
     const newStatus = Number(item.notification_enable) === 1 ? 0 : 1;
     setData(prevData => prevData.map(d =>
       d.id === item.id ? { ...d, notification_enable: newStatus } : d
     ));
-
     try {
-      if (activeTab === 'budget') {
-        await toggleBudget(item.id);
-      }
-      else {
-        await toggleFixedCost(item.id);
-      }
-    }
-    catch (err) {
+      if (activeTab === 'budget') await toggleBudget(item.id);
+      else await toggleFixedCost(item.id);
+    } catch (err) {
       setData(prevData => prevData.map(d =>
         d.id === item.id ? { ...d, notification_enable: item.notification_enable } : d
       ));
@@ -218,6 +254,8 @@ const Budget = () => {
   };
 
   const handleOpenModal = (type, item = null) => {
+    setErrors({ amount: "", customDays: "", budgetRuleId: "", fixedCostRuleId: "" }); // エラーリセット
+
     if (type === 'edit' && item) {
       setEditItem(item);
 
@@ -292,41 +330,26 @@ const Budget = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditItem(null);
+    setErrors({});
   };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     
-    // チェックボックスは既存通り
     if (type === 'checkbox') {
       setFormData(prev => ({ ...prev, [name]: checked }));
       return;
     }
 
-    // 金額項目のバリデーション
-    if (name === 'amount') {
-      // 数字以外を除去
-      const cleanValue = value.replace(/[^0-9]/g, '');
-      // 上限チェック (空文字は許可)
-      if (cleanValue === '' || Number(cleanValue) <= MAX_AMOUNT) {
-        setFormData(prev => ({ ...prev, [name]: cleanValue }));
-      }
-      return;
+    let cleanValue = value;
+
+    // [追加] sanitizeNumericInput を使用
+    if (name === 'amount' || name === 'customDays') {
+      cleanValue = sanitizeNumericInput(value);
     }
 
-    // カスタム日数のバリデーション
-    if (name === 'customDays') {
-      // 数字以外を除去
-      const cleanValue = value.replace(/[^0-9]/g, '');
-      // 上限チェック (空文字は許可、1以上のチェックは保存時に行う)
-      if (cleanValue === '' || Number(cleanValue) <= MAX_DAYS) {
-        setFormData(prev => ({ ...prev, [name]: cleanValue }));
-      }
-      return;
-    }
-
-    // その他の項目はそのまま更新
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: cleanValue }));
+    validateField(name, cleanValue); // [追加] 変更時バリデーション
   };
 
   const handleCategorySelect = (id) => {
@@ -342,21 +365,31 @@ const Budget = () => {
 
   const handleFixedTypeChangeDropdown = (value) => {
     setFixedRuleType(value);
-
+    // ルールが変わったらIDをリセットしてバリデーション状態も更新
+    let newRuleId = "";
     if (value === 'daily') {
       const rule = fixedCostRules.find(r => r.rule_name === 'daily');
-      setFormData(prev => ({ ...prev, fixedCostRuleId: rule ? rule.id : "" }));
+      newRuleId = rule ? rule.id : "";
     }
     else if (value === 'last_day') {
       const rule = fixedCostRules.find(r => r.rule_name === 'last_day');
-      setFormData(prev => ({ ...prev, fixedCostRuleId: rule ? rule.id : "" }));
+      newRuleId = rule ? rule.id : "";
     }
-    else {
-      setFormData(prev => ({ ...prev, fixedCostRuleId: "" }));
+    
+    setFormData(prev => ({ ...prev, fixedCostRuleId: newRuleId }));
+    
+    // 不要なエラーを消す
+    if (value === 'daily' || value === 'last_day') {
+      setErrors(prev => ({ ...prev, fixedCostRuleId: "" }));
     }
   };
 
   const handleSave = async () => {
+    // [追加] 保存前バリデーション
+    const isAmountValid = validateField('amount', formData.amount);
+    let isRuleValid = true;
+    let isDaysValid = true;
+
     if (!formData.categoryId) {
       alert("カテゴリを選択してください");
       return;
@@ -365,31 +398,30 @@ const Budget = () => {
       alert("金額を入力してください");
       return;
     }
+    
+    if (activeTab === 'budget') {
+      isRuleValid = validateField('budgetRuleId', formData.budgetRuleId);
+      const selectedRule = budgetRules.find(r => String(r.id) === String(formData.budgetRuleId));
+      if (selectedRule && selectedRule.rule_name === 'custom') {
+         isDaysValid = validateField('customDays', formData.customDays);
+         if (!formData.customDays) {
+           setErrors(prev => ({ ...prev, customDays: "必須です" }));
+           isDaysValid = false;
+         }
+      }
+    } else {
+      if (fixedRuleType !== 'daily' && fixedRuleType !== 'last_day') {
+         isRuleValid = validateField('fixedCostRuleId', formData.fixedCostRuleId);
+      }
+    }
 
-    // 金額の範囲チェック (0〜MAX_AMOUNT)
-    const amountNum = Number(formData.amount);
-    if (amountNum < 0 || amountNum > MAX_AMOUNT) {
-      alert(`金額は0円以上${MAX_AMOUNT.toLocaleString()}円以下で入力してください`);
+    // エラーがある場合は中断
+    if (!isAmountValid || !isRuleValid || !isDaysValid || Object.values(errors).some(e => e)) {
       return;
     }
 
     try {
       if (activeTab === 'budget') {
-        if (!formData.budgetRuleId) {
-          alert("予算ルールを選択してください");
-          return;
-        }
-
-        //カスタム日数の範囲チェック
-        const selectedRule = budgetRules.find(r => String(r.id) === String(formData.budgetRuleId));
-        if (selectedRule && selectedRule.rule_name === 'custom') {
-          const daysNum = Number(formData.customDays);
-          if (!formData.customDays || daysNum < 1 || daysNum > MAX_DAYS) {
-             alert(`日数は1日以上${MAX_DAYS}日以下で入力してください`);
-             return;
-          }
-        }
-
         const payload = {
           category_id: Number(formData.categoryId),
           budget_rule_id: Number(formData.budgetRuleId),
@@ -401,10 +433,6 @@ const Budget = () => {
         else await createBudget(payload);
       }
       else {
-        if (!formData.fixedCostRuleId) {
-          alert("固定費の日程ルールを選択してください");
-          return;
-        }
         const payload = {
           type_id: transactionType,
           category_id: Number(formData.categoryId),
@@ -434,6 +462,7 @@ const Budget = () => {
     }
   };
 
+  // 描画系関数 (renderBudgetItem, renderFixedItem は変更なしのため省略)
   const renderBudgetItem = (item) => {
     const limit = Number(item.budget_limit) || 0;
     const spent = Number(item.current_usage) || 0;
@@ -449,7 +478,7 @@ const Budget = () => {
         <div className={styles.cardHeader}>
           <div className={styles.cardTitleGroup}>
             <span className={styles.cardIconBox} style={{ backgroundColor: color }}>
-              <IconComponent size={16} color="#fff" />
+              <IconComponent size={20} color="#fff" />
             </span>
             <div>
               <div className={styles.cardTitle}>{item.category_name}</div>
@@ -461,13 +490,13 @@ const Budget = () => {
           <div className={styles.cardActions}>
             <button onClick={() => handleToggle(item)}>
               {isNotifyOn ? (
-                <Bell size={16} className={styles.iconActive} />
+                <Bell size={18} className={styles.iconActive} />
               ) : (
-                <BellOff size={16} />
+                <BellOff size={18} />
               )}
             </button>
-            <button onClick={() => handleOpenModal('edit', item)}><Edit2 size={16} /></button>
-            <button onClick={() => handleDelete(item.id)}><Trash2 size={16} /></button>
+            <button onClick={() => handleOpenModal('edit', item)}><Edit2 size={18} /></button>
+            <button onClick={() => handleDelete(item.id)}><Trash2 size={18} /></button>
           </div>
         </div>
         <div style={{ marginTop: '12px' }}>
@@ -504,7 +533,7 @@ const Budget = () => {
         <div className={styles.cardHeader}>
           <div className={styles.cardTitleGroup}>
             <span className={`${styles.cardIconBox}`} style={{ backgroundColor: color }}>
-              <IconComponent size={16} color="#fff" />
+              <IconComponent size={20} color="#fff" />
             </span>
             <div>
               <span className={styles.cardTitle}>{item.category_name}</span>
@@ -516,13 +545,13 @@ const Budget = () => {
           <div className={styles.cardActions}>
             <button onClick={() => handleToggle(item)}>
               {isNotifyOn ? (
-                <Bell size={16} className={styles.iconActive} />
+                <Bell size={18} className={styles.iconActive} />
               ) : (
-                <BellOff size={16} />
+                <BellOff size={18} />
               )}
             </button>
-            <button onClick={() => handleOpenModal('edit', item)}><Edit2 size={16} /></button>
-            <button onClick={() => handleDelete(item.id)}><Trash2 size={16} /></button>
+            <button onClick={() => handleOpenModal('edit', item)}><Edit2 size={18} /></button>
+            <button onClick={() => handleDelete(item.id)}><Trash2 size={18} /></button>
           </div>
         </div>
         <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed #e5e7eb' }}>
@@ -571,7 +600,8 @@ const Budget = () => {
 
             <div className={styles.formGroup}>
               <label className={styles.label}>{activeTab === 'budget' ? '上限額' : '金額'}</label>
-              <div className={styles.amountInputWrapper}>
+              {/* [変更] エラー時に枠線を赤くする */}
+              <div className={`${styles.amountInputWrapper} ${errors.amount ? styles.inputErrorBorder : ''}`}>
                 <span className={styles.yenMark}>¥</span>
                 <input 
                   type="text"
@@ -580,50 +610,51 @@ const Budget = () => {
                   name="amount"
                   value={formData.amount}
                   onChange={handleInputChange}
+                  onBlur={() => validateField('amount', formData.amount)}
                   className={styles.amountInput}
                   placeholder="0" />
               </div>
-              {/* 金額の制限注釈 */}
-              <div className={styles.helperText}>※ 最大{MAX_AMOUNT.toLocaleString()}円まで</div>
+              {/* [追加] エラーメッセージ表示 */}
+              {errors.amount && <p className={styles.errorText}>{errors.amount}</p>}
             </div>
 
             {activeTab === 'budget' && (
-              <>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>予算ルール設定</label>
-                  <div className={styles.flexRow}>
-                    <div className={styles.flexItem}>
-                      <CustomDropdown
-                        value={formData.budgetRuleId}
-                        onChange={(val) => handleDropdownChange('budgetRuleId', val)}
-                        placeholder="ルールを選択"
-                        options={budgetRules.map(rule => ({
-                          value: rule.id,
-                          label: rule.rule_name_jp
-                        }))}
-                      />
-                    </div>
-
-                    {budgetRules.find(r => String(r.id) === String(formData.budgetRuleId))?.rule_name === 'custom' && (
-                      <div className={styles.flexItemSmall}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <input
-                            type="text" inputMode="numeric" pattern="\d*"
-                            name="customDays"
-                            value={formData.customDays}
-                            onChange={handleInputChange}
-                            className={styles.inputField}
-                            placeholder="日数"
-                            style={{ marginBottom: 0 }} />
-                          <span style={{ fontSize: '14px', whiteSpace: 'nowrap' }}>日</span>
-                        </div>
-                        {/* 日数の制限注釈 */}
-                        <div className={styles.helperText} style={{marginTop: '2px'}}>※最大{MAX_DAYS}日</div>
-                      </div>
-                    )}
+              <div className={styles.formGroup}>
+                <label className={styles.label}>予算ルール設定</label>
+                <div className={styles.flexRow}>
+                  <div className={styles.flexItem}>
+                    <CustomDropdown
+                      value={formData.budgetRuleId}
+                      onChange={(val) => handleDropdownChange('budgetRuleId', val)}
+                      placeholder="ルールを選択"
+                      options={budgetRules.map(rule => ({
+                        value: rule.id,
+                        label: rule.rule_name_jp
+                      }))}
+                      hasError={!!errors.budgetRuleId} // [追加] エラーフラグを渡す
+                    />
+                    {errors.budgetRuleId && <p className={styles.errorText}>{errors.budgetRuleId}</p>}
                   </div>
+
+                  {budgetRules.find(r => String(r.id) === String(formData.budgetRuleId))?.rule_name === 'custom' && (
+                    <div className={styles.flexItemSmall}>
+                      {/* [変更] 日数入力のエラー表示 */}
+                      <div className={`${styles.inputField} ${errors.customDays ? styles.inputErrorBorder : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <input
+                          type="text" inputMode="numeric" pattern="\d*"
+                          name="customDays"
+                          value={formData.customDays}
+                          onChange={handleInputChange}
+                          onBlur={() => validateField('customDays', formData.customDays)}
+                          style={{ border: 'none', width: '100%', outline: 'none', textAlign: 'right' }}
+                          placeholder="0" />
+                        <span style={{ fontSize: '14px', whiteSpace: 'nowrap' }}>日</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </>
+                {errors.customDays && <p className={styles.errorText} style={{fontSize: '0.65rem'}}>{errors.customDays}</p>}
+              </div>
             )}
 
             {activeTab === 'fixed' && (
@@ -656,6 +687,7 @@ const Budget = () => {
                             value: rule.id,
                             label: rule.rule_name_jp
                           }))}
+                        hasError={!!errors.fixedCostRuleId}
                       />
                     </div>
                   )}
@@ -672,15 +704,23 @@ const Budget = () => {
                             value: rule.id,
                             label: rule.rule_name_jp
                           }))}
+                        hasError={!!errors.fixedCostRuleId}
                       />
                     </div>
                   )}
                 </div>
+                {errors.fixedCostRuleId && <p className={styles.errorText}>{errors.fixedCostRuleId}</p>}
               </div>
             )}
 
             <div className={styles.modalActions}>
-              <button type="button" className={styles.saveBtn} disabled={isLoading} onClick={handleSave}>
+              <button 
+                type="button" 
+                className={styles.saveBtn} 
+                // [変更] エラーがある場合はボタン無効化
+                disabled={isLoading || Object.values(errors).some(e => e !== "")} 
+                onClick={handleSave}
+              >
                 {isLoading ? '保存中...' : '保存'}
               </button>
             </div>
