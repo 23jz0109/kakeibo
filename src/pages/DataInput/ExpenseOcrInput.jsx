@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Layout from "../../components/common/Layout";
 import imageCompression from "browser-image-compression";
 import { Camera, Loader2, Image as ImageIcon } from "lucide-react";
+import { useAuthFetch } from "../../hooks/useAuthFetch";
 import styles from "./ExpenseOcrInput.module.css";
 
 const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
@@ -14,6 +15,9 @@ const ExpenseOcrInput = () => {
   const [error, setError] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const streamRef = useRef(null);
+
+  // カスタムフック呼び出し
+  const authFetch = useAuthFetch();
 
   // カメラ起動
   const startCamera = useCallback(async () => {
@@ -49,11 +53,9 @@ const ExpenseOcrInput = () => {
 
   // ライフサイクル管理 
   useEffect(() => {
-    // 解析中+エラーも出ていない場合のみカメラを起動
     if (!isProcessing && !error) {
       startCamera();
     }
-    // エラー発生時に停止
     return () => {
       stopCamera();
     };
@@ -69,6 +71,9 @@ const ExpenseOcrInput = () => {
 
   // 写真圧縮 + 解析
   const processImageFile = async (imageFile) => {
+    // authFetchの準備ができていなければ実行しない
+    if (!authFetch) return;
+
     try {
       setIsProcessing(true);
       setError(null);
@@ -81,22 +86,21 @@ const ExpenseOcrInput = () => {
       const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true };
       const compressedFile = await imageCompression(imageFile, options);
 
-      // トークン確認
-      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-      if (!token) throw new Error("ログインセッションが切れました。再度ログインしてください。");
-
       const formData = new FormData();
       formData.append("image", compressedFile);
 
-      // API送信
-      const response = await fetch(`${API_BASE_URL}/analyze-receipt`, {
+      // authFetchを使用
+      const response = await authFetch(`${API_BASE_URL}/analyze-receipt`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          // Authorizationヘッダーは自動付与されるため削除
           "Accept": "application/json"
         },
         body: formData,
       });
+
+      // リダイレクト発生時は response が null になる場合を考慮
+      if (!response) return;
 
       if (!response.ok) throw new Error("通信エラーが発生しました。");
       
@@ -114,8 +118,11 @@ const ExpenseOcrInput = () => {
       navigate("/input/manual", { state: { ocrResult: result } });
 
     } catch (err) {
-      console.error(err);
-      setError(err.message);
+      // リダイレクトのエラーなら無視、それ以外は表示
+      if (err.message !== "Redirecting...") {
+        console.error(err);
+        setError(err.message);
+      }
       setIsProcessing(false); 
     }
   };
@@ -209,8 +216,6 @@ const ExpenseOcrInput = () => {
           )}
         </div>
       }
-
-      //データ解析中はヘッダーとフッターを非表示
       hideHeader={isProcessing}
       hideFooter={isProcessing}
     />

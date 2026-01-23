@@ -3,13 +3,15 @@ import { useParams, useNavigate } from "react-router-dom";
 import Layout from "../../components/common/Layout";
 import { ArrowRightLeft, ChevronLeft, ExternalLink, ShoppingBag, Loader2 } from "lucide-react";
 import styles from "./PriceInfo.module.css";
+import { useAuthFetch } from "../../hooks/useAuthFetch";
 
 const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
 
 const PriceInfo = () => {
   const { productName } = useParams();
   const navigate = useNavigate();
-  const authToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+  const authFetch = useAuthFetch(); // フックを使用
+
   const [site, setSite] = useState("rakuten"); // 'rakuten' or 'yahoo'
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -37,13 +39,13 @@ const PriceInfo = () => {
 
       const url = `${API_BASE_URL}${endpoint}`;
       
-      const res = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${authToken}`,
-          "Accept": "application/json"
-        }
+      // authFetch を使用 (ヘッダー付与・401ハンドリングを自動化)
+      const res = await authFetch(url, {
+        method: "GET"
       });
+
+      // authFetch が null を返した場合は処理中断 (リダイレクト済み)
+      if (!res) return;
 
       if (!res.ok) {
         throw new Error(`API Error: ${res.status}`);

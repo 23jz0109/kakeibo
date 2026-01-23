@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { ChevronLeft, X, Lock, Calendar, LogOut } from "lucide-react";
 import Layout from "../../components/common/Layout";
 import styles from "./UserInfo.module.css";
+import { useAuthFetch } from "../../hooks/useAuthFetch";
 
-// 年選択
+//年選択コンポーネント
 function YearSelect({ selectedYear, setSelectedYear }) {
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef(null);
@@ -14,6 +15,7 @@ function YearSelect({ selectedYear, setSelectedYear }) {
   });
   const selected = options.find((opt) => opt.value === Number(selectedYear));
 
+  // 元の「外側クリックで閉じる処理」に戻しました
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
@@ -50,16 +52,15 @@ function YearSelect({ selectedYear, setSelectedYear }) {
   );
 }
 
-// メイン
+// メインコンポーネント
 function UserInfo() {
   const navigate = useNavigate();
+  // フックを使用
+  const authFetch = useAuthFetch();
   
   // APIのベースURL
   const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
   
-  // トークン取得 (localStorage優先、なければsessionStorage)
-  const authToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-
   // データ表示用
   const [userData, setUserData] = useState({
     birthYear: null,
@@ -80,46 +81,44 @@ function UserInfo() {
   const [birthYearError, setBirthYearError] = useState("");
   const [birthYearMessage, setBirthYearMessage] = useState("");
 
-  // ユーザー情報取得
+  // ユーザー情報取得 
   useEffect(() => {
     const fetchUserInfo = async () => {
-      if (!authToken) return;
-
       try {
-        const response = await fetch(`${API_BASE_URL}/me`, {
+        const response = await authFetch(`${API_BASE_URL}/me`, {
           method: "GET",
-          headers: {
-            "Authorization": `Bearer ${authToken}`,
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          }
         });
 
-        // 取得成功
+        // 401でフック側が処理した場合はここで終了
+        if (!response) return;
+
+        // 成功時
         if (response.ok) {
           const data = await response.json();
-        //   console.log("ユーザー情報取得:", data.id, data.mail_address);
           setUserData({
             birthYear: data.year_of_born || data.YEAR_OF_BORN || null,
           });
           setTempBirthYear(data.year_of_born || data.YEAR_OF_BORN || "");
         } 
-        // 取得失敗
+        // 【失敗時】ここを強化します！
         else {
           console.error("ユーザー情報の取得に失敗:", response.status);
-          if (response.status === 401) {
-            console.error("認証トークンが無効です");
+
+          if (response.status === 404 || response.status === 500) {
+            alert("ユーザー情報が見つかりません。ログアウトします。");
+            sessionStorage.clear();
+            localStorage.removeItem("authToken");
+            navigate("/");
           }
         }
       }
-      // 取得失敗
       catch (error) {
         console.error("通信エラー", error);
       }
     };
 
     fetchUserInfo();
-  }, [authToken]);
+  }, [authFetch, navigate]);
 
   // ポップアップを閉じる処理
   const closeModals = () => {
@@ -131,7 +130,7 @@ function UserInfo() {
     setTempBirthYear(userData.birthYear); 
   };
 
-  // パスワード更新
+  // パスワード更新 
   const updatePassword = async () => {
     if (!tempCurrentPassword) {
       setPasswordError("現在のパスワードを入力してください");
@@ -143,18 +142,16 @@ function UserInfo() {
     }
 
     try {
-      const res = await fetch(`${API_BASE_URL}/user`, {
+      const res = await authFetch(`${API_BASE_URL}/user`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${authToken}`,
-          "Accept": "application/json"
-        },
+        // headers は自動付与されるので body だけでOK
         body: JSON.stringify({ 
           password: tempCurrentPassword,
           new_password: tempNewPassword
         }),
       });
+
+      if (!res) return; // ログアウト判定時は終了
 
       const data = await res.json();
 
@@ -165,34 +162,29 @@ function UserInfo() {
           closeModals();
         }, 1500);
       }
-      
       // 変更失敗
       else {
         setPasswordError(data.message || "更新に失敗しました");
       }
     }
-    // DBエラー
     catch (e) {
       console.error(e);
       setPasswordError("サーバーエラーが発生しました");
     }
   };
 
-  // 生年更新
+  // 生年更新 
   const updateBirthYear = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/user`, {
+      const res = await authFetch(`${API_BASE_URL}/user`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${authToken}`,
-          "Accept": "application/json"
-        },
         body: JSON.stringify({ 
           year_of_born: tempBirthYear ? parseInt(tempBirthYear, 10) : null 
         }),
       });
       
+      if (!res) return; // ログアウト判定時は終了
+
       const data = await res.json();
 
       // 更新成功
@@ -203,35 +195,29 @@ function UserInfo() {
           closeModals();
         }, 1000);
       }
-      
       // 更新失敗
       else {
         setBirthYearError(data.message || "更新に失敗しました");
       }
     }
-    // DBエラー
     catch (e) {
       setBirthYearError("サーバーエラーが発生しました");
     }
   };
 
-  // 退会処理
+  // 退会処理 
   const handleWithdraw = async () => {
-    // 確認
     if (!window.confirm("本当に退会しますか？\n保存されたデータは全て削除され、復元できません。")) {
       return;
     }
 
     try {
-      const res = await fetch(`${API_BASE_URL}/user`, {
+      const res = await authFetch(`${API_BASE_URL}/user`, {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${authToken}`,
-          "Accept": "application/json"
-        },
       });
       
+      if (!res) return; // 既にトークン切れ等の場合
+
       // 退会成功
       if (res.ok) {
         alert("退会処理が完了しました。");
@@ -239,13 +225,11 @@ function UserInfo() {
         localStorage.removeItem("authToken");
         navigate("/");
       }
-      
       // 退会失敗
       else {
         alert("退会処理に失敗しました。");
       }
     }
-    // DBエラー
     catch (e) {
       alert("エラーが発生しました。");
     }

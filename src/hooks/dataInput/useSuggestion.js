@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useAuthFetch } from '../useAuthFetch';
 
 const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
 
@@ -6,40 +7,37 @@ export const useSuggestion = () => {
   const [productList, setProductList] = useState([]);
   const [shopList, setShopList] = useState([]);
 
-  const authToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+  const authFetch = useAuthFetch(); // フックを使用
 
   // 商品候補
   const fetchProductCandidates = useCallback(async () => {
-    if (!authToken) return;
-    
     try {
-      const response = await fetch(`${API_BASE_URL}/product`, {
-        method: "GET",
-        headers: { "Authorization": `Bearer ${authToken}` }
+      // authFetch を使用
+      const response = await authFetch(`${API_BASE_URL}/product`, {
+        method: "GET"
       });
-      if (response.ok) {
+      
+      if (response && response.ok) {
         const data = await response.json();
         if (data.status === 'success' && Array.isArray(data.products)) {
           setProductList(data.products);
         }
       }
     }
-    
     catch (err) {
       console.error("候補取得エラー", err);
     }
-  }, [authToken]);
+  }, [authFetch]);
 
   // 店舗候補
   const fetchShopCandidates = useCallback(async () => {
-    if (!authToken) return;
-
     try {
-      const response = await fetch(`${API_BASE_URL}/shop`, {
-        method: "GET",
-        headers: { "Authorization": `Bearer ${authToken}` }
+      // authFetch を使用
+      const response = await authFetch(`${API_BASE_URL}/shop`, {
+        method: "GET"
       });
-      if (response.ok) {
+
+      if (response && response.ok) {
         const data = await response.json();
         if (data.status === 'success' && Array.isArray(data.shops)) {
           setShopList(data.shops);
@@ -49,8 +47,7 @@ export const useSuggestion = () => {
     catch (err) {
       console.error("候補取得エラー", err);
     }
-
-  }, [authToken]);
+  }, [authFetch]);
 
   return {
     productList,

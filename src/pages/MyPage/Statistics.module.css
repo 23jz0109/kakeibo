@@ -204,14 +204,6 @@
   gap: 0.5rem;
 }
 
-.downloadButton:hover {
-  background-color: #2563eb;
-}
-
-.downloadButton:disabled {
-  background-color: #9ca3af;
-  cursor: not-allowed;
-}
 
 /* ヘッダー共通デザイン */
 .headerContainer {
