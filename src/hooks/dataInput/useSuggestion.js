@@ -42,7 +42,7 @@ export const useSuggestion = () => {
       if (response.ok) {
         const data = await response.json();
         if (data.status === 'success' && Array.isArray(data.shops)) {
-          setProductList(data.shops);
+          setShopList(data.shops);
         }
       }
     }

@@ -14,16 +14,56 @@ import styles from "./ReceiptForm.module.css";
 const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
 
 // 店舗名・メモの入力部分
-const ReceiptHeader = ({ receipt, updateReceiptInfo }) => (
-  <div className={styles.inputSection}>
+const ReceiptHeader = ({ receipt, updateReceiptInfo, shopList = [] }) => {
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // 候補選択ハンドラ
+  const selectShop = (shopName) => {
+    updateReceiptInfo("shop_name", shopName);
+    setShowSuggestions(false);
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => setShowSuggestions(false), 200);
+  };
+
+  const filteredShops = shopList.filter(shop => {
+    const name = shop.shop_name || shop.name || "";
+    return name.toLowerCase().includes((receipt.shop_name || "").toLowerCase());
+  });
+
+  return (
+    <div className={styles.inputSection}>
     <div className={styles.inputRow}>
       <label className={styles.label}>店舗名</label>
-      <input
-        type="text"
-        className={styles.cleanInput}
-        placeholder="未入力"
-        value={receipt.shop_name}
-        onChange={(e) => updateReceiptInfo("shop_name", e.target.value)}/>
+      <div className={styles.relativeInputArea}>
+        {/* 入力欄 */}
+        <input
+          type="text"
+          className={styles.cleanInput}
+          placeholder="未入力"
+          value={receipt.shop_name}
+          onChange={(e) => {
+            updateReceiptInfo("shop_name", e.target.value);
+            setShowSuggestions(true);
+          }}
+          onFocus={() => setShowSuggestions(true)}
+          onBlur={handleBlur}
+          autoComplete="off"/>
+        {/* 候補表示 */}
+        {showSuggestions && receipt.shop_name && filteredShops.length > 0 && (
+          <ul className={styles.suggestionList}>
+            {filteredShops.map((shop, idx) => (
+              <li 
+                key={shop.id || idx} 
+                className={styles.suggestionItem} 
+                onClick={() => selectShop(shop.shop_name || shop.name)}>
+                {shop.shop_name || shop.name}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>      
     </div>
     <div className={styles.divider}></div>
     <div className={styles.inputRow}>
@@ -36,7 +76,8 @@ const ReceiptHeader = ({ receipt, updateReceiptInfo }) => (
       />
     </div>
   </div>
-);
+  );
+};
 
 // 小計・消費税・合計表示部分
 const ReceiptSummary = ({ calculated, priceMode, setPriceMode, pointsUsage, onPointsChange }) => {
@@ -404,7 +445,7 @@ const ReceiptForm = forwardRef(({
 }, ref) => {
   const storageKey = `kakeibo_tax_mode_${formId}`;
   const persistKey = formId; // 旧: null
-  const authToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+  // const authToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
   // const [productList, setProductList] = useState([]);  
 
   // useEffect(() => {
@@ -428,12 +469,12 @@ const ReceiptForm = forwardRef(({
   //   fetchProductCandidates();
   // }, [authToken]);
 
-  const { productList, fetchProductCandidates } = useSuggestion();
+  const { productList, shopList, fetchProductCandidates, fetchShopCandidates } = useSuggestion();
 
   useEffect(() => {
     fetchProductCandidates();
-  }, [fetchProductCandidates]);
-
+    fetchShopCandidates();
+  }, [fetchProductCandidates, fetchShopCandidates]);
   
   const {
     receipt,
@@ -539,7 +580,7 @@ const ReceiptForm = forwardRef(({
     <>
       <div className={styles.fixedTopArea}>
         <DayPicker date={receipt.purchase_day} onChange={(d) => updateReceiptInfo("purchase_day", d)} />
-        <ReceiptHeader receipt={receipt} updateReceiptInfo={updateReceiptInfo} />
+        <ReceiptHeader receipt={receipt} updateReceiptInfo={updateReceiptInfo} shopList={shopList} />
       </div>
 
       <div className={styles.scrollArea}>
