@@ -89,6 +89,77 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // メールアドレスのバリデーション関数
+  const validateMailAddress = (val) => {
+    if (!val) return true;
+
+    const isWithInMaxLength = val.length <= 255;
+
+    if(!isWithInMaxLength) {
+      setErrorMessage("メールアドレスは255文字以内で入力してください。");
+    }
+
+    return isWithInMaxLength;
+  }
+
+  // パスワードのバリデーション関数
+  const validatePassword = (val) => {
+    if (!val) return true; 
+
+    // バリデーションチェック実行 (半角英数字 8-16文字)
+    const regex = /^[a-zA-Z0-9]{8,16}$/;
+    const isValid = regex.test(val);
+
+    if (!isValid) {
+      setErrorMessage("パスワードは8～16文字の半角英数字で入力してください");
+    }
+    return isValid;
+  };
+
+  const handleEmailChange = (e) => {
+    const newValue = e.target.value;
+    setEmail(newValue);
+
+    // エラーメッセージが表示中の場合、条件を満たせば自動クリア
+    if (errorMessage) {
+      // 空欄エラーがクリアされたかチェック（「メールアドレスとパスワードを入力してください」が表示されている場合）
+      if (errorMessage.includes("入力してください") && newValue) {
+        setErrorMessage("");
+      }
+      // メールアドレスの文字数エラーがクリアされたかチェック
+      else if (errorMessage.includes("255文字以内") && newValue.length <= 255) {
+        setErrorMessage("");
+      }
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    const newValue = e.target.value;
+    setPassword(newValue);
+
+    // エラーメッセージが表示中の場合、条件を満たせば自動クリア
+    if (errorMessage) {
+      // 空欄エラーがクリアされたかチェック
+      if (errorMessage.includes("入力してください") && newValue) {
+        setErrorMessage("");
+      }
+      // パスワードの形式エラーがクリアされたかチェック
+      else if (errorMessage.includes("8～16文字の半角英数字")) {
+        const regex = /^[a-zA-Z0-9]{8,16}$/;
+        if (regex.test(newValue)) {
+          setErrorMessage("");
+        }
+      }
+    }
+  };
+
+  const handleEmailBlur = () => {
+    validateMailAddress(email);
+  };
+
+  const handlePasswordBlur = () => {
+    validatePassword(password);
+  };
 
   // 保存されたメールアドレスを復元
   useEffect(() => {
@@ -145,9 +216,16 @@ const Login = () => {
     // エラーメッセージをリセット
     setErrorMessage("");
 
-    // バリデーション(空欄チェック)
     if (!email || !password) {
       setErrorMessage("メールアドレスとパスワードを入力してください");
+      return;
+    }
+
+    if (!validateMailAddress(email)) {
+      return;
+    }
+
+    if (!validatePassword(password)) {
       return;
     }
 
@@ -292,7 +370,8 @@ const Login = () => {
                     type="email"
                     placeholder="メールアドレス"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleEmailChange} /* 【変更】エラー自動クリア機能付きハンドラに変更 */
+                    onBlur={handleEmailBlur} /* 【追加】フォーカスアウト時のチェックを追加 */
                     className={styles.inputField}
                   />
                 </div>
@@ -304,7 +383,8 @@ const Login = () => {
                     type={showPassword ? "text" : "password"}
                     placeholder="パスワード"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={handlePasswordChange} /* 【変更】エラー自動クリア機能付きハンドラに変更 */
+                    onBlur={handlePasswordBlur}
                     className={styles.inputField}
                   />
                   {/* パスワード表示 */}
@@ -315,6 +395,10 @@ const Login = () => {
                   >
                     {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
                   </span>
+                </div>
+                
+                <div className={styles.passwordRequirements}>
+                  8～16文字の半角英数字で入力してください
                 </div>
 
                 {/* 新規登録表示部分 / 自動ログインチェックボックス */}
