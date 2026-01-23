@@ -9,6 +9,10 @@ import { useBudgetApi } from "../../hooks/budget/useBudget";
 import { useFixedCostApi } from "../../hooks/budget/useFixedCost";
 import { useCategories } from "../../hooks/common/useCategories";
 
+/* 入力制限のための定数 */
+const MAX_AMOUNT = 9999999; // 金額最大値 (7桁)
+const MAX_DAYS = 365;       // 日数最大値
+
 const CustomDropdown = ({ value, options, onChange, placeholder = "選択してください" }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState({});
@@ -292,10 +296,37 @@ const Budget = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    
+    // チェックボックスは既存通り
+    if (type === 'checkbox') {
+      setFormData(prev => ({ ...prev, [name]: checked }));
+      return;
+    }
+
+    // 金額項目のバリデーション
+    if (name === 'amount') {
+      // 数字以外を除去
+      const cleanValue = value.replace(/[^0-9]/g, '');
+      // 上限チェック (空文字は許可)
+      if (cleanValue === '' || Number(cleanValue) <= MAX_AMOUNT) {
+        setFormData(prev => ({ ...prev, [name]: cleanValue }));
+      }
+      return;
+    }
+
+    // カスタム日数のバリデーション
+    if (name === 'customDays') {
+      // 数字以外を除去
+      const cleanValue = value.replace(/[^0-9]/g, '');
+      // 上限チェック (空文字は許可、1以上のチェックは保存時に行う)
+      if (cleanValue === '' || Number(cleanValue) <= MAX_DAYS) {
+        setFormData(prev => ({ ...prev, [name]: cleanValue }));
+      }
+      return;
+    }
+
+    // その他の項目はそのまま更新
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleCategorySelect = (id) => {
@@ -335,12 +366,30 @@ const Budget = () => {
       return;
     }
 
+    // 金額の範囲チェック (0〜MAX_AMOUNT)
+    const amountNum = Number(formData.amount);
+    if (amountNum < 0 || amountNum > MAX_AMOUNT) {
+      alert(`金額は0円以上${MAX_AMOUNT.toLocaleString()}円以下で入力してください`);
+      return;
+    }
+
     try {
       if (activeTab === 'budget') {
         if (!formData.budgetRuleId) {
           alert("予算ルールを選択してください");
           return;
         }
+
+        //カスタム日数の範囲チェック
+        const selectedRule = budgetRules.find(r => String(r.id) === String(formData.budgetRuleId));
+        if (selectedRule && selectedRule.rule_name === 'custom') {
+          const daysNum = Number(formData.customDays);
+          if (!formData.customDays || daysNum < 1 || daysNum > MAX_DAYS) {
+             alert(`日数は1日以上${MAX_DAYS}日以下で入力してください`);
+             return;
+          }
+        }
+
         const payload = {
           category_id: Number(formData.categoryId),
           budget_rule_id: Number(formData.budgetRuleId),
@@ -534,6 +583,8 @@ const Budget = () => {
                   className={styles.amountInput}
                   placeholder="0" />
               </div>
+              {/* 金額の制限注釈 */}
+              <div className={styles.helperText}>※ 最大{MAX_AMOUNT.toLocaleString()}円まで</div>
             </div>
 
             {activeTab === 'budget' && (
@@ -566,6 +617,8 @@ const Budget = () => {
                             style={{ marginBottom: 0 }} />
                           <span style={{ fontSize: '14px', whiteSpace: 'nowrap' }}>日</span>
                         </div>
+                        {/* 日数の制限注釈 */}
+                        <div className={styles.helperText} style={{marginTop: '2px'}}>※最大{MAX_DAYS}日</div>
                       </div>
                     )}
                   </div>
@@ -591,7 +644,6 @@ const Budget = () => {
                     />
                   </div>
 
-                  {/* ★変更箇所: 右側：詳細選択を 3割 (flexItem3) に設定 */}
                   {fixedRuleType === 'monthly_fixed' && (
                     <div className={styles.flexItem3}>
                       <CustomDropdown

@@ -550,10 +550,6 @@
   border-bottom: 1px solid #f3f4f6;
 }
 
-.dropdownItem:last-child { 
-  border-bottom: none; 
-}
-
 .dropdownItem:hover { 
   background-color: #eff6ff; 
   color: #2563eb; 
@@ -563,4 +559,11 @@
   background-color: #eff6ff; 
   color: #2563eb; 
   font-weight: bold; 
+}
+
+.helperText {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 4px;
+  text-align: right;
 }
