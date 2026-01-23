@@ -542,3 +542,50 @@
   padding: 8px;
   border-radius: 4px;
 }
+
+/*スワイプ削除 */
+.swipeContainer {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  /* margin-bottom: 1rem; */
+  isolation: isolate;
+}
+
+.deleteLayer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 24px;
+  border-radius: 12px;
+  z-index: 0;
+  cursor: pointer;
+}
+
+.deleteIcon {
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.swipeContent {
+  position: relative;
+  z-index: 10;
+  background-color: #fff;
+  transition: transform 0.2s ease-out;
+  touch-action: pan-y;
+  border-radius: 12px;
+}
+
+.swipeContent > div {
+  margin-bottom: 0 !important;
+}
