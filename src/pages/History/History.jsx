@@ -447,7 +447,7 @@ const History = () => {
                                       </div>
 
                                       {/* 金額 */}
-                                      <span className={`${styles.amountBadge} ${isIncome ? styles.textIncome : styles.textExpense}`}>
+                                      <span className={`${styles.amountBadge}`}>
                                         ¥{Number(r.total_amount).toLocaleString()}
                                       </span>
                                     </div>

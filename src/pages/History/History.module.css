@@ -449,13 +449,10 @@
 }
 
 .amountBadge {
-  font-size: 1rem;
   font-weight: bold;
+  font-size: 0.95rem;
   flex-shrink: 0;
 }
-.textIncome { color: #10b981; }
-.textExpense { color: #ef4444; }
-
 
 .cardFooter {
   background-color: #f8fafc;
