@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ChevronLeft, Bell, Smartphone, Trash2 } from "lucide-react";
 import Layout from "../../components/common/Layout";
 import styles from "./Setting.module.css";
+import { useAuthFetch } from "../../hooks/useAuthFetch";
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken } from "firebase/messaging";
 
@@ -21,9 +22,10 @@ const app = initializeApp(firebaseConfig);
 //通知一覧
 function Setting() {
   const navigate = useNavigate();
-  const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
+  // フックを使用
+  const authFetch = useAuthFetch();
 
-  const authToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+  const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
 
   const [devices, setDevices] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -33,7 +35,6 @@ function Setting() {
   // デバイス判定
   const getDeviceName = () => {
     const ua = navigator.userAgent;
-    // OS
     let os = "Unknown OS";
     if (ua.indexOf("Win") !== -1) os = "Windows";
     if (ua.indexOf("Mac") !== -1) os = "Mac";
@@ -41,71 +42,67 @@ function Setting() {
     if (ua.indexOf("Android") !== -1) os = "Android";
     if (ua.indexOf("like Mac") !== -1) os = "iOS";
 
-    // ブラウザ
     let browser = "Unknown Browser";
     if (ua.indexOf("Chrome") !== -1) browser = "Chrome";
     if (ua.indexOf("Safari") !== -1 && ua.indexOf("Chrome") === -1) browser = "Safari";
     if (ua.indexOf("Firefox") !== -1) browser = "Firefox";
 
-    // OS BROWSER
     return `${os} (${browser})`;
   };
 
+  // 強制ログアウト処理 (共通化)
+  const handleForceLogout = () => {
+    sessionStorage.clear();
+    localStorage.removeItem("authToken");
+    navigate("/");
+  };
+
   // 端末一覧取得
-  const fetchDevices = async () => {
-    if (!authToken) return;
+  const fetchDevices = async (isBackground = false) => {
+    if (!isBackground) setIsLoading(true);
 
-    // ローディングを挟む
-    setIsLoading(true);
-
-    // DBから取得
     try {
-      const res = await fetch(`${API_BASE_URL}/settings`, {
+      // authFetchに変更 (headers不要)
+      const res = await authFetch(`${API_BASE_URL}/settings`, {
         method: "GET",
-        headers: {
-          "Authorization": `Bearer ${authToken}`,
-          "Content-Type": "application/json"
-        }
       });
 
-      // 取得成功
+      // 401ならフック内で処理済みなので終了
+      if (!res) return;
+
       if (res.ok) {
         const data = await res.json();
-        // 取得したデータをそのままセット
         setDevices(data.device || []);
-        // デバッグ用：取得データのキーを確認（F12コンソールに出ます）
         console.log("Fetched Devices:", data.device);
-      }
-
-      // 取得失敗
-      else {
+      } else {
         console.error("端末一覧取得失敗", res.status);
+        // ユーザー削除済み(404)なら強制ログアウト
+        if (res.status === 404) {
+          handleForceLogout();
+        }
       }
-    }
-    // DBエラー
-    catch (err) {
+    } catch (err) {
       console.error("通信エラー", err);
       setErrorMessage("データの取得に失敗しました");
-    }
-    finally {
-      setIsLoading(false);
+    } finally {
+      if (!isBackground) setIsLoading(false);
     }
   };
 
-  // すぐデバイス一覧を取得
+  // 初回取得
   useEffect(() => {
     fetchDevices();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // authFetchは依存配列に入れなくてもOK（入れるならuseCallbackが必要）
 
   // 端末登録
   const registerCurrentDevice = async () => {
-    if (!authToken) return;
     setErrorMessage("");
     setSuccessMessage("");
     setIsLoading(true);
 
     try {
-      // ドメイン必須(ローカル無効→FCMの規則)
+      // Service Worker登録 (Firebase周りはそのまま)
       const registration = await navigator.serviceWorker.register("/combine_test/firebase-messaging-sw.js", {
         scope: "/combine_test/"
       }).catch(err => { throw new Error("Service Worker登録失敗: " + err.message); });
@@ -120,117 +117,51 @@ function Setting() {
       if (!token) throw new Error("トークン生成失敗");
 
       const deviceInfo = getDeviceName();
-      const res = await fetch(`${API_BASE_URL}/settings`, {
+
+      // authFetchに変更
+      const res = await authFetch(`${API_BASE_URL}/settings`, {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${authToken}`,
-          "Content-Type": "application/json"
-        },
         body: JSON.stringify({
           fcm_token: token,
           device_info: deviceInfo
         })
       });
 
+      if (!res) return; // 401 Guard
+
       const data = await res.json();
 
-      // 登録成功
       if (res.ok) {
         setSuccessMessage("この端末を登録しました");
-        fetchDevices();
-      }
-      // 登録失敗
-      else {
-        // 重複
+        fetchDevices(true);
+      } else {
+        if (res.status === 404) {
+           handleForceLogout();
+           return;
+        }
+
         if (data.message && data.message.includes("already")) {
           setSuccessMessage("この端末は既に登録されています");
-        }
-        // その他の失敗
-        else {
+        } else {
           setErrorMessage(data.message || "登録に失敗しました");
         }
       }
-    }
-    catch (err) {
+    } catch (err) {
       console.error(err);
       setErrorMessage(err.message || "通信エラーが発生しました");
-    }
-    finally {
+    } finally {
       setIsLoading(false);
     }
   };
 
-  // ON/OFF切り替え(デバイス)
-  const toggleNotification = async (device) => {
-    // IDの取得
-    const targetId = device.ID || device.id;
-    if (!targetId) {
-      console.error("Device IDが見つかりません", device);
-      setErrorMessage("端末IDの取得に失敗しました");
-      return;
-    }
-
-    // 現在の状態値を取得
-    const rawVal = device.DEVICE_NOTIFICATION_ENABLE ?? device.device_notification_enable;
-    const currentVal = Number(rawVal);
-    const nextVal = currentVal === 1 ? 0 : 1;
-
-    console.log(`Toggle: ID=${targetId}, ${currentVal} -> ${nextVal}`);
-
-    // UI更新
-    const originalDevices = [...devices];
-    setDevices(prev => prev.map(d => {
-      // 値を反転
-      const dId = d.ID || d.id;
-      if (dId === targetId) {
-        return { ...d, DEVICE_NOTIFICATION_ENABLE: nextVal, device_notification_enable: nextVal };
-      }
-      return d;
-    }));
-
-    // DBに更新
-    try {
-      const res = await fetch(`${API_BASE_URL}/settings`, {
-        method: "PATCH",
-        headers: {
-          "Authorization": `Bearer ${authToken}`,
-          "Content-Type": "application/json",
-          "X-Device-ID": String(targetId)
-        },
-        body: JSON.stringify({
-          enable: nextVal
-        })
-      });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        console.error("Server Error:", errData);
-        throw new Error(errData.message || "更新失敗");
-      }
-
-      console.log("通知設定を更新しました");
-
-    }
-    // 失敗したらUIを元に戻す
-    catch (err) {
-      console.error(err);
-      setErrorMessage("設定の更新に失敗しました");
-      setDevices(originalDevices);
-    }
-  };
-
-  // ON/OFF更新ver2
+  // ON/OFF更新 
   const handleToggle = async (item, e) => {
     e.stopPropagation();
 
     const targetId = item._id || item.id || item.ID;
-
-    // FCMトークンを取得 (プロパティ名は大文字・小文字両方を想定)
     const fcmToken = item.fcm_token || item.FCM_TOKEN;
 
-    // トークンがない場合に備えてチェック
     if (!fcmToken) {
-      console.error("FCMトークンが見つかりません:", item);
       alert("このデバイスの通知用トークンが取得できていないため、設定を変更できません。");
       return;
     }
@@ -248,12 +179,10 @@ function Setting() {
     }));
 
     try {
-      const response = await fetch(`${API_BASE_URL}/settings`, {
-        method: "PATCH", // 必要に応じてPOSTからPATCHに変更
+      // ★authFetchに変更
+      const response = await authFetch(`${API_BASE_URL}/settings`, {
+        method: "PATCH",
         headers: {
-          "Authorization": `Bearer ${authToken}`,
-          "Content-Type": "application/json",
-          "Accept": "application/json",
           "X-Device-ID": String(targetId)
         },
         body: JSON.stringify({
@@ -262,18 +191,18 @@ function Setting() {
         })
       });
 
-      const responseData = await response.json();
-      console.log("API Response:", responseData);
+      if (!response) return; // 401 Guard
 
       if (!response.ok) {
-        if (response.status === 422) {
-          const errorDetail = await response.json();
-          console.error("Validation Error:", errorDetail);
+        if (response.status === 404) {
+           handleForceLogout();
+           return;
         }
+        
+        // エラー時は元に戻す
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
-      await fetchDevices(true); // 最新のデバイス一覧を取得
+      
       console.log("通知設定を更新しました");
 
     } catch (err) {
@@ -287,29 +216,28 @@ function Setting() {
   const deleteDevice = async (deviceId) => {
     if (!window.confirm("この端末の登録を解除しますか？")) return;
 
-    // DB更新
     try {
-      const res = await fetch(`${API_BASE_URL}/settings`, {
+      const res = await authFetch(`${API_BASE_URL}/settings`, {
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${authToken}`,
           "X-Device-ID": String(deviceId)
         }
       });
 
-      // 削除成功
+      if (!res) return; // 401 Guard
+
       if (res.ok) {
         setDevices(prev => prev.filter(d => (d.ID || d.id) !== deviceId));
         setSuccessMessage("登録を解除しました");
-      }
-      // 削除失敗
-      else {
+      } else {
+        if (res.status === 404) {
+           handleForceLogout();
+           return;
+        }
         const data = await res.json();
         setErrorMessage(data.message || "削除に失敗しました");
       }
-    }
-    // DBエラー
-    catch (err) {
+    } catch (err) {
       console.error(err);
       setErrorMessage("通信エラーが発生しました");
     }
@@ -325,7 +253,6 @@ function Setting() {
     </div>
   );
 
-  // 画面生成
   return (
     <Layout
       headerContent={headerContent}
@@ -368,7 +295,6 @@ function Setting() {
                 </thead>
                 <tbody>
                   {devices.map((device, index) => {
-                    // データ取得時のカラム名揺れに対応
                     const deviceId = device.ID || device.id;
                     const deviceInfo = device.DEVICE_INFO || device.device_info;
                     const rawEnable = device.DEVICE_NOTIFICATION_ENABLE ?? device.device_notification_enable;
@@ -380,14 +306,6 @@ function Setting() {
                           <div className={styles.deviceName}>{deviceInfo}</div>
                         </td>
                         <td style={{ textAlign: "center" }} className={styles.cardActions}>
-                          {/* <label className={styles.switch}>
-                            <input
-                              type="checkbox"
-                              checked={isEnabled}
-                              onChange={() => toggleNotification(device)}
-                            />
-                            <span className={styles.slider}></span>
-                          </label> */}
                           <button
                             onClick={(e) => handleToggle(device, e)}
                             className={`${styles.toggleBtn} ${isEnabled ? styles.toggleOn : styles.toggleOff}`}

@@ -5,6 +5,11 @@ import { Trash2, Search, CheckCircle, Edit2, X } from 'lucide-react';
 import styles from './Notification.module.css';
 import { useNotification } from '../../hooks/notification/useNotification';
 import { useSuggestion } from '../../hooks/dataInput/useSuggestion';
+import { 
+  VALIDATION_LIMITS, 
+  validateTextLength, 
+  sanitizeNumericInput 
+} from '../../constants/validationsLimits';
 
 // 時間選択用の汎用プルダウンコンポーネント
 const TimeDropdown = ({ value, options, onChange }) => {
@@ -80,6 +85,12 @@ const Notification = () => {
   const [showModal, setShowModal] = useState(false);
   const [editTargetId, setEditTargetId] = useState(null);
   const [originalItem, setOriginalItem] = useState(null);
+  
+  const [errors, setErrors] = useState({
+    title: '',
+    notification_period: ''
+  });
+
   const [formData, setFormData] = useState({
     title: '',
     notification_period: '',
@@ -117,11 +128,32 @@ const Notification = () => {
     setExpandedId(prev => (prev === id ? null : id));
   };
 
+  const validateField = (name, value) => {
+    let error = "";
+    if (name === "title") {
+      if (!value) error = ""; // 必須チェックは送信時
+      else if (!validateTextLength(value, VALIDATION_LIMITS.TEXT.PRODUCT_NAME)) {
+        error = `${VALIDATION_LIMITS.TEXT.PRODUCT_NAME}文字以内で入力してください`;
+      }
+    }
+    if (name === "notification_period") {
+      if (value !== "") {
+        const days = Number(value);
+        if (days < VALIDATION_LIMITS.DAYS.MIN || days > VALIDATION_LIMITS.DAYS.MAX) {
+          error = `${VALIDATION_LIMITS.DAYS.MIN}〜${VALIDATION_LIMITS.DAYS.MAX}日の間で入力してください`;
+        }
+      }
+    }
+    setErrors(prev => ({ ...prev, [name]: error }));
+    return error === "";
+  };
+
   const openCreateModal = () => {
     setEditTargetId(null);
     setOriginalItem(null);
     setSuggestedPeriod(null);
     setFormData({ title: '', notification_period: '', notification_hour: 9, notification_min: 0 });
+    setErrors({ title: '', notification_period: '' }); // エラーリセット
     setShowModal(true);
   };
 
@@ -130,6 +162,7 @@ const Notification = () => {
     setEditTargetId(item._id);
     setOriginalItem(item);
     setSuggestedPeriod(null);
+    setErrors({ title: '', notification_period: '' }); // エラーリセット
 
     let initHour = 9;
     let initMin = 0;
@@ -159,27 +192,52 @@ const Notification = () => {
   };
 
   const handleTitleChange = (e) => {
-    setFormData({ ...formData, title: e.target.value });
+    const val = e.target.value;
+    setFormData({ ...formData, title: val });
     setShowSuggestions(true);
+    validateField('title', val); // 入力時にチェック
   };
 
   const selectProduct = (product) => {
     setFormData({ ...formData, title: product.product_name });
+    setErrors(prev => ({ ...prev, title: '' })); // エラー消去
     setShowSuggestions(false);
     const pid = product.id || product.ID;
     if (pid) fetchSuggestedInterval(pid);
   };
 
+  const handlePeriodChange = (e) => {
+    const val = sanitizeNumericInput(e.target.value);
+    setFormData({ ...formData, notification_period: val });
+    validateField('notification_period', val);
+  };
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title) return alert("商品名を入力してください");
+
+    const isTitleValid = validateField('title', formData.title);
+    const isPeriodValid = validateField('notification_period', formData.notification_period);
+
+    if (!formData.title) {
+        alert("商品名を入力してください");
+        return;
+    }
+    if (!isTitleValid || !isPeriodValid || Object.values(errors).some(e => e)) {
+        return; // エラーがあれば中断
+    }
 
     let periodVal = formData.notification_period;
     if (!periodVal && suggestedPeriod) {
       periodVal = suggestedPeriod;
     }
     if (!periodVal) return alert("補充間隔を入力してください");
+    
+    // 間隔の範囲チェック(手動入力で空だった場合など)
     const periodNum = parseInt(periodVal);
+    if (periodNum < VALIDATION_LIMITS.DAYS.MIN || periodNum > VALIDATION_LIMITS.DAYS.MAX) {
+      setErrors(prev => ({ ...prev, notification_period: `${VALIDATION_LIMITS.DAYS.MIN}〜${VALIDATION_LIMITS.DAYS.MAX}日の間で入力してください` }));
+      return;
+    }
 
     const result = await saveNotification({
       title: formData.title,
@@ -224,7 +282,6 @@ const Notification = () => {
   };
 
   const handleHistoryClick = (item) => {
-    // id, ID, _id のどれが入っていても大丈夫なように取得する
     const targetId = item.id || item.ID || item._id;
   
     if (Number(item.is_read) === 0) {
@@ -263,7 +320,6 @@ const Notification = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  // 未読の場合は、削除と同時に既読処理(バッジ減少)も呼ぶ
                   if (isUnread) {
                     markAsRead(item.id);
                   }
@@ -412,17 +468,20 @@ const Notification = () => {
 
                 <form onSubmit={handleFormSubmit}>
                   {/* 商品名 */}
-                  <div className={styles.formRow}>
-                    <label className={styles.rowLabel}>商品名</label>
-                    <div style={{ flex: 1, position: 'relative' }}>
+                  <div className={styles.formRow} style={{ alignItems: 'flex-start' }}>
+                    <label className={styles.rowLabel} style={{ marginTop: '12px' }}>商品名</label>
+                    <div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }}>
                       <input
                         type="text"
-                        className={styles.rowInput}
+                        className={`${styles.rowInput} ${errors.title ? styles.inputErrorBorder : ''}`}
                         value={formData.title}
                         onChange={handleTitleChange}
+                        onBlur={() => validateField('title', formData.title)}
                         onFocus={() => setShowSuggestions(true)}
-                        required
                         placeholder="商品名を入力" />
+                      
+                      {errors.title && <p className={styles.errorText}>{errors.title}</p>}
+
                       {showSuggestions && formData.title && filteredProducts.length > 0 && (
                         <ul className={styles.suggestionList}>
                           {filteredProducts.map(p => (
@@ -436,16 +495,20 @@ const Notification = () => {
                   </div>
 
                   {/* 間隔 */}
-                  <div className={styles.formRow}>
-                    <label className={styles.rowLabel}>間隔(日)</label>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      pattern="\d*"
-                      className={styles.rowInput}
-                      value={formData.notification_period}
-                      onChange={(e) => setFormData({ ...formData, notification_period: e.target.value.replace(/\D/g, "") })}
-                      placeholder={suggestedPeriod ? `${suggestedPeriod}` : ""} />
+                  <div className={styles.formRow} style={{ alignItems: 'flex-start' }}>
+                    <label className={styles.rowLabel} style={{ marginTop: '12px' }}>間隔(日)</label>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="\d*"
+                        className={`${styles.rowInput} ${errors.notification_period ? styles.inputErrorBorder : ''}`}
+                        value={formData.notification_period}
+                        onChange={handlePeriodChange}
+                        onBlur={() => validateField('notification_period', formData.notification_period)}
+                        placeholder={suggestedPeriod ? `${suggestedPeriod}` : ""} />
+                       {errors.notification_period && <p className={styles.errorText}>{errors.notification_period}</p>}
+                    </div>
                   </div>
 
                   {/* 時間 */}
@@ -467,7 +530,12 @@ const Notification = () => {
                   </div>
 
                   <div style={{ marginTop: '25px' }}>
-                    <button type="submit" className={styles.submitButton}>
+                    <button 
+                      type="submit" 
+                      className={styles.submitButton}
+                      disabled={Object.values(errors).some(e => e !== "")}
+                      style={{ opacity: Object.values(errors).some(e => e !== "") ? 0.6 : 1 }}
+                    >
                       保存する
                     </button>
                   </div>

@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Settings, LogOut, ChartBar, UserPen, Tag } from "lucide-react";
 import Layout from "../../components/common/Layout";
 import styles from "./MyPage.module.css";
+import { useAuthFetch } from "../../hooks/useAuthFetch";
 
 const MyPage = () => {
   const navigate = useNavigate();
+  const authFetch = useAuthFetch();
   
   // 状態管理
   const [email, setEmail] = useState("");
@@ -32,45 +34,43 @@ const MyPage = () => {
     }
   }, []);
 
-  // ユーザー情報
+  // ユーザー情報取得 (useAuthFetch版)
   useEffect(() => {
     const fetchUserInfo = async () => {
-      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-      if (!token) return;
-
-      // meからユーザー情報を取得 
-      // ** 2回目以降はlocalstorage/sessionからでもよさそう **
+      // トークンの手動取得コードを削除し、authFetchを使用
+      
       try {
-        const response = await fetch(`${API_BASE_URL}/me`, {
+        const response = await authFetch(`${API_BASE_URL}/me`, {
           method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          }
         });
 
-        // 取得後表示エリアにセットする
+        // 401エラー（期限切れ）の場合はフック内で処理されるので終了
+        if (!response) return;
+
+        // 成功時
         if (response.ok) {
           const data = await response.json();
           console.log("ユーザー情報取得:", data.id, data.mail_address);
-
           setEmail(data.mail_address || "");
         }
-        // 取得失敗
+        // 失敗時
         else {
           console.error("ユーザー情報の取得に失敗:", response.status);
+
+          if (response.status === 404 || response.status === 500) {
+            sessionStorage.clear();
+            localStorage.removeItem("authToken");
+            navigate("/"); // ログイン画面へ
+          }
         }
       }
-      // DBエラー
       catch (error) {
         console.error("通信エラー", error);
       }
     };
 
-    // ユーザー情報取得
     fetchUserInfo();
-  }, []);
+  }, [authFetch, navigate]); // 依存配列に追加
 
   // 遷移先
   const goToUserInfo = () => navigate("/userinfo");
@@ -80,15 +80,12 @@ const MyPage = () => {
 
   // ログアウト
   const handleLogout = () => {
-    // メール
-    // localStorage.removeItem("savedEmail");
-
     // アクセストークン
     localStorage.removeItem("authToken");
     sessionStorage.removeItem("authToken");
 
     // ログインページに戻る
-    navigate("/login");
+    navigate("/"); // 一般的にルートかログインページへ
   };
 
   // ページのヘッダー

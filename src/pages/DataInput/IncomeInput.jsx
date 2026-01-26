@@ -8,6 +8,7 @@ import CompleteModal from "../../components/common/CompleteModal";
 import styles from "./IncomeInput.module.css";
 import { useCategories } from "../../hooks/common/useCategories";
 import { useFormPersist } from "../../hooks/common/useFormPersist";
+import { useAuthFetch } from "../../hooks/useAuthFetch"; 
 // [追加] バリデーション定数とヘルパー関数のインポート
 import { 
   VALIDATION_LIMITS, 
@@ -30,6 +31,9 @@ const IncomeInput = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [complete, setComplete] = useState(false);
   const { categories, fetchCategories, addCategory } = useCategories(); 
+  
+  // 【追加】フック呼び出し
+  const authFetch = useAuthFetch();
 
   // バリデーション実行関数
   const validateField = (name, value) => {
@@ -89,6 +93,10 @@ const IncomeInput = () => {
   }, [categories, categoryId, setCategoryId]);
 
   const handleSubmit = async () => {
+    // authFetchの準備確認
+    if (!authFetch) return;
+
+    // バリデーション
     // [変更] バリデーションチェック（送信前にも再確認）
     const isAmountValid = validateField("amount", amount);
     const isMemoValid = validateField("memo", memo);
@@ -134,17 +142,20 @@ const IncomeInput = () => {
     setIsSubmitting(true);
 
     try {
-      // サーバーへ送信
-      const response = await fetch(`${API_BASE_URL}/receipt`, {
+      // authFetchを使用
+      const response = await authFetch(`${API_BASE_URL}/receipt`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          // Authorizationヘッダーは自動付与されるため不要
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "X-Type-ID": "1"
+          "X-Type-ID": "1" // カスタムヘッダーは維持
         },
         body: JSON.stringify(payload)
       });
+
+      // リダイレクト等の場合は response が null になる
+      if (!response) return;
 
       // エラー判定
       if (!response.ok) {
@@ -171,8 +182,11 @@ const IncomeInput = () => {
       }, 1500);
 
     } catch (error) {
-      console.error("通信エラー:", error);
-      alert("エラーが発生しました: " + error.message);
+      // リダイレクトのエラーでなければアラート表示
+      if (error.message !== "Redirecting...") {
+        console.error("通信エラー:", error);
+        alert("エラーが発生しました: " + error.message);
+      }
     } finally {
       setIsSubmitting(false);
     }

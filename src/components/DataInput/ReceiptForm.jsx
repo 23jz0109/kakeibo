@@ -141,7 +141,7 @@ const ReceiptSummary = ({ calculated, priceMode, setPriceMode, pointsUsage, onPo
       <div className={styles.summaryRow} style={{ alignItems: "center", flexWrap: "wrap" }}>
         <span>ポイント利用</span>
         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-          <span style={{ fontSize: "14px", color: "#ef4444" }}>-</span>
+          <span style={{ fontSize: "14px"}}>-</span>
           <input
             type="text"
             inputMode="numeric"

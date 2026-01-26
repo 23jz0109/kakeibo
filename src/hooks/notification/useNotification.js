@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useAuthFetch } from '../useAuthFetch'; 
 
 const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
 let unread = 0;
@@ -11,7 +12,7 @@ export const useNotification = () => {
   const [productList, setProductList] = useState([]);
   const [suggestedPeriod, setSuggestedPeriod] = useState(null);
 
-  const getAuthToken = () => localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+  const authFetch = useAuthFetch(); // フックを使用
 
   // UTC -> Local 変換ヘルパー
   const getLocalTimeFromUtc = (utcHour, utcMin) => {
@@ -22,18 +23,22 @@ export const useNotification = () => {
 
   // 補充通知設定一覧取得
   const fetchNotifications = useCallback(async (isSilent = false) => {
-    const authToken = getAuthToken();
-    if (!authToken) return;
     if (!isSilent) setLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/notification`, {
+      // authFetch を使用 (Authorizationヘッダーは自動付与)
+      const response = await authFetch(`${API_BASE_URL}/notification`, {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${authToken}`,
           "Accept": "application/json"
         }
       });
+
+      // authFetch は 401/404 等で null を返す場合がある
+      if (!response) {
+        if (!isSilent) setLoading(false);
+        return;
+      }
 
       if (!response.ok) throw new Error("データの取得に失敗しました");
 
@@ -49,11 +54,11 @@ export const useNotification = () => {
 
           let dbUtcHour = scheduledDate.getUTCHours()
           let dbUtcMin = scheduledDate.getUTCMinutes();
-          console.log("UTC time:" + dbUtcHour + ":" + dbUtcMin);
+          // console.log("UTC time:" + dbUtcHour + ":" + dbUtcMin);
 
           // ローカル時間に変換
           const localTime = getLocalTimeFromUtc(dbUtcHour, dbUtcMin);
-          console.log("JST time:" + localTime.hour + ":" + localTime.min)
+          // console.log("JST time:" + localTime.hour + ":" + localTime.min)
 
           return {
             ...n,
@@ -65,13 +70,6 @@ export const useNotification = () => {
             _scheduledDate: scheduledDate
           };
         });
-
-        // 日付順 -> 時間順でソート
-        // normalized.sort((a, b) => {
-        //   const dateDiff = a._scheduledDate - b._scheduledDate;
-        //   if (dateDiff !== 0) return dateDiff;
-        //   return a._localHour - b._localHour;
-        // });
 
         // IDの降順（大きい順）
         normalized.sort((a, b) => {
@@ -88,17 +86,16 @@ export const useNotification = () => {
     finally {
       if (!isSilent) setLoading(false);
     }
-  }, []);
+  }, [authFetch]);
 
   // 商品候補リスト取得
   const fetchProductCandidates = useCallback(async () => {
-    const authToken = getAuthToken();
     try {
-      const response = await fetch(`${API_BASE_URL}/product`, {
-        method: "GET",
-        headers: { "Authorization": `Bearer ${authToken}` }
+      const response = await authFetch(`${API_BASE_URL}/product`, {
+        method: "GET"
       });
-      if (response.ok) {
+      
+      if (response && response.ok) {
         const data = await response.json();
         if (data.status === 'success' && Array.isArray(data.products)) {
           setProductList(data.products);
@@ -108,20 +105,19 @@ export const useNotification = () => {
     catch (err) {
       console.error("候補取得エラー", err);
     }
-  }, []);
+  }, [authFetch]);
 
   // 推奨間隔取得
   const fetchSuggestedInterval = useCallback(async (productId) => {
-    const authToken = getAuthToken();
     try {
-      const response = await fetch(`${API_BASE_URL}/notification/diff`, {
+      const response = await authFetch(`${API_BASE_URL}/notification/diff`, {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${authToken}`,
           "X-Product-ID": String(productId)
         }
       });
-      if (response.ok) {
+
+      if (response && response.ok) {
         const data = await response.json();
         if (data.status === 'success' && data.can_calculate) {
           setSuggestedPeriod(data.suggested_period);
@@ -135,12 +131,10 @@ export const useNotification = () => {
       console.error(err);
       setSuggestedPeriod(null);
     }
-  }, []);
+  }, [authFetch]);
 
   // 補充通知の追加・更新
   const saveNotification = async ({ title, period, hour, min, editTargetId, originalItem }) => {
-    const authToken = getAuthToken();
-
     // 日付計算ロジック
     let targetDate;
     if (editTargetId && originalItem && originalItem._scheduledDate) {
@@ -177,7 +171,6 @@ export const useNotification = () => {
     try {
       const method = editTargetId ? "PATCH" : "POST";
       const headers = {
-        "Authorization": `Bearer ${authToken}`,
         "Content-Type": "application/json",
         "Accept": "application/json"
       };
@@ -185,11 +178,13 @@ export const useNotification = () => {
         headers["X-Notification-ID"] = String(editTargetId);
       }
 
-      const response = await fetch(`${API_BASE_URL}/notification`, {
+      const response = await authFetch(`${API_BASE_URL}/notification`, {
         method,
         headers,
         body: JSON.stringify(bodyData)
       });
+
+      if (!response) return { success: false, message: "通信エラー" }; // authFetch失敗時
 
       const resData = await response.json();
 
@@ -209,42 +204,42 @@ export const useNotification = () => {
 
   // 補充通知のON/OFF切り替え
   const toggleNotification = async (item) => {
-    const authToken = getAuthToken();
     const targetId = item._id;
     const currentVal = Number(item.notification_enable ?? item.NOTIFICATION_ENABLE);
     const nextVal = currentVal === 1 ? 0 : 1;
     const originalList = [...notifications];
+    
+    // 楽観的UI更新
     setNotifications(prev => prev.map(n => n._id === targetId ? { ...n, notification_enable: nextVal, NOTIFICATION_ENABLE: nextVal } : n));
 
     try {
-      await fetch(`${API_BASE_URL}/notification/toggle`, {
+      const response = await authFetch(`${API_BASE_URL}/notification/toggle`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${authToken}`,
           "Content-Type": "application/json",
           "X-Notification-ID": String(targetId)
         },
         body: JSON.stringify({ enable: nextVal })
       });
+
+      if (!response || !response.ok) throw new Error("Failed");
+
       await fetchNotifications(true);
       return { success: true };
     }
     catch {
-      setNotifications(originalList);
+      setNotifications(originalList); // ロールバック
       return { success: false, message: "更新に失敗しました" };
     }
   };
 
   // 補充
   const refillNotification = async (item) => {
-    const authToken = getAuthToken();
     const period = Number(item.notification_period);
-    console.log("間隔:" + period);
-
+    
     // 設定時間取得
     let targetLocalHour = item._localHour;
     let targetLocalMin = item._localMin;
-    console.log("setting time:" + targetLocalHour + ":" + targetLocalMin)
 
     if (targetLocalHour === undefined) {
       const utcHour = item._utcHour ?? Number(item.notification_hour) ?? 0;
@@ -279,10 +274,9 @@ export const useNotification = () => {
     };
 
     try {
-      const response = await fetch(`${API_BASE_URL}/notification`, {
+      const response = await authFetch(`${API_BASE_URL}/notification`, {
         method: "PATCH",
         headers: {
-          "Authorization": `Bearer ${authToken}`,
           "Content-Type": "application/json",
           "Accept": "application/json",
           "X-Notification-ID": String(item._id)
@@ -290,7 +284,7 @@ export const useNotification = () => {
         body: JSON.stringify(payload)
       });
 
-      if (response.ok) {
+      if (response && response.ok) {
         await fetchNotifications(true);
         return { success: true };
       }
@@ -305,18 +299,17 @@ export const useNotification = () => {
 
   // 補充通知削除
   const deleteNotification = async (item) => {
-    const authToken = getAuthToken();
     const targetId = item._id;
 
     try {
-      const res = await fetch(`${API_BASE_URL}/notification`, {
+      const res = await authFetch(`${API_BASE_URL}/notification`, {
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${authToken}`,
           "X-Notification-ID": String(targetId)
         }
       });
-      if (res.ok) {
+
+      if (res && res.ok) {
         setNotifications(prev => prev.filter(n => n._id !== targetId));
         return { success: true };
       }
@@ -330,22 +323,19 @@ export const useNotification = () => {
     }
   };
 
-  // 通知一覧
+  // 通知一覧 (履歴)
   const fetchNotificationHistory = useCallback(async (isSilent = false) => {
-    const authToken = getAuthToken();
-    if (!authToken) return;
     if (!isSilent) setLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/notification/list`, {
+      const response = await authFetch(`${API_BASE_URL}/notification/list`, {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${authToken}`,
           "Accept": "application/json"
         }
       });
 
-      if (response.ok) {
+      if (response && response.ok) {
         const data = await response.json();
         const rawList = data.notifications || [];
 
@@ -372,11 +362,10 @@ export const useNotification = () => {
     finally {
       if (!isSilent) setLoading(false);
     }
-  }, []);
+  }, [authFetch]);
 
   // 通知を既読にする
   const markAsRead = async (notificationId) => {
-    const authToken = getAuthToken();
     // UI更新
     const targetIdStr = String(notificationId);
 
@@ -395,18 +384,19 @@ export const useNotification = () => {
 
     try {
       // APIへ送信
-      await fetch(`${API_BASE_URL}/notification/list`, {
+      const response = await authFetch(`${API_BASE_URL}/notification/list`, {
         method: "PATCH",
         headers: {
-          "Authorization": `Bearer ${authToken}`,
           "Content-Type": "application/json",
           "X-Notification-ID": targetIdStr
         }
       });
-      //  サーバーの更新が終わってから合図を出す
-      window.dispatchEvent(new Event("notificationUpdated"));
 
-      await fetchNotificationHistory(true);
+      if (response) {
+        //  サーバーの更新が終わってから合図を出す
+        window.dispatchEvent(new Event("notificationUpdated"));
+        // await fetchNotificationHistory(true); // 必要なら再取得
+      }
 
     } catch (err) {
       console.error("既読エラー", err);
@@ -415,21 +405,19 @@ export const useNotification = () => {
 
   // 通知履歴からの削除
   const deleteHistoryItem = async (notificationId) => {
-    const authToken = getAuthToken();
     setNotificationHistory(prev => prev.filter(n => n.id !== notificationId));
 
     try {
-      const response = await fetch(`${API_BASE_URL}/notification/list`, {
+      const response = await authFetch(`${API_BASE_URL}/notification/list`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${authToken}`,
           "X-Notification-ID": String(notificationId)
         }
       });
 
-      if (!response.ok) {
+      if (!response || !response.ok) {
         console.error("削除失敗");
-        // 失敗したらリロード
+        // 失敗したらリロード等の処理が必要かも
       }
     }
     catch (err) {
@@ -439,21 +427,16 @@ export const useNotification = () => {
 
   // 未読件数取得
   const fetchUnreadCount = useCallback(async () => {
-    const authToken = getAuthToken();
-    if (!authToken) return;
-
     try {
-      const response = await fetch(`${API_BASE_URL}/notification/count`, {
+      const response = await authFetch(`${API_BASE_URL}/notification/count`, {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${authToken}`,
           "Accept": "application/json"
         }
       });
 
-      if (response.ok) {
+      if (response && response.ok) {
         const data = await response.json();
-
         // キャッシュにセットする
         unread = data.count;
         setUnreadCount(unread);
@@ -462,7 +445,7 @@ export const useNotification = () => {
     catch (err) {
       console.error("カウント取得エラー", err);
     }
-  }, []);
+  }, [authFetch]);
 
   return {
     notifications,
