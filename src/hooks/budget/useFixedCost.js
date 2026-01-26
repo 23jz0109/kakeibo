@@ -1,24 +1,15 @@
 import { useState, useCallback } from "react";
+import { useAuthFetch } from "../useAuthFetch";
 
 const BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
 
 export const useFixedCostApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const authFetch = useAuthFetch();
 
-  const getHeaders = () => {
-    const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-    if (!token) throw new Error("認証トークンがありません");
-
-    return {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-    };
-  };
-
-  // 共通レスポンス処理
   const handleResponse = async (res) => {
+    if (!res) throw new Error("Redirecting...");
     const json = await res.json().catch(() => ({}));
     if (!res.ok) {
       throw new Error(json.message || "API Error");
@@ -31,29 +22,33 @@ export const useFixedCostApi = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${BASE_URL}/fixedcost`, {
+      const res = await authFetch(`${BASE_URL}/fixedcost`, {
         method: "GET",
-        headers: getHeaders(),
       });
+      if (!res) return [];
+
       const json = await handleResponse(res);
       return json.data || [];
     }
     catch (err) {
-      setError(err.message);
+      if (err.message !== "Redirecting...") {
+        setError(err.message);
+      }
       throw err;
     }
     finally {
       setLoading(false);
     }
-  }, []);
+  }, [authFetch]);
 
   // ルール一覧取得
   const fetchRules = useCallback(async () => {
     try {
-      const res = await fetch(`${BASE_URL}/fixedcost/rules`, {
+      const res = await authFetch(`${BASE_URL}/fixedcost/rules`, {
         method: "GET",
-        headers: getHeaders(),
       });
+      if (!res) return [];
+
       const json = await handleResponse(res);
       return json.data || [];
     }
@@ -61,101 +56,110 @@ export const useFixedCostApi = () => {
       console.error(err);
       return [];
     }
-  }, []);
+  }, [authFetch]);
 
   // 作成
   const createFixedCost = useCallback(async (data) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${BASE_URL}/fixedcost`, {
+      const res = await authFetch(`${BASE_URL}/fixedcost`, {
         method: "POST",
-        headers: getHeaders(),
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(data),
       });
+      if (!res) return;
+
       await handleResponse(res);
     }
     catch (err) {
-      setError(err.message);
+      if (err.message !== "Redirecting...") {
+        setError(err.message);
+      }
       throw err;
     }
     finally {
       setLoading(false);
     }
-  }, []);
+  }, [authFetch]);
 
   // 更新
   const updateFixedCost = useCallback(async (id, data) => {
     setLoading(true);
     setError(null);
     try {
-      const headers = {
-        ...getHeaders(),
-        "X-Fixed-Cost-ID": id,
-      };
-      const res = await fetch(`${BASE_URL}/fixedcost`, {
+      const res = await authFetch(`${BASE_URL}/fixedcost`, {
         method: "PATCH",
-        headers,
+        headers: {
+          "Content-Type": "application/json",
+          "X-Fixed-Cost-ID": id,
+        },
         body: JSON.stringify(data),
       });
+      if (!res) return;
+
       await handleResponse(res);
     }
     catch (err) {
-      setError(err.message);
+      if (err.message !== "Redirecting...") {
+        setError(err.message);
+      }
       throw err;
     }
     finally {
       setLoading(false);
     }
-  }, []);
+  }, [authFetch]);
 
   // 通知オンオフ
   const toggleFixedCost = useCallback(async (id) => {
-    // setLoading(true);
     setError(null);
     try {
-      const headers = {
-        ...getHeaders(),
-        "X-Fixed-Cost-ID": id,
-      };
-      const res = await fetch(`${BASE_URL}/fixedcost/toggle`, {
+      const res = await authFetch(`${BASE_URL}/fixedcost/toggle`, {
         method: "POST",
-        headers,
+        headers: {
+          "X-Fixed-Cost-ID": id,
+        },
       });
+      if (!res) return;
+
       await handleResponse(res);
     }
     catch (err) {
-      setError(err.message);
+      if (err.message !== "Redirecting...") {
+        setError(err.message);
+      }
       throw err;
     }
-    finally {
-      setLoading(false);
-    }
-  }, []);
+  }, [authFetch]);
 
   // 削除
   const deleteFixedCost = useCallback(async (id) => {
     setLoading(true);
     setError(null);
     try {
-      const headers = {
-        ...getHeaders(),
-        "X-Fixed-Cost-ID": id,
-      };
-      const res = await fetch(`${BASE_URL}/fixedcost`, {
+      const res = await authFetch(`${BASE_URL}/fixedcost`, {
         method: "DELETE",
-        headers,
+        headers: {
+          "X-Fixed-Cost-ID": id,
+        },
       });
+      if (!res) return;
+
       await handleResponse(res);
     }
     catch (err) {
-      setError(err.message);
+      if (err.message !== "Redirecting...") {
+        setError(err.message);
+      }
       throw err;
     }
     finally {
       setLoading(false);
     }
-  }, []);
+  }, [authFetch]);
 
   return {
     loading,

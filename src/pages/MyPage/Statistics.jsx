@@ -3,9 +3,13 @@ import { useNavigate } from "react-router-dom";
 import Layout from "../../components/common/Layout";
 import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import styles from "./Statistics.module.css";
+import { useAuthFetch } from "../../hooks/useAuthFetch";
 
 const Statistics = () => {
   const navigate = useNavigate();
+  // フックを使用
+  const authFetch = useAuthFetch();
+
   const [isLoading, setIsLoading] = useState(false);
 
   const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
@@ -154,35 +158,35 @@ const Statistics = () => {
 
   // CSVダウンロード
   const handleDownload = async () => {
-    const token =
-      localStorage.getItem("authToken") ||
-      sessionStorage.getItem("authToken");
-
-    if (!token) {
-      alert("ログインセッションが切れました。再ログインしてください。");
-      navigate("/login");
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      const res = await fetch(
+      const res = await authFetch(
         `${API_BASE_URL}/statistical/download`,
         {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
             "X-StartDate": startDate,
             "X-EndDate": endDate,
           },
         }
       );
 
+      // 401エラー（期限切れ）の場合はフック内で処理されるので終了
+      if (!res) return;
+
+      // 404（ユーザー削除済み）等のエラーハンドリング
       if (!res.ok) {
+        if (res.status === 404) {
+           sessionStorage.clear();
+           localStorage.removeItem("authToken");
+           navigate("/");
+           return;
+        }
         throw new Error("ダウンロードに失敗しました");
       }
 
+      // Blob処理はそのまま可能
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -190,6 +194,7 @@ const Statistics = () => {
       a.download = `statistical_data_${startDate}_to_${endDate}.csv`;
       a.click();
       URL.revokeObjectURL(url);
+
     } catch (e) {
       alert(e.message);
     } finally {

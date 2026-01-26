@@ -515,21 +515,3 @@
   cursor: pointer;
   transition: background-color 0.2s;
 }
-
-.submitButton:hover { 
-  background-color: #2563eb; 
-}
-
-/* バリデーション用スタイル */
-.inputErrorBorder {
-  border-color: #ef4444 !important; /* Red-500 */
-  border-width: 1px;
-}
-
-.errorText {
-  color: #ef4444;
-  font-size: 0.75rem;
-  margin-top: 0.25rem;
-  font-weight: 500;
-  width: 100%;
-}
