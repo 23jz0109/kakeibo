@@ -1,4 +1,4 @@
-  .container {
+.container {
   width: 100%;
   height: 100%; 
   background-color: #f9fafb;
@@ -42,19 +42,6 @@
   pointer-events: none;
 }
 
-.backButton {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #1f2937;
-  z-index: 10;
-  margin-left: 1rem;
-}
-
 .addButton {
   position: absolute;
   right: 10px;
@@ -85,7 +72,8 @@
   background-color: #e5e7eb;
   border-radius: 8px;
   padding: 4px;
-  margin-bottom: 16px;
+  margin: 16px;
+  margin-bottom: 8px;
 }
 
 .tab {
@@ -164,6 +152,7 @@
   padding-top: 40px;
 }
 
+/* Modal */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -172,25 +161,22 @@
   height: 100dvh;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 100;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modalContent {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  height: 70vh;  
-  transform: translate(-50%, -50%);
   width: 90%;
   max-width: 400px;
+  max-height: 80vh;
   background-color: #fff;
-  box-sizing: border-box; 
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  z-index: 101; 
+  z-index: 101;
+  overflow: hidden;
 }
 
 /* Modal Header */
@@ -203,9 +189,9 @@
 }
 
 .modalTitleGroup {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .modalHeader h2 {
@@ -215,87 +201,74 @@
   margin: 0;
 }
 
-.closeButton {
+.deleteButton {
   background: none;
   border: none;
-  color: #6b7280;
   cursor: pointer;
+  color: #ef4444;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
 }
 
-.deleteButton {
-    background: #fee2e2;
-    border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    color: #ef4444;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+.closeButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  padding: 0;
 }
 
+/* Modal Body */
 .scrollArea {
-  padding: 20px 20px 0 20px;
-  background-color: #fff;
-  flex-shrink: 0;
-  z-index: 10;
-  border-bottom: 1px solid #f9fafb;
-}
-
-/* Modal Body (Scrollable) */
-.modalBody {
   padding: 20px;
   overflow-y: auto;
   flex: 1;
 }
 
-/* Modal Footer */
-.modalFooter {
-  padding: 16px 20px;
-  border-top: 1px solid #f3f4f6;
-  background-color: #fff;
-  border-bottom-left-radius: 16px;
-  border-bottom-right-radius: 16px;
-}
-
 .previewSection {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  margin-bottom: 16px;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .iconPreviewCircle {
-  width: 72px;
-  height: 72px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  flex-shrink: 0;
 }
 
 .nameInput {
   width: 100%;
-  text-align: center;
-  font-size: 1.25rem;
-  font-weight: bold;
+  font-size: 1rem;
   border: none;
   border-bottom: 2px solid #e5e7eb;
-  padding: 8px;
+  padding: 8px 0;
   outline: none;
   color: #1f2937;
   background: transparent;
+  transition: border-color 0.2s;
 }
 
 .nameInput:focus {
   border-color: #3b82f6;
+}
+
+.inputError {
+  border-color: #ef4444 !important;
+}
+
+.errorMessage {
+  color: #ef4444;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  font-weight: 500;
 }
 
 .sectionTitle {
@@ -306,6 +279,7 @@
   margin-top: 10px;
 }
 
+/* Icon Grid */
 .iconGrid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -321,7 +295,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.1s;
+  transition: transform 0.1s, background-color 0.2s;
 }
 
 .iconItem:active {
@@ -332,11 +306,12 @@
   background-color: #3b82f6;
 }
 
+/* Color Grid */
 .colorGrid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .colorItem {
@@ -349,9 +324,18 @@
   transition: transform 0.1s;
 }
 
+.colorItem:active {
+  transform: scale(0.95);
+}
+
 .colorItem.selectedColor {
-  transform: scale(1.15);
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #3b82f6;
+  box-shadow: 0 0 0 2px white, 0 0 0 4px #3b82f6;
+}
+
+.modalFooter {
+  padding: 16px 20px;
+  border-top: 1px solid #f3f4f6;
+  background-color: #fff;
 }
 
 .saveButton {
@@ -359,13 +343,17 @@
   background-color: #3b82f6;
   color: white;
   border: none;
+  border-radius: 8px;
   padding: 12px;
-  border-radius: 10px;
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+  transition: background-color 0.2s;
+}
+
+.saveButton:active {
+  background-color: #2563eb;
 }
