@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Mail, Lock, Eye, EyeOff, CircleAlert, Cake } from "lucide-react";  // アイコン部品
 import { useNavigate } from "react-router-dom";
 import styles from "./Login.module.css";
+import SubmitButton from "../components/common/SubmitButton";
 
 /**
  * 新規登録の年選択パーツ
@@ -283,10 +284,10 @@ const Login = () => {
               const msg = data.errors.mail_address[0];
 
               if (msg.includes("taken")) {
-                setErrorMessage("このメールアドレスは既に使用されています。");
+                setErrorMessage(msg);
               }
               else {
-                setErrorMessage(msg);
+                setErrorMessage("このメールアドレスは既に使用されています。");
               }
             }
             else if (data.errors.password) {
@@ -428,12 +429,11 @@ const Login = () => {
                 )}
 
                 {/* 送信ボタン */}
-                <button
-                  type="submit"
-                  className={styles.submitButton}
-                  disabled={isLoading}>
-                  {activeTab === "login" ? "ログイン" : "登録する"}
-                </button>
+                <SubmitButton 
+                  disabled={isLoading}
+                  onClick={handleSubmit}
+                  text={activeTab === "login" ? "ログイン" : "登録する"}
+                />
               </form>
             </div>
           </div>
