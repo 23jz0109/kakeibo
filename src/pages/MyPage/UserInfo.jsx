@@ -4,6 +4,7 @@ import { ChevronLeft, X, Lock, Calendar, LogOut } from "lucide-react";
 import Layout from "../../components/common/Layout";
 import styles from "./UserInfo.module.css";
 import { useAuthFetch } from "../../hooks/useAuthFetch";
+import SubmitButton from "../../components/common/SubmitButton";
 
 //年選択コンポーネント
 function YearSelect({ selectedYear, setSelectedYear }) {
@@ -332,7 +333,10 @@ function UserInfo() {
                     {passwordError && <p className={styles.errorMessage}>{passwordError}</p>}
                     {passwordMessage && <p className={styles.successMessage}>{passwordMessage}</p>}
                     
-                    <button className={styles.updateButton} onClick={updatePassword}>更新する</button>
+                    <SubmitButton 
+                      onClick={updatePassword}
+                      text={'更新する'}
+                    />
                 </div>
               </div>
             </div>
@@ -345,14 +349,17 @@ function UserInfo() {
                 <button className={styles.closeButton} onClick={closeModals}>
                     <X size={24} />
                 </button>
-                <p className={styles.modalTitle}>生まれた年を変更</p>
+                <p className={styles.modalTitle}>生年月日を変更</p>
                 <div className={styles.modalBody}>
                     <YearSelect selectedYear={tempBirthYear} setSelectedYear={setTempBirthYear} />
                     
                     {birthYearError && <div className={styles.errorMessage}>{birthYearError}</div>}
                     {birthYearMessage && <div className={styles.successMessage}>{birthYearMessage}</div>}
-                    
-                    <button className={styles.updateButton} onClick={updateBirthYear}>更新する</button>
+
+                    <SubmitButton 
+                      onClick={updateBirthYear}
+                      text={'更新する'}
+                    />
                 </div>
               </div>
             </div>

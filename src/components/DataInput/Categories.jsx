@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import styles from "./Categories.module.css";
 import iconMap, { getIcon } from "../../constants/categories"; 
 import { Plus, Check, X } from "lucide-react";
+import SubmitButton from "../common/SubmitButton";
 
 const ICON_OPTIONS = Object.keys(iconMap).map((key) => ({
   name: key,
@@ -117,9 +118,10 @@ const Categories = ({ categories = [], selectedCategoryId, onSelectedCategory, o
         </div>
 
         <div className={styles.modalFooter}>
-            <button className={styles.saveButton} onClick={handleSave}>
-                保存
-            </button>
+            <SubmitButton 
+              onClick={handleSave}
+              text={'保存'}
+            />
         </div>
       </div>
     </div>
