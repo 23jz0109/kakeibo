@@ -35,6 +35,11 @@ export const VALIDATION_LIMITS = {
     MEMO: 500,          // メモ最大文字数
     SHOP_NAME: 40,      // 店舗名
     PRODUCT_NAME: 40,   // 商品名
+    MAIL_ADDRESS: 255,  // メールアドレス
+    PASSWORD: {
+      MIN: 8,
+      MAX: 16
+    },
   },
   
   // 日数系（Budget用）
@@ -52,6 +57,11 @@ export const validateAmount = (value, max = VALIDATION_LIMITS.AMOUNT.MAX) => {
 
 export const validateTextLength = (text, maxLength) => {
   return text.length <= maxLength;
+};
+
+export const validateAlphanumeric = (text) => {
+  if (!text) return true;
+  return /^[a-zA-Z0-9]+$/.test(text);
 };
 
 export const sanitizeNumericInput = (value) => {
