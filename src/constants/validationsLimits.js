@@ -2,7 +2,7 @@
 export const VALIDATION_LIMITS = {
   // 金額系
   AMOUNT: {
-    MIN: 0,
+    MIN: 1,
     MAX: 9999999, // 7桁
   },
   
@@ -50,9 +50,9 @@ export const VALIDATION_LIMITS = {
 };
 
 /* バリデーション用ヘルパー関数 */
-export const validateAmount = (value, max = VALIDATION_LIMITS.AMOUNT.MAX) => {
+export const validateAmount = (value, min = VALIDATION_LIMITS. AMOUNT.MIN, max = VALIDATION_LIMITS.AMOUNT.MAX) => {
   const num = Number(value);
-  return num >= 0 && num <= max;
+  return num >= min && num <= max;
 };
 
 export const validateTextLength = (text, maxLength) => {
