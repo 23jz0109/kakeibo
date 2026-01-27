@@ -40,7 +40,7 @@ const IncomeInput = () => {
     let error = "";
     if (name === "amount") {
       if (value !== "" && !validateAmount(value)) {
-        error = `金額は0〜${VALIDATION_LIMITS.AMOUNT.MAX.toLocaleString()}円の範囲で入力してください`;
+        error = `金額は${VALIDATION_LIMITS.AMOUNT.MIN.toLocaleString()}〜${VALIDATION_LIMITS.AMOUNT.MAX.toLocaleString()}円の範囲で入力してください`;
       }
     }
     if (name === "memo") {
