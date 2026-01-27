@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import styles from "./Categories.module.css";
 import iconMap, { getIcon } from "../../constants/categories"; 
-import { Plus, Check, X } from "lucide-react";
+import { Plus, Check, X, Save } from "lucide-react";
+// [追加] バリデーション定数のインポート
+import { VALIDATION_LIMITS } from "../../constants/validationsLimits";
 
 const ICON_OPTIONS = Object.keys(iconMap).map((key) => ({
   name: key,
@@ -34,92 +36,132 @@ const Categories = ({ categories = [], selectedCategoryId, onSelectedCategory, o
     color: "#6b7280"
   });
 
+  // [追加] エラー状態管理
+  const [errors, setErrors] = useState({});
+
+  // [追加] バリデーション関数
+  const validateField = (name, value) => {
+    let error = "";
+    if (name === "name") {
+      if (!value || !value.trim()) {
+        error = "カテゴリ名を入力してください";
+      } else if (value.length > VALIDATION_LIMITS.TEXT.PRODUCT_NAME) { 
+        error = `カテゴリ名は${VALIDATION_LIMITS.TEXT.PRODUCT_NAME}文字以内で入力してください`;
+      }
+    }
+    setErrors(prev => ({ ...prev, [name]: error }));
+    return error === "";
+  };
+
   // モーダルを開く
   const handleOpenModal = () => {
-    setFormData({ name: "", icon: "ShoppingBag", color: "#6b7280" });
+    setFormData({
+      name: "",
+      icon: "ShoppingBag",
+      color: "#6b7280"
+    });
+    setErrors({}); // エラーリセット
     setIsModalOpen(true);
   };
 
   // モーダルを閉じる
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setErrors({});
+  };
+
+  // [変更] 入力変更ハンドラ（バリデーション付き）
+  const handleNameChange = (e) => {
+    const val = e.target.value;
+    setFormData(prev => ({ ...prev, name: val }));
+    validateField("name", val);
   };
 
   // 保存処理
   const handleSave = () => {
-    if (!formData.name.trim()) {
-      alert("カテゴリ名を入力してください");
-      return;
-    }
+    // [追加] 保存前バリデーション
+    const isNameValid = validateField("name", formData.name);
+    if (!isNameValid) return;
 
-    if (typeof onAddCategory === 'function') {
+    if (onAddCategory) {
       onAddCategory(formData.name, formData.icon, formData.color);
-      setIsModalOpen(false);
     }
-    else {
-      console.error("onAddCategory not function");
-      alert("設定エラー: カテゴリ追加関数がありません");
-    }
+    handleCloseModal();
   };
 
-  // モーダル部分のJSX
+  // モーダルの中身
   const modalContent = (
     <div className={styles.modalOverlay} onClick={handleCloseModal}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <h3>カテゴリ追加</h3>
-          <button onClick={handleCloseModal} className={styles.closeBtn}>
-            <X size={20}/>
+          <button className={styles.closeButton} onClick={handleCloseModal}>
+            <X size={24} />
           </button>
         </div>
 
         <div className={styles.modalBody}>
+          {/* 名前入力 */}
           <div className={styles.formGroup}>
-            <label>カテゴリ名</label>
-            <input 
-              type="text" 
+            <label className={styles.label}>カテゴリ名</label>
+            <input
+              type="text"
+              // [変更] エラー時に赤枠スタイルを適用
+              className={`${styles.textInput} ${errors.name ? styles.inputError : ''}`}
               value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-              placeholder="カテゴリ名"
-              className={styles.textInput}
+              onChange={handleNameChange}
+              placeholder="例: 食費"
             />
+            {/* [追加] エラーメッセージ表示 */}
+            {errors.name && <p className={styles.errorMessage}>{errors.name}</p>}
           </div>
 
+          {/* アイコン選択 */}
           <div className={styles.formGroup}>
-            <label>アイコン</label>
+            <label className={styles.label}>アイコン</label>
             <div className={styles.iconGrid}>
-              {ICON_OPTIONS.map(({ name, component: Icon }) => (
-                <div 
-                  key={name}
-                  className={`${styles.iconOption} ${formData.icon === name ? styles.activeIcon : ""}`}
-                  onClick={() => setFormData({...formData, icon: name})}
-                >
-                  <Icon size={20} />
-                </div>
-              ))}
+              {ICON_OPTIONS.map((opt) => {
+                const Icon = opt.component;
+                const isActive = formData.icon === opt.name;
+                return (
+                  <div
+                    key={opt.name}
+                    className={`${styles.iconOption} ${isActive ? styles.activeIcon : ""}`}
+                    onClick={() => setFormData({ ...formData, icon: opt.name })}
+                  >
+                    <Icon size={20} />
+                  </div>
+                );
+              })}
             </div>
           </div>
 
+          {/* 色選択 */}
           <div className={styles.formGroup}>
-            <label>カラー</label>
+            <label className={styles.label}>カラー</label>
             <div className={styles.colorGrid}>
-              {COLOR_PALETTE.map((c) => (
-                <div
-                  key={c}
-                  className={`${styles.colorOption} ${formData.color === c ? styles.activeColor : ""}`}
-                  style={{ backgroundColor: c }}
-                  onClick={() => setFormData({ ...formData, color: c })}>
-                  {formData.color === c && <Check size={16} color="#fff" strokeWidth={3} />}
-                </div>
-              ))}
+              {COLOR_PALETTE.map((color) => {
+                const isSelected = formData.color === color;
+                return (
+                  <div
+                    key={color}
+                    className={styles.colorOption}
+                    style={{ backgroundColor: color }}
+                    onClick={() => setFormData({ ...formData, color })}
+                  >
+                    {isSelected && <Check size={16} color="#fff" />}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
 
         <div className={styles.modalFooter}>
-            <button className={styles.saveButton} onClick={handleSave}>
-                保存
-            </button>
+          <button className={styles.saveButton} onClick={handleSave}>
+            <Save size={18} style={{ marginRight: 4 }} />
+            保存
+          </button>
         </div>
       </div>
     </div>
