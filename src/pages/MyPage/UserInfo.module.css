@@ -1,3 +1,5 @@
+/* UserInfo.module.css */
+
 /* コンテナ全体 */
 .mainContainer {
   width: 100%;
@@ -177,6 +179,12 @@
   font-size: 1rem;
   border-radius: 6px;
   border: 1px solid #ccc;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.inputLarge:focus {
+  border-color: #656ac6;
 }
 
 .updateButton {
@@ -188,6 +196,12 @@
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
+}
+
+.updateButton:disabled {
+  background-color: #a5a8e0;
+  cursor: not-allowed;
+  opacity: 1;
 }
 
 .errorMessage {
@@ -292,4 +306,20 @@
   color: #1f2937;
   white-space: nowrap;
   pointer-events: none;
+}
+
+/* --- バリデーション用追加スタイル --- */
+.errorText {
+  color: #ef4444;
+  font-size: 0.8rem;
+  margin-top: -12px; /* inputとの隙間を調整 */
+  margin-bottom: 4px;
+  font-weight: 500;
+  text-align: left;
+  padding-left: 4px;
+}
+
+.inputErrorBorder {
+  border-color: #ef4444 !important;
+  background-color: #fff9f9;
 }

@@ -276,14 +276,14 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
         break;
       case "product_price":
         if (value === "") error = "必須です";
-        else if (!validateAmount(value)) error = "金額が不正です";
+        else if (!validateAmount(value)) error = `※${VALIDATION_LIMITS.AMOUNT.MAX.toLocaleString()}まで`;
         break;
       case "quantity":
         if (!value || Number(value) < VALIDATION_LIMITS.QUANTITY.MIN) error = "1以上";
-        else if (Number(value) > VALIDATION_LIMITS.QUANTITY.MAX) error = "多すぎます";
+        else if (Number(value) > VALIDATION_LIMITS.QUANTITY.MAX) error = `※${VALIDATION_LIMITS.QUANTITY.MAX.toLocaleString()}まで`;
         break;
       case "discount":
-        if (value && !validateAmount(value)) error = "金額が不正です";
+        if (value && !validateAmount(value)) error = `※${VALIDATION_LIMITS.AMOUNT.MAX.toLocaleString()}まで`;
         break;
       default:
         break;
@@ -595,8 +595,10 @@ const ReceiptForm = forwardRef(({
       }
     }
     if (name === "point_usage") {
-      if (value !== "" && !validateAmount(value)) {
-        error = "ポイントは数値で入力してください";
+      const pointMin = VALIDATION_LIMITS.POINT.MIN;
+      const pointMax = VALIDATION_LIMITS.POINT.MAX;
+      if (!validateAmount(value, pointMin, pointMax)) {
+        error = `ポイントは${pointMin.toLocaleString()}〜${pointMax.toLocaleString()}円の範囲で入力してください`;
       }
     }
     setErrors(prev => ({ ...prev, [name]: error }));

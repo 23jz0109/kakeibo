@@ -4,6 +4,7 @@ import Layout from "../../components/common/Layout";
 import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import styles from "./Statistics.module.css";
 import { useAuthFetch } from "../../hooks/useAuthFetch";
+import SubmitButton from "../../components/common/SubmitButton";
 
 const Statistics = () => {
   const navigate = useNavigate();
@@ -244,15 +245,17 @@ const Statistics = () => {
                 />
               </div>
             </div>
-
-            <button
-              className={styles.downloadButton}
+            
+            <SubmitButton 
               onClick={handleDownload}
               disabled={isLoading}
-            >
-              <Download size={20} />
-              {isLoading ? "ダウンロード中..." : "CSVをダウンロード"}
-            </button>
+              text={
+                <>
+                  <Download size={20} />
+                  {isLoading ? "ダウンロード中..." : "CSVをダウンロード"}
+                </>
+              }
+            />
           </div>
         </div>
       }

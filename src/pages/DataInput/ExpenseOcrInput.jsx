@@ -86,14 +86,17 @@ const ExpenseOcrInput = () => {
       const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true };
       const compressedFile = await imageCompression(imageFile, options);
 
+      // トークン確認
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+
       const formData = new FormData();
       formData.append("image", compressedFile);
 
       // authFetchを使用
-      const response = await authFetch(`${API_BASE_URL}/analyze-receipt`, {
+      const response = await fetch(`${API_BASE_URL}/analyze-receipt`, {
         method: "POST",
         headers: {
-          // Authorizationヘッダーは自動付与されるため削除
+          "Authorization": `Bearer ${token}`,
           "Accept": "application/json"
         },
         body: formData,

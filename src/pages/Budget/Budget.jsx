@@ -14,6 +14,7 @@ import {
   validateAmount, 
   sanitizeNumericInput 
 } from "../../constants/validationsLimits";
+import SubmitButton from "../../components/common/SubmitButton";
 
 // [変更] hasError プロパティを受け取れるように変更
 const CustomDropdown = ({ value, options, onChange, placeholder = "選択してください", hasError }) => {
@@ -714,15 +715,11 @@ const Budget = () => {
             )}
 
             <div className={styles.modalActions}>
-              <button 
-                type="button" 
-                className={styles.saveBtn} 
-                // [変更] エラーがある場合はボタン無効化
-                disabled={isLoading || Object.values(errors).some(e => e !== "")} 
+              <SubmitButton
+                disabled={isLoading || Object.values(errors).some(e => e !== "")}
                 onClick={handleSave}
-              >
-                {isLoading ? '保存中...' : '保存'}
-              </button>
+                text={isLoading ? '保存中...' : '保存'}
+              />
             </div>
           </div>
         </div>
