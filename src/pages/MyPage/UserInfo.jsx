@@ -6,6 +6,7 @@ import styles from "./UserInfo.module.css";
 // バリデーション関数と定数をインポート
 import { VALIDATION_LIMITS, validateAlphanumeric } from "../../constants/validationsLimits";
 import { useAuthFetch } from "../../hooks/useAuthFetch";
+import SubmitButton from "../../components/common/SubmitButton";
 
 //年選択コンポーネント
 function YearSelect({ selectedYear, setSelectedYear }) {
@@ -414,13 +415,10 @@ function UserInfo() {
                     
                     {passwordMessage && <p className={styles.successMessage}>{passwordMessage}</p>}
                     
-                    <button 
-                      className={styles.updateButton} 
+                    <SubmitButton 
                       onClick={updatePassword}
-                      disabled={!isPasswordFormValid}
-                    >
-                      更新する
-                    </button>
+                      text={'更新する'}
+                    />
                 </div>
               </div>
             </div>
@@ -433,13 +431,16 @@ function UserInfo() {
                 <button className={styles.closeButton} onClick={closeModals}>
                     <X size={24} />
                 </button>
-                <p className={styles.modalTitle}>生まれた年を変更</p>
+                <p className={styles.modalTitle}>生年月日を変更</p>
                 <div className={styles.modalBody}>
                     <YearSelect selectedYear={tempBirthYear} setSelectedYear={setTempBirthYear} />
                     
                     {birthYearMessage && <div className={styles.successMessage}>{birthYearMessage}</div>}
-                    
-                    <button className={styles.updateButton} onClick={updateBirthYear}>更新する</button>
+
+                    <SubmitButton 
+                      onClick={updateBirthYear}
+                      text={'更新する'}
+                    />
                 </div>
               </div>
             </div>

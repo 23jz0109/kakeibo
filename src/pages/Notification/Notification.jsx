@@ -10,6 +10,7 @@ import {
   validateTextLength, 
   sanitizeNumericInput 
 } from '../../constants/validationsLimits';
+import SubmitButton from '../../components/common/SubmitButton';
 
 // 時間選択用の汎用プルダウンコンポーネント
 const TimeDropdown = ({ value, options, onChange }) => {
@@ -466,7 +467,7 @@ const Notification = () => {
                   </button>
                 </div>
 
-                <form onSubmit={handleFormSubmit}>
+                <form>
                   {/* 商品名 */}
                   <div className={styles.formRow} style={{ alignItems: 'flex-start' }}>
                     <label className={styles.rowLabel} style={{ marginTop: '12px' }}>商品名</label>
@@ -530,14 +531,11 @@ const Notification = () => {
                   </div>
 
                   <div style={{ marginTop: '25px' }}>
-                    <button 
-                      type="submit" 
-                      className={styles.submitButton}
+                    <SubmitButton
                       disabled={Object.values(errors).some(e => e !== "")}
-                      style={{ opacity: Object.values(errors).some(e => e !== "") ? 0.6 : 1 }}
-                    >
-                      保存する
-                    </button>
+                      text={'保存する'}
+                      onClick={handleFormSubmit}
+                    />
                   </div>
                 </form>
               </div>

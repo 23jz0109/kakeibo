@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import styles from "./Categories.module.css";
 import iconMap, { getIcon } from "../../constants/categories"; 
 import { Plus, Check, X, Save } from "lucide-react";
+import SubmitButton from "../common/SubmitButton";
 // [追加] バリデーション定数のインポート
 import { VALIDATION_LIMITS } from "../../constants/validationsLimits";
 
@@ -158,10 +159,10 @@ const Categories = ({ categories = [], selectedCategoryId, onSelectedCategory, o
         </div>
 
         <div className={styles.modalFooter}>
-          <button className={styles.saveButton} onClick={handleSave}>
-            <Save size={18} style={{ marginRight: 4 }} />
-            保存
-          </button>
+            <SubmitButton 
+              onClick={handleSave}
+              text={'保存'}
+            />
         </div>
       </div>
     </div>
