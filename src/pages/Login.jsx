@@ -38,7 +38,7 @@ function YearSelect({ selectedYear, setSelectedYear }) {
   return (
     <div className={styles.customSelectContainer} ref={wrapperRef}>
       <div
-        className={`${styles.inputField} ${styles.selectTrigger}`} // inputFieldのスタイルを共通利用
+        className={`${styles.inputField} ${styles.selectTrigger}`}
         onClick={() => setIsOpen(!isOpen)}>
         <span className={!selected ? styles.placeholderText : ""}>
           {selected ? selected.label : "生年月日 (年・任意)"}
@@ -75,7 +75,11 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [year, setYear] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
+  
+  // State for separate error handling
+  const [errors, setErrors] = useState({ email: "", password: "" });
+  const [serverError, setServerError] = useState(""); // General API errors
+  
   const [isLoading, setIsLoading] = useState(false);
 
   // モバイル対応: 入力欄にフォーカスが当たったら画面中央へスクロール
@@ -85,52 +89,49 @@ const Login = () => {
     }, 300);
   };
 
-  const validateMailAddress = (val) => {
-    if (!val) return true;
-    const isWithInMaxLength = val.length <= 255;
-    if(!isWithInMaxLength) {
-      setErrorMessage("メールアドレスは255文字以内で入力してください。");
-    }
-    return isWithInMaxLength;
-  }
-
-  const validatePassword = (val) => {
-    if (!val) return true; 
-    const regex = /^[a-zA-Z0-9]{8,16}$/;
-    const isValid = regex.test(val);
-    if (!isValid) {
-      setErrorMessage("パスワードは8～16文字の半角英数字で入力してください");
-    }
-    return isValid;
-  };
 
   const handleEmailChange = (e) => {
-    const newValue = e.target.value;
-    setEmail(newValue);
-    if (errorMessage) {
-      if (errorMessage.includes("入力してください") && newValue) {
-        setErrorMessage("");
-      } else if (errorMessage.includes("255文字以内") && newValue.length <= 255) {
-        setErrorMessage("");
-      }
+    const val = e.target.value;
+    setEmail(val);
+
+    if (serverError) setServerError("");
+
+    let newEmailError = "";
+    
+    if (val.length > 255) {
+      newEmailError = "メールアドレスは255文字以内で入力してください。";
+    } 
+    else if (errors.email && val) {
+       newEmailError = ""; 
     }
+
+    setErrors(prev => ({ ...prev, email: newEmailError }));
   };
 
   const handlePasswordChange = (e) => {
-    const newValue = e.target.value;
-    setPassword(newValue);
-    if (errorMessage) {
-      if (errorMessage.includes("入力してください") && newValue) {
-        setErrorMessage("");
-      } else if (errorMessage.includes("8～16文字の半角英数字")) {
-        const regex = /^[a-zA-Z0-9]{8,16}$/;
-        if (regex.test(newValue)) setErrorMessage("");
-      }
-    }
-  };
+    const val = e.target.value;
+    setPassword(val);
 
-  const handleEmailBlur = () => validateMailAddress(email);
-  const handlePasswordBlur = () => validatePassword(password);
+    if (serverError) setServerError("");
+
+    let newPassError = "";
+
+    if (val.length > 0 && !/^[a-zA-Z0-9]*$/.test(val)) {
+      newPassError = "半角英数字のみ使用可能です";
+    }
+    else if (val.length > 16) {
+      newPassError = "パスワードは16文字以内で入力してください";
+    }
+    else if (val.length >= 8) {
+        newPassError = "";
+    } else {
+        newPassError = errors.password === "パスワードは8～16文字の半角英数字で入力してください" 
+          ? errors.password 
+          : "";
+    }
+
+    setErrors(prev => ({ ...prev, password: newPassError }));
+  };
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("savedEmail");
@@ -161,22 +162,38 @@ const Login = () => {
       return true;
     } else {
       console.error("ログイン失敗:", data);
-      setErrorMessage("ログインに失敗しました。");
+      setServerError("メールアドレスまたはパスワードが正しくありません。");
       return false;
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage("");
+    setServerError("");
+    
+    // Final Validation on Submit
+    const newErrors = {};
+    let hasError = false;
 
-    if (!email || !password) {
-      setErrorMessage("メールアドレスとパスワードを入力してください");
-      return;
+    if (!email) {
+      newErrors.email = "メールアドレスを入力してください";
+      hasError = true;
+    } else if (email.length > 255) {
+      newErrors.email = "メールアドレスは255文字以内で入力してください。";
+      hasError = true;
     }
-    if (!validateMailAddress(email) || !validatePassword(password)) {
-      return;
+
+    if (!password) {
+      newErrors.password = "パスワードを入力してください";
+      hasError = true;
+    } else if (!/^[a-zA-Z0-9]{8,16}$/.test(password)) {
+      newErrors.password = "パスワードは8～16文字の半角英数字で入力してください";
+      hasError = true;
     }
+
+    setErrors(newErrors);
+
+    if (hasError) return;
 
     setIsLoading(true);
 
@@ -204,35 +221,38 @@ const Login = () => {
           const loginResult = await performLogin(email, password);
           if (!loginResult) {
             setActiveTab("login");
-            setErrorMessage("登録は成功 | ログイン失敗、もう一度やり直してください。");
+            setServerError("登録は成功しましたが、ログインに失敗しました。");
           }
         } else {
           console.error("登録エラー:", data);
           if (data.errors) {
+            const serverFieldErrors = {};
             if (data.errors.mail_address) {
               const msg = data.errors.mail_address[0];
-              if (msg.includes("taken")) {
-                setErrorMessage(msg);
-              }
-              else {
-                setErrorMessage("このメールアドレスは既に使用されています。");
-              }
-            } else if (data.errors.password) {
-              setErrorMessage(data.errors.password[0]);
-            } else {
-              const errorValues = Object.values(data.errors).flat();
-              setErrorMessage(errorValues[0] || "入力内容を確認してください。");
+              serverFieldErrors.email = msg.includes("taken") 
+                ? "このメールアドレスは既に使用されています。" 
+                : msg;
+            }
+            if (data.errors.password) {
+              serverFieldErrors.password = data.errors.password[0];
+            }
+            
+            setErrors(serverFieldErrors);
+            
+            if (!data.errors.mail_address && !data.errors.password) {
+                const errorValues = Object.values(data.errors).flat();
+                setServerError(errorValues[0] || "入力内容を確認してください。");
             }
           } else if (data.message) {
-            setErrorMessage(data.message);
+            setServerError(data.message);
           } else {
-            setErrorMessage("登録処理に失敗しました。");
+            setServerError("登録処理に失敗しました。");
           }
         }
       }
     } catch (error) {
       console.error("通信エラー", error);
-      setErrorMessage("サーバーに接続できませんでした。");
+      setServerError("サーバーに接続できませんでした。");
     } finally {
       setIsLoading(false);
     }
@@ -242,14 +262,15 @@ const Login = () => {
     setActiveTab(tab);
     setEmail("");
     setPassword("");
-    setErrorMessage("");
+    setErrors({ email: "", password: "" });
+    setServerError("");
     setYear(null);
   };
 
   return (
     <div className={styles.loginScrollRoot}>
       <div className={styles.loginPageContainer}>
-        {/* ログイン・新規登録タブ (モダンデザイン化) */}
+        {/* ログイン・新規登録タブ */}
         <div className={styles.tabContainer}>
           <div className={styles.toggleGroup}>
             <button
@@ -269,63 +290,82 @@ const Login = () => {
           <div className={styles.mainContainer}>
             <div className={styles.mainInner}>
               <div className={styles.mainHeader}>
-              <img src={myIcon} className={styles.myIcon} alt="App Logo" />
-              <h1 className={styles.mainTitle}>おうちの台帳</h1>
-            </div>
+                <img src={myIcon} className={styles.myIcon} alt="App Logo" />
+                <h1 className={styles.mainTitle}>おうちの台帳</h1>
+              </div>
 
-              {/* エラーメッセージ表示エリア */}
-              {errorMessage && (
+              {/* サーバー/グローバルエラーのみトップに表示 */}
+              {serverError && (
                 <div className={styles.errorMessageArea}>
                   <CircleAlert size={20} flexShrink={0} />
-                  <span>{errorMessage}</span>
+                  <span>{serverError}</span>
                 </div>
               )}
 
               {/* 入力欄 */}
               <form onSubmit={handleSubmit} className={styles.inputSection}>
                 {/* メール */}
-                <div className={styles.inputWrapper}>
-                  <span className={styles.icon}><Mail size={20} /></span>
-                  <input
-                    type="email"
-                    placeholder="メールアドレス"
-                    value={email}
-                    onChange={handleEmailChange}
-                    onBlur={handleEmailBlur}
-                    onFocus={handleFocus}
-                    className={styles.inputField}
-                  />
+                <div className={styles.inputGroup}>
+                  <div className={styles.inputWrapper}>
+                    <span className={styles.icon}><Mail size={20} /></span>
+                    <input
+                      type="email"
+                      placeholder="メールアドレス"
+                      value={email}
+                      onChange={handleEmailChange}
+                      onFocus={handleFocus}
+                      className={`${styles.inputField} ${errors.email ? styles.inputError : ""}`}
+                    />
+                  </div>
+                  {/* Inline Error Message */}
+                  {errors.email && (
+                    <div className={styles.inlineError}>
+                      <CircleAlert size={14} />
+                      <span>{errors.email}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* パスワード */}
-                <div className={styles.inputWrapper}>
-                  <span className={styles.icon}><Lock size={20} /></span>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="パスワード"
-                    value={password}
-                    onChange={handlePasswordChange}
-                    onBlur={handlePasswordBlur}
-                    onFocus={handleFocus}
-                    className={styles.inputField}
-                  />
-                  <span
-                    onClick={() => setShowPassword(!showPassword)}
-                    className={styles.eyeIcon}
-                  >
-                    {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
-                  </span>
-                </div>
-                
-                <div className={styles.passwordRequirements}>
-                  ※8～16文字の半角英数字
+                <div className={styles.inputGroup}>
+                  <div className={styles.inputWrapper}>
+                    <span className={styles.icon}><Lock size={20} /></span>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="パスワード"
+                      value={password}
+                      onChange={handlePasswordChange}
+                      onFocus={handleFocus}
+                      className={`${styles.inputField} ${errors.password ? styles.inputError : ""}`}
+                    />
+                    <span
+                      onClick={() => setShowPassword(!showPassword)}
+                      className={styles.eyeIcon}
+                    >
+                      {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                    </span>
+                  </div>
+
+                  {/* Inline Error Message OR Helper Text */}
+                  {errors.password ? (
+                    <div className={styles.inlineError}>
+                      <CircleAlert size={14} />
+                      <span>{errors.password}</span>
+                    </div>
+                  ) : (
+                    <div className={styles.passwordRequirements}>
+                      ※8～16文字の半角英数字
+                    </div>
+                  )}
                 </div>
 
                 {/* 新規登録表示部分 / 自動ログインチェックボックス */}
                 {activeTab === "register" ? (
-                  <div className={styles.inputWrapper}>
-                    <span className={styles.icon}><Cake size={20} /></span>
-                    <YearSelect selectedYear={year} setSelectedYear={setYear} />
+                  <div className={styles.inputGroup}>
+                    <div className={styles.inputWrapper}>
+                      <span className={styles.icon}><Cake size={20} /></span>
+                      <YearSelect selectedYear={year} setSelectedYear={setYear} />
+                    </div>
                   </div>
                 ) : (
                   <div className={styles.loginOptionsRow}>

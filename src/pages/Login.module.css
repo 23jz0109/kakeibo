@@ -144,7 +144,7 @@
   -webkit-text-fill-color: transparent;
 }
 
-/* エラーメッセージエリア */
+/* サーバー/全体エラーメッセージエリア */
 .errorMessageArea {
   background-color: #fef2f2;
   color: #ef4444;
@@ -153,7 +153,7 @@
   border-radius: 10px;
   border: 1px solid #fee2e2;
   display: flex;
-  align-items: start;
+  align-items: center;
   gap: 0.5rem;
   font-size: 0.85rem;
   line-height: 1.4;
@@ -170,6 +170,12 @@
   gap: 1.25rem;
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .inputWrapper {
@@ -204,6 +210,33 @@ input.inputField {
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
+/* エラー時の入力欄スタイル */
+.inputError {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+
+.inputError:focus {
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+}
+
+/* インラインエラーメッセージ */
+.inlineError {
+  color: #ef4444;
+  font-size: 0.8rem;
+  margin-top: 0.4rem;
+  margin-left: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* アイコン */
 .icon {
   position: absolute;
@@ -218,6 +251,11 @@ input.inputField {
 
 .inputWrapper:focus-within .icon {
   color: #3b82f6;
+}
+
+/* エラー時はアイコンも赤くする（任意） */
+.inputGroup:has(.inputError) .icon {
+  color: #ef4444;
 }
 
 /* パスワード表示切替 */
@@ -243,42 +281,8 @@ input.inputField {
 .passwordRequirements {
   font-size: 0.75rem;
   color: #94a3b8;
-  margin-top: -0.8rem;
+  margin-top: 0.4rem;
   margin-left: 0.5rem;
-}
-
-/* 送信ボタン */
-.submitButton {
-  width: 100%;
-  min-height: 52px;
-  margin-top: 1rem;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
-}
-
-.submitButton:hover {
-  background-color: #2563eb;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.3);
-}
-
-.submitButton:active {
-  background-color: #1d4ed8;
-  transform: scale(0.98);
-}
-
-.submitButton:disabled {
-  background-color: #cbd5e1;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
 }
 
 /* 年選択 */
