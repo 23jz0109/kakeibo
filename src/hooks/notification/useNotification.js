@@ -9,10 +9,11 @@ export const useNotification = () => {
   const [notificationHistory, setNotificationHistory] = useState([]);
   const [unreadCount, setUnreadCount] = useState(unread);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); // エラー管理用ステート追加
   const [productList, setProductList] = useState([]);
   const [suggestedPeriod, setSuggestedPeriod] = useState(null);
 
-  const authFetch = useAuthFetch(); // フックを使用
+  const authFetch = useAuthFetch(); 
 
   // UTC -> Local 変換ヘルパー
   const getLocalTimeFromUtc = (utcHour, utcMin) => {
@@ -23,10 +24,12 @@ export const useNotification = () => {
 
   // 補充通知設定一覧取得
   const fetchNotifications = useCallback(async (isSilent = false) => {
-    if (!isSilent) setLoading(true);
+    if (!isSilent) {
+      setLoading(true);
+      setError(null); // リセット
+    }
 
     try {
-      // authFetch を使用 (Authorizationヘッダーは自動付与)
       const response = await authFetch(`${API_BASE_URL}/notification`, {
         method: "GET",
         headers: {
@@ -34,9 +37,8 @@ export const useNotification = () => {
         }
       });
 
-      // authFetch は 401/404 等で null を返す場合がある
       if (!response) {
-        if (!isSilent) setLoading(false);
+        // authFetch が null を返す場合（401等）
         return;
       }
 
@@ -54,11 +56,9 @@ export const useNotification = () => {
 
           let dbUtcHour = scheduledDate.getUTCHours()
           let dbUtcMin = scheduledDate.getUTCMinutes();
-          // console.log("UTC time:" + dbUtcHour + ":" + dbUtcMin);
 
           // ローカル時間に変換
           const localTime = getLocalTimeFromUtc(dbUtcHour, dbUtcMin);
-          // console.log("JST time:" + localTime.hour + ":" + localTime.min)
 
           return {
             ...n,
@@ -81,7 +81,8 @@ export const useNotification = () => {
     }
     catch (err) {
       console.error(err);
-      if (!isSilent) alert("データの読み込みに失敗しました");
+      // alertではなくステートにセット
+      if (!isSilent) setError("ネットワーク接続を確認して\n再読み込みしてください");
     }
     finally {
       if (!isSilent) setLoading(false);
@@ -135,7 +136,6 @@ export const useNotification = () => {
 
   // 補充通知の追加・更新
   const saveNotification = async ({ title, period, hour, min, editTargetId, originalItem }) => {
-    // 日付計算ロジック
     let targetDate;
     if (editTargetId && originalItem && originalItem._scheduledDate) {
       targetDate = new Date(originalItem._scheduledDate);
@@ -145,14 +145,12 @@ export const useNotification = () => {
       }
     }
     else {
-      // 新規
       targetDate = new Date();
       targetDate.setDate(targetDate.getDate() + period);
     }
 
     targetDate.setHours(Number(hour), Number(min), 0, 0);
 
-    // UTC文字列作成
     const yyyy = targetDate.getUTCFullYear();
     const mm = String(targetDate.getUTCMonth() + 1).padStart(2, "0");
     const dd = String(targetDate.getUTCDate()).padStart(2, "0");
@@ -184,12 +182,12 @@ export const useNotification = () => {
         body: JSON.stringify(bodyData)
       });
 
-      if (!response) return { success: false, message: "通信エラー" }; // authFetch失敗時
+      if (!response) return { success: false, message: "通信エラー" };
 
       const resData = await response.json();
 
       if (response.ok) {
-        await fetchNotifications(true); // リスト更新
+        await fetchNotifications(true);
         return { success: true };
       }
       else {
@@ -209,7 +207,6 @@ export const useNotification = () => {
     const nextVal = currentVal === 1 ? 0 : 1;
     const originalList = [...notifications];
     
-    // 楽観的UI更新
     setNotifications(prev => prev.map(n => n._id === targetId ? { ...n, notification_enable: nextVal, NOTIFICATION_ENABLE: nextVal } : n));
 
     try {
@@ -228,7 +225,7 @@ export const useNotification = () => {
       return { success: true };
     }
     catch {
-      setNotifications(originalList); // ロールバック
+      setNotifications(originalList);
       return { success: false, message: "更新に失敗しました" };
     }
   };
@@ -237,7 +234,6 @@ export const useNotification = () => {
   const refillNotification = async (item) => {
     const period = Number(item.notification_period);
     
-    // 設定時間取得
     let targetLocalHour = item._localHour;
     let targetLocalMin = item._localMin;
 
@@ -250,14 +246,11 @@ export const useNotification = () => {
       targetLocalMin = tempDate.getMinutes();
     }
 
-    // 期間分の日付を進めます
     let targetDate = new Date();
     targetDate.setDate(targetDate.getDate() + period);
 
-    // 新たな日時をセット
     targetDate.setHours(targetLocalHour, targetLocalMin, 0, 0);
 
-    // UTC文字列を作成
     const yyyy = targetDate.getUTCFullYear();
     const mm = String(targetDate.getUTCMonth() + 1).padStart(2, "0");
     const dd = String(targetDate.getUTCDate()).padStart(2, "0");
@@ -325,7 +318,10 @@ export const useNotification = () => {
 
   // 通知一覧 (履歴)
   const fetchNotificationHistory = useCallback(async (isSilent = false) => {
-    if (!isSilent) setLoading(true);
+    if (!isSilent) {
+      setLoading(true);
+      setError(null); // リセット
+    }
 
     try {
       const response = await authFetch(`${API_BASE_URL}/notification/list`, {
@@ -353,11 +349,14 @@ export const useNotification = () => {
         });
 
         setNotificationHistory(formattedList);
+      } else {
+        throw new Error("履歴の取得に失敗しました");
       }
     }
     catch (err) {
       console.error("履歴取得エラー", err);
-      if (!isSilent) alert("データの読み込みに失敗しました");
+      // alertではなくステートにセット
+      if (!isSilent) setError("データの読み込みに失敗しました");
     }
     finally {
       if (!isSilent) setLoading(false);
@@ -366,10 +365,8 @@ export const useNotification = () => {
 
   // 通知を既読にする
   const markAsRead = async (notificationId) => {
-    // UI更新
     const targetIdStr = String(notificationId);
 
-    // 現在の画面（通知一覧）はすぐに書き換える
     setNotificationHistory(prev =>
       prev.map(n => {
         const currentId = String(n.id || n.ID || n._id);
@@ -379,11 +376,9 @@ export const useNotification = () => {
         return n;
       })
     );
-    // 未読カウントを引く
     setUnreadCount(prev => Math.max(0, prev - 1));
 
     try {
-      // APIへ送信
       const response = await authFetch(`${API_BASE_URL}/notification/list`, {
         method: "PATCH",
         headers: {
@@ -393,9 +388,7 @@ export const useNotification = () => {
       });
 
       if (response) {
-        //  サーバーの更新が終わってから合図を出す
         window.dispatchEvent(new Event("notificationUpdated"));
-        // await fetchNotificationHistory(true); // 必要なら再取得
       }
 
     } catch (err) {
@@ -417,7 +410,6 @@ export const useNotification = () => {
 
       if (!response || !response.ok) {
         console.error("削除失敗");
-        // 失敗したらリロード等の処理が必要かも
       }
     }
     catch (err) {
@@ -437,7 +429,6 @@ export const useNotification = () => {
 
       if (response && response.ok) {
         const data = await response.json();
-        // キャッシュにセットする
         unread = data.count;
         setUnreadCount(unread);
       }
@@ -450,6 +441,7 @@ export const useNotification = () => {
   return {
     notifications,
     loading,
+    error,
     productList,
     suggestedPeriod,
     setSuggestedPeriod,

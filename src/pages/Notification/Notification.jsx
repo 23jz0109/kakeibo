@@ -11,6 +11,7 @@ import {
   sanitizeNumericInput 
 } from '../../constants/validationsLimits';
 import SubmitButton from '../../components/common/SubmitButton';
+import ErrorDisplay from '../../components/common/ErrorDisplay';
 
 // 時間選択用の汎用プルダウンコンポーネント
 const TimeDropdown = ({ value, options, onChange }) => {
@@ -68,6 +69,7 @@ const Notification = () => {
     notificationHistory,
     notifications,
     loading,
+    error: apiError, // エラーステートを受け取り
     suggestedPeriod,
     setSuggestedPeriod,
     fetchNotificationHistory,
@@ -123,6 +125,15 @@ const Notification = () => {
       fetchProductCandidates();
     }
   }, [showModal, fetchProductCandidates]);
+
+  // リトライハンドラ
+  const handleRetry = () => {
+    if (activeTab === 'settings') {
+      fetchNotifications();
+    } else {
+      fetchNotificationHistory();
+    }
+  };
 
   // ハンドラ
   const handleCardClick = (id) => {
@@ -435,21 +446,33 @@ const Notification = () => {
           {/* ローディング */}
           {loading && <p className={styles.loadingText}>読み込み中...</p>}
 
-          {/* 表示 */}
+          {/* コンテンツ表示 */}
           {!loading && (
             <div className={styles.viewContainer}>
-              {/* 通知一覧 */}
-              {activeTab === 'list' && (
-                <div className={styles.contentWrapper}>
-                  {renderNotificationList()}
-                </div>
-              )}
+              {apiError ? (
+                // エラー発生時の表示
+                <ErrorDisplay 
+                  message="データを読み込めませんでした"
+                  description={apiError}
+                  onRetry={handleRetry}
+                />
+              ) : (
+                // 正常時の表示
+                <>
+                  {/* 通知一覧 */}
+                  {activeTab === 'list' && (
+                    <div className={styles.contentWrapper}>
+                      {renderNotificationList()}
+                    </div>
+                  )}
 
-              {/* 補充通知設定 */}
-              {activeTab === 'settings' && (
-                <div className={styles.contentWrapper}>
-                  {renderRefillNotificationSettingList()}
-                </div>
+                  {/* 補充通知設定 */}
+                  {activeTab === 'settings' && (
+                    <div className={styles.contentWrapper}>
+                      {renderRefillNotificationSettingList()}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}

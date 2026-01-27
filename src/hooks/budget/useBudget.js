@@ -10,7 +10,6 @@ export const useBudgetApi = () => {
 
   // 共通レスポンス処理
   const handleResponse = async (res) => {
-    // authFetchがnullを返した場合はリダイレクト処理済みなので中断
     if (!res) throw new Error("Redirecting..."); 
     
     const json = await res.json().catch(() => ({}));
@@ -28,7 +27,7 @@ export const useBudgetApi = () => {
       const res = await authFetch(`${BASE_URL}/budget`, {
         method: "GET",
       });
-      if (!res) return []; // リダイレクト時は空配列を返す
+      if (!res) return []; 
 
       const json = await handleResponse(res);
       return json.data || [];
@@ -46,6 +45,7 @@ export const useBudgetApi = () => {
 
   // ルール一覧取得
   const fetchRules = useCallback(async () => {
+    setError(null);
     try {
       const res = await authFetch(`${BASE_URL}/budget/rules`, {
         method: "GET",
@@ -56,12 +56,14 @@ export const useBudgetApi = () => {
       return json.data || [];
     }
     catch (err) {
-      console.error("Rules fetch error", err);
+      if (err.message !== "Redirecting...") {
+        setError(err.message);
+      }
       return [];
     }
   }, [authFetch]);
 
-  // 作成
+  // 新規作成
   const createBudget = useCallback(async (data) => {
     setLoading(true);
     setError(null);
@@ -94,7 +96,7 @@ export const useBudgetApi = () => {
     setError(null);
     try {
       const res = await authFetch(`${BASE_URL}/budget`, {
-        method: "PATCH",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           "X-Budget-ID": id,
@@ -118,7 +120,6 @@ export const useBudgetApi = () => {
 
   // 通知オンオフ
   const toggleBudget = useCallback(async (id) => {
-    // setLoading(true); // UIのちらつき防止のためLoadingは操作しない場合が多い
     setError(null);
     try {
       const res = await authFetch(`${BASE_URL}/budget/toggle`, {
@@ -166,13 +167,13 @@ export const useBudgetApi = () => {
   }, [authFetch]);
 
   return {
-    loading,
-    error,
     fetchBudgets,
     fetchRules,
     createBudget,
     updateBudget,
     toggleBudget,
     deleteBudget,
+    loading,
+    error
   };
 };
