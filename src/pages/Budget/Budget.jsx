@@ -8,7 +8,7 @@ import { getIcon } from "../../constants/categories";
 import { useBudgetApi } from "../../hooks/budget/useBudget";
 import { useFixedCostApi } from "../../hooks/budget/useFixedCost";
 import { useCategories } from "../../hooks/common/useCategories";
-// [追加] バリデーション関連のインポート
+// バリデーション関連のインポート
 import { 
   VALIDATION_LIMITS, 
   validateAmount, 
@@ -16,7 +16,7 @@ import {
 } from "../../constants/validationsLimits";
 import SubmitButton from "../../components/common/SubmitButton";
 
-// [変更] hasError プロパティを受け取れるように変更
+//  hasError プロパティを受け取れるように変更
 const CustomDropdown = ({ value, options, onChange, placeholder = "選択してください", hasError }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState({});
@@ -93,7 +93,7 @@ const CustomDropdown = ({ value, options, onChange, placeholder = "選択して�
     <>
       <div 
         ref={triggerRef}
-        // [変更] エラー時に赤枠スタイルを適用
+        //  エラー時に赤枠スタイルを適用
         className={`${styles.dropdownValue} ${hasError ? styles.inputErrorBorder : ''}`} 
         onClick={handleToggle}
       >
@@ -237,7 +237,6 @@ const Budget = () => {
     return found ? found.rule_name : "";
   };
 
-  // ... handleToggle, renderBudgetItem, renderFixedItem などは変更なし ...
   const handleToggle = async (item) => {
     const newStatus = Number(item.notification_enable) === 1 ? 0 : 1;
     setData(prevData => prevData.map(d =>
@@ -344,13 +343,13 @@ const Budget = () => {
 
     let cleanValue = value;
 
-    // [追加] sanitizeNumericInput を使用
+    // sanitizeNumericInput を使用
     if (name === 'amount' || name === 'customDays') {
       cleanValue = sanitizeNumericInput(value);
     }
 
     setFormData(prev => ({ ...prev, [name]: cleanValue }));
-    validateField(name, cleanValue); // [追加] 変更時バリデーション
+    validateField(name, cleanValue); //  変更時バリデーション
   };
 
   const handleCategorySelect = (id) => {
@@ -621,7 +620,7 @@ const Budget = () => {
 
             {activeTab === 'budget' && (
               <div className={styles.formGroup}>
-                <label className={styles.label}>予算ルール設定</label>
+                <label className={styles.label}>集計ルール設定</label>
                 <div className={styles.flexRow}>
                   <div className={styles.flexItem}>
                     <CustomDropdown
