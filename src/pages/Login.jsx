@@ -249,27 +249,29 @@ const Login = () => {
   return (
     <div className={styles.loginScrollRoot}>
       <div className={styles.loginPageContainer}>
-        {/* ログイン・新規登録タブ */}
+        {/* ログイン・新規登録タブ (モダンデザイン化) */}
         <div className={styles.tabContainer}>
-          <button
-            className={`${styles.tabButton} ${activeTab === "login" ? styles.active : ""}`}
-            onClick={() => handleTabChange("login")}>
-            ログイン
-          </button>
-          <button
-            className={`${styles.tabButton} ${activeTab === "register" ? styles.active : ""}`}
-            onClick={() => handleTabChange("register")}>
-            新規登録
-          </button>
+          <div className={styles.toggleGroup}>
+            <button
+              className={`${styles.tabButton} ${activeTab === "login" ? styles.active : ""}`}
+              onClick={() => handleTabChange("login")}>
+              ログイン
+            </button>
+            <button
+              className={`${styles.tabButton} ${activeTab === "register" ? styles.active : ""}`}
+              onClick={() => handleTabChange("register")}>
+              新規登録
+            </button>
+          </div>
         </div>
 
         <div className={styles.cardWrapper}>
           <div className={styles.mainContainer}>
             <div className={styles.mainInner}>
               <div className={styles.mainHeader}>
-                {/* 画像サイズを指定し、デザイン崩れを防止 */}
-                <img src={myIcon} className={styles.myIcon} alt="App Logo" />
-              </div>
+              <img src={myIcon} className={styles.myIcon} alt="App Logo" />
+              <h1 className={styles.mainTitle}>おうちの台帳</h1>
+            </div>
 
               {/* エラーメッセージ表示エリア */}
               {errorMessage && (
@@ -290,7 +292,7 @@ const Login = () => {
                     value={email}
                     onChange={handleEmailChange}
                     onBlur={handleEmailBlur}
-                    onFocus={handleFocus} // 追加
+                    onFocus={handleFocus}
                     className={styles.inputField}
                   />
                 </div>
@@ -304,7 +306,7 @@ const Login = () => {
                     value={password}
                     onChange={handlePasswordChange}
                     onBlur={handlePasswordBlur}
-                    onFocus={handleFocus} // 追加
+                    onFocus={handleFocus}
                     className={styles.inputField}
                   />
                   <span
