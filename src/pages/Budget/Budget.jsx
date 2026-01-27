@@ -621,7 +621,7 @@ const Budget = () => {
 
             {activeTab === 'budget' && (
               <div className={styles.formGroup}>
-                <label className={styles.label}>予算ルール設定</label>
+                <label className={styles.label}>集計ルール設定</label>
                 <div className={styles.flexRow}>
                   <div className={styles.flexItem}>
                     <CustomDropdown
