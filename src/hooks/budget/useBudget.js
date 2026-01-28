@@ -96,7 +96,7 @@ export const useBudgetApi = () => {
     setError(null);
     try {
       const res = await authFetch(`${BASE_URL}/budget`, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           "X-Budget-ID": id,
