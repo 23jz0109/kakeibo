@@ -309,7 +309,7 @@
 
 .modalHeader {
   display: flex;
-  justify-content: space-between;
+  gap: 1rem;
   align-items: center;
   padding-bottom: 0.4rem;
   border-bottom: 1.5px solid #e5e7eb;
@@ -335,6 +335,23 @@
 
 .deleteBtn:hover {
   background: #fecaca;
+}
+
+.closeButton {
+  display: flex;
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  color: #6b7280;
+  transition: all 0.3s;
+}
+
+.closeButton:hover {
+  color: #111827;
 }
 
 .staticInputArea {
