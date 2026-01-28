@@ -50,9 +50,15 @@ const DayPicker = ({ date, onChange }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+
   const formatDate = (date) => {
-    const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
-    return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} (${weekdays[date.getDay()]})`;
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    const w = weekdays[date.getDay()];
+    // モダンな表記に変更 (例: 2025.01.28 (水))
+    return `${y}.${m}.${d} (${w})`;
   };
 
   const emitChange = (d) => {
@@ -79,7 +85,6 @@ const DayPicker = ({ date, onChange }) => {
   };
 
   const selectDate = (d) => {
-    // 未来の日付なら何もしない
     if (d > today) return;
 
     setSelectedDate(d);
@@ -105,16 +110,24 @@ const DayPicker = ({ date, onChange }) => {
     return days;
   };
 
-  const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
-
-  // 右矢印（翌日）ボタンを無効化するかどうか
   const isNextDayDisabled = selectedDate.getTime() >= today.getTime();
+
+  const getDateStatus = () => {
+    const timeDiff = today.getTime() - selectedDate.getTime();
+    const dayDiff = timeDiff / (1000 * 3600 * 24);
+
+    if (dayDiff < 1) return "today";
+    if (dayDiff < 7) return "recent";
+    return "old";
+  };
+  const dateStatus = getDateStatus();
 
   return (
     <div ref={pickerRef} className={styles["date-picker-container"]}>
-      <div className={styles["date-picker-display"]}>
+      {/* data-status属性でCSSを切り替える */}
+      <div className={styles["date-picker-display"]} data-status={dateStatus}>
         <button className={styles["date-nav-button"]} onClick={() => changeDate(-1)}>
-          <ChevronLeft size={20} />
+          <ChevronLeft size={18} />
         </button>
         
         <button 
@@ -127,10 +140,9 @@ const DayPicker = ({ date, onChange }) => {
         <button 
           className={styles["date-nav-button"]} 
           onClick={() => changeDate(1)}
-          disabled={isNextDayDisabled} // 今日なら無効化
-          style={{ opacity: isNextDayDisabled ? 0.3 : 1 }}
+          disabled={isNextDayDisabled}
         >
-          <ChevronRight size={20} />
+          <ChevronRight size={18} />
         </button>
       </div>
 
@@ -165,14 +177,14 @@ const DayPicker = ({ date, onChange }) => {
             {generateCalendarDays().map((d, i) => {
               if (!d) return <div key={i} className={styles["calendar-day-empty"]} />;
 
-              const isFuture = d > today; // 未来判定
+              const isFuture = d > today; 
               const isToday = d.getTime() === today.getTime();
               const isSelected = d.getTime() === selectedDate.getTime();
               const dayOfWeek = d.getDay();
               
               let dayClass = styles["calendar-day"];
               if (isFuture) {
-                dayClass += ` ${styles["disabled"]}`; // 無効クラス追加
+                dayClass += ` ${styles["disabled"]}`;
               } else {
                 if (dayOfWeek === 0) dayClass += ` ${styles["sunday"]}`;
                 if (dayOfWeek === 6) dayClass += ` ${styles["saturday"]}`;
