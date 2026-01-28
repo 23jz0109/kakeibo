@@ -43,6 +43,7 @@ export const useFixedCostApi = () => {
 
   // ルール一覧取得
   const fetchRules = useCallback(async () => {
+    setError(null);
     try {
       const res = await authFetch(`${BASE_URL}/fixedcost/rules`, {
         method: "GET",
@@ -53,12 +54,14 @@ export const useFixedCostApi = () => {
       return json.data || [];
     }
     catch (err) {
-      console.error(err);
+      if (err.message !== "Redirecting...") {
+        setError(err.message);
+      }
       return [];
     }
   }, [authFetch]);
 
-  // 作成
+  // 新規作成
   const createFixedCost = useCallback(async (data) => {
     setLoading(true);
     setError(null);
@@ -91,7 +94,7 @@ export const useFixedCostApi = () => {
     setError(null);
     try {
       const res = await authFetch(`${BASE_URL}/fixedcost`, {
-        method: "PATCH",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           "X-Fixed-Cost-ID": id,
@@ -162,13 +165,13 @@ export const useFixedCostApi = () => {
   }, [authFetch]);
 
   return {
-    loading,
-    error,
     fetchFixedCosts,
     fetchRules,
     createFixedCost,
     updateFixedCost,
     toggleFixedCost,
     deleteFixedCost,
+    loading,
+    error
   };
 };

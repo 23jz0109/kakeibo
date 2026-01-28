@@ -3,6 +3,7 @@ import Layout from "../../components/common/Layout";
 import MonthPicker from "../../components/common/MonthPicker";
 import CalendarView from "../../components/common/CalendarView";
 import GraphView from "../../components/common/GraphView";
+import ErrorDisplay from "../../components/common/ErrorDisplay"; // 共通エラーコンポーネント
 import { getIcon } from "../../constants/categories";
 import { FileInput, FileOutput, Trash2 } from "lucide-react";
 import { useGetRecord } from "../../hooks/history/useGetRecord";
@@ -129,6 +130,7 @@ const History = () => {
 
   const {
     isLoading,
+    error, // エラーオブジェクトを取得
     calendarDailySum,
     monthlyRecordList,
     graphCategorySum,
@@ -172,19 +174,6 @@ const History = () => {
     }
   };
 
-  // const handleRecordClick = async (recordId) => {
-  //   try {
-  //     const detailData = await getRecordDetail(recordId);
-  //     console.log(
-  //       "【詳細データ取得成功】",
-  //       JSON.stringify(detailData, null, 2)
-  //     );
-  //   }
-  //   catch (error) {
-  //     console.error("詳細取得に失敗しました", error);
-  //     alert("詳細データの取得に失敗しました。");
-  //   }
-  // };
   const handleRecordClick = async (recordId) => {
     // スワイプを閉じる
     setOpenSwipeId(null);
@@ -383,8 +372,10 @@ const History = () => {
           )}
           
           <div className={styles.scroll}>
-            {/* グラフ/カレンダービュー */}
-            {isLoading ? (
+            {/* 条件分岐: エラー -> ローディング -> コンテンツ */}
+            {error ? (
+              <ErrorDisplay onRetry={refetch} />
+            ) : isLoading ? (
               <p className={styles["loading-text"]}>読み込み中...</p>
             ) : (
               <div className={styles.viewContainer}>
@@ -444,7 +435,7 @@ const History = () => {
                             {records.map((r, index) => {
                               const isIncome = Number(r.type_id) === 1;
                               const IconComponent = isIncome ? FileInput : FileOutput;
-                              const iconBgColor = isIncome ? "#d1fae5" : "#fee2e2"; 
+                              // const iconBgColor = isIncome ? "#d1fae5" : "#fee2e2"; 
                               const iconColor = isIncome ? "#10b981" : "#ef4444";
 
                               const isExpanded = expandedRecordId === r.record_id;
@@ -494,7 +485,7 @@ const History = () => {
                                         ) : (
                                           <>
                                             {detailData?.receipts?.map((receipt, rIdx) => (
-                                              <div key={rIdx} className={styles.receiptBlock}>                                           
+                                              <div key={rIdx} className={styles.receiptBlock}>                          
                                                 <div className={styles.productList}>
                                                   {receipt.products.map((p, pIdx) => {
                                                     const subTotal = p.product_price * p.quantity - (p.discount || 0);
