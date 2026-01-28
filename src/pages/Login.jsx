@@ -190,13 +190,13 @@ const Login = () => {
       hasError = true;
     }
 
-    if (!password) {
-      newErrors.password = "パスワードを入力してください";
-      hasError = true;
-    } else if (!/^[a-zA-Z0-9]{8,16}$/.test(password)) {
-      newErrors.password = "パスワードは8～16文字の半角英数字で入力してください";
-      hasError = true;
-    }
+    // if (!password) {
+    //   newErrors.password = "パスワードを入力してください";
+    //   hasError = true;
+    // } else if (!/^[a-zA-Z0-9]{8,16}$/.test(password)) {
+    //   newErrors.password = "パスワードは8～16文字の半角英数字で入力してください";
+    //   hasError = true;
+    // }
 
     setErrors(newErrors);
 
@@ -344,6 +344,7 @@ const Login = () => {
                       onChange={handlePasswordChange}
                       // onFocus={handleFocus}
                       className={`${styles.inputField} ${errors.password ? styles.inputError : ""}`}
+                      maxLength={16}
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
