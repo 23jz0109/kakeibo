@@ -558,6 +558,16 @@ const Budget = () => {
   };
 
   const renderModal = () => {
+    const activeFixedOptions = fixedCostRules
+      .filter(rule => {
+        if (fixedRuleType === 'monthly_fixed') return rule.rule_name === 'fixed_day';
+        if (fixedRuleType === 'weekly_fixed') return rule.rule_name === 'week_day';
+        return false;
+      })
+      .map(rule => ({
+        value: rule.id,
+        label: rule.rule_name_jp
+      }));
     const modalContent = (
       <div className={styles.modalOverlay} onClick={handleCloseModal}>
         <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
