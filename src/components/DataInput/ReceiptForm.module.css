@@ -333,10 +333,6 @@
   transition: background 0.2s;
 }
 
-.deleteBtn:hover {
-  background: #fecaca;
-}
-
 .staticInputArea {
   display: flex;
   flex-direction: column;

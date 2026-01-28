@@ -202,14 +202,14 @@
 }
 
 .deleteButton {
-  background: none;
-  border: none;
-  cursor: pointer;
+  background: #fee2e2;
   color: #ef4444;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.2s;
 }
 
 .closeButton {
