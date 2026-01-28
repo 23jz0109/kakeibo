@@ -82,12 +82,12 @@ const Login = () => {
   
   const [isLoading, setIsLoading] = useState(false);
 
-  // モバイル対応: 入力欄にフォーカスが当たったら画面中央へスクロール
-  const handleFocus = (e) => {
-    setTimeout(() => {
-      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 300);
-  };
+  // // モバイル対応: 入力欄にフォーカスが当たったら画面中央へスクロール
+  // const handleFocus = (e) => {
+  //   setTimeout(() => {
+  //     e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  //   }, 300);
+  // };
 
 
   const handleEmailChange = (e) => {
@@ -166,6 +166,13 @@ const Login = () => {
       return false;
     }
   };
+
+  // メール・パスワードチェック
+  const isEmailValid = email.length > 0 && email.length <= 255;
+  const isPasswordValid = /^[a-zA-Z0-9]{8,16}$/.test(password);
+
+  // 送信可能状態
+  const canSubmit = !isLoading && isEmailValid && isPasswordValid;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -313,7 +320,7 @@ const Login = () => {
                       placeholder="メールアドレス"
                       value={email}
                       onChange={handleEmailChange}
-                      onFocus={handleFocus}
+                      // onFocus={handleFocus}
                       className={`${styles.inputField} ${errors.email ? styles.inputError : ""}`}
                     />
                   </div>
@@ -335,7 +342,7 @@ const Login = () => {
                       placeholder="パスワード"
                       value={password}
                       onChange={handlePasswordChange}
-                      onFocus={handleFocus}
+                      // onFocus={handleFocus}
                       className={`${styles.inputField} ${errors.password ? styles.inputError : ""}`}
                     />
                     <span
@@ -387,8 +394,9 @@ const Login = () => {
 
                 {/* 送信ボタン */}
                 <SubmitButton 
-                  disabled={isLoading}
-                  onClick={handleSubmit}
+                  type = "submit"
+                  disabled={!canSubmit}
+                  // onClick={handleSubmit}
                   text={activeTab === "login" ? "ログイン" : "登録する"}
                 />
               </form>

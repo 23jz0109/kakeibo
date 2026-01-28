@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/common/Layout';
 import { Trash2, Search, CheckCircle, Edit2, X } from 'lucide-react';
@@ -477,8 +478,8 @@ const Notification = () => {
             </div>
           )}
 
-          {/* モーダル (タブに関係なく表示) */}
-          {showModal && (
+          {/* モーダル (Portalを使用してbody直下に描画) */}
+          {showModal && createPortal(
             <div className={styles.modalOverlay} onClick={closeModal}>
               <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.modalHeader}>
@@ -562,7 +563,8 @@ const Notification = () => {
                   </div>
                 </form>
               </div>
-            </div>
+            </div>,
+            document.body
           )}
         </div>
       } />

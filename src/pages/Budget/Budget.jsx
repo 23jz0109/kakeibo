@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { Edit2, Trash2, X, AlertCircle, Bell, BellOff } from "lucide-react";
 import Layout from "../../components/common/Layout";
 import styles from "./Budget.module.css";
-import Categories from "../../components/dataInput/Categories";
+import Categories from "../../components/DataInput/Categories";
 import { getIcon } from "../../constants/categories";
 import { useBudgetApi } from "../../hooks/budget/useBudget";
 import { useFixedCostApi } from "../../hooks/budget/useFixedCost";
@@ -606,7 +606,7 @@ const Budget = () => {
 
             {activeTab === 'budget' ? (
               <div className={styles.formGroup}>
-                <label className={styles.label}>予算ルール設定</label>
+                <label className={styles.label}>集計ルール設定</label>
                 <div className={styles.flexRow}>
                   <div className={styles.flexItem}>
                     <CustomDropdown

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import styles from "./CategorySetting.module.css";
 import Layout from "../../components/common/Layout";
@@ -132,7 +133,7 @@ const CategorySettings = () => {
   // モーダル
   const renderModal = () => {
     const IconPreview = getIcon(formData.icon);
-    return (
+    return createPortal(
       <div className={styles.modalOverlay} onClick={handleCloseModal}>
         <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
           {/* ヘッダー */}
@@ -216,7 +217,8 @@ const CategorySettings = () => {
             </button>
           </div>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   };
 
