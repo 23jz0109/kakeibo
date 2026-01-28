@@ -147,7 +147,7 @@ const ReceiptSummary = ({ calculated, priceMode, setPriceMode, pointsUsage, onPo
             inputMode="numeric"
             pattern="\d*"
             placeholder="0"
-            value={pointsUsage || ""}
+            value={pointsUsage ?? ""}
             onChange={handlePointsChange}
             onBlur={() => validateField("point_usage", pointsUsage)}
             className={`${styles.cleanInput} ${errors.point_usage ? styles.inputErrorBorder : ''}`}

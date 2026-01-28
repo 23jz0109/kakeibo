@@ -149,7 +149,7 @@ const ExpenseManualInput = () => {
       // total_amount: calculated.totalAmount,
       total_amount: calculated.totalAmount - (Number(receipt.point_usage) || 0),
       memo: receipt.memo,
-      point_usage: Number(receipt.point_usage) || 0,
+      point_usage: Number(receipt.point_usage) ?? 0,
       products: receipt.products.map(p => ({
         product_name: p.product_name,
         product_price: Number(p.product_price),
