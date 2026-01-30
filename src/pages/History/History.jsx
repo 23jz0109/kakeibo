@@ -465,7 +465,7 @@ const History = () => {
                                       <div className={styles.cardContent}>
                                         <p className={styles.cardTitle}>
                                           {isIncome
-                                            ? (r.category || r.category_name) // 収入の場合：カテゴリ名を表示
+                                            ? (r.category || r.category_name) // 収入の場合：カテゴリ名を表示 
                                             : ((r.shop_name && r.shop_name !== "不明") ? r.shop_name : "店舗未登録") // 支出の場合：店名を表示
                                           }
                                         </p>
