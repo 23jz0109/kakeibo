@@ -150,7 +150,6 @@ const Login = () => {
     const data = await response.json();
 
     if (response.ok && data.status === "success") {
-      console.log("ログイン成功:", data);
       localStorage.setItem("savedEmail", loginEmail);
       if (rememberMe) {
         localStorage.setItem("authToken", data.token);
@@ -190,14 +189,6 @@ const Login = () => {
       hasError = true;
     }
 
-    // if (!password) {
-    //   newErrors.password = "パスワードを入力してください";
-    //   hasError = true;
-    // } else if (!/^[a-zA-Z0-9]{8,16}$/.test(password)) {
-    //   newErrors.password = "パスワードは8～16文字の半角英数字で入力してください";
-    //   hasError = true;
-    // }
-
     setErrors(newErrors);
 
     if (hasError) return;
@@ -224,7 +215,6 @@ const Login = () => {
         const data = await response.json();
 
         if (response.ok) {
-          console.log("新規登録成功:", data);
           const loginResult = await performLogin(email, password);
           if (!loginResult) {
             setActiveTab("login");
