@@ -8,7 +8,7 @@ import { useAuthFetch } from "../../hooks/useAuthFetch";
 const MyPage = () => {
   const navigate = useNavigate();
   const authFetch = useAuthFetch();
-  
+
   // 状態管理
   const [email, setEmail] = useState("");
   const [greeting, setGreeting] = useState("こんにちは");
@@ -37,7 +37,7 @@ const MyPage = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
       // トークンの手動取得コードを削除し、authFetchを使用
-      
+
       try {
         const response = await authFetch(`${API_BASE_URL}/me`, {
           method: "GET",
@@ -78,12 +78,14 @@ const MyPage = () => {
 
   // ログアウト
   const handleLogout = () => {
-    // アクセストークン
-    localStorage.removeItem("authToken");
-    sessionStorage.removeItem("authToken");
+    // ローカルストレージ全削除
+    localStorage.clear();
+
+    // セッションストレージ全削除
+    sessionStorage.clear();
 
     // ログインページに戻る
-    navigate("/"); // 一般的にルートかログインページへ
+    navigate("/");
   };
 
   // ページのヘッダー
@@ -94,7 +96,7 @@ const MyPage = () => {
   // メインコンテンツ
   const mainContent = (
     <div className={styles.mainContainer}>
-      
+
       {/* 挨拶 */}
       <div className={styles.greetingSection}>
         <p className={styles.greetingText}>
@@ -147,8 +149,8 @@ const MyPage = () => {
 
         {/* ログアウト */}
         <li className={styles.menuItem}>
-          <button 
-            className={`${styles.menuButton} ${styles.logoutButton}`} 
+          <button
+            className={`${styles.menuButton} ${styles.logoutButton}`}
             onClick={handleLogout}>
             <div className={styles.labelContent}>
               <LogOut size={20} />
