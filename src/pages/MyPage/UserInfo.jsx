@@ -390,6 +390,7 @@ function UserInfo() {
                       value={tempCurrentPassword}
                       className={`${styles.inputLarge} ${errors.currentPassword ? styles.inputErrorBorder : ''}`}
                       onChange={handleInputChange}
+                      maxLength={16}
                     />
                     {errors.currentPassword && <p className={styles.errorText}>{errors.currentPassword}</p>}
 
@@ -400,6 +401,7 @@ function UserInfo() {
                       value={tempNewPassword}
                       className={`${styles.inputLarge} ${errors.newPassword ? styles.inputErrorBorder : ''}`}
                       onChange={handleInputChange}
+                      maxLength={16}
                     />
                     {errors.newPassword && <p className={styles.errorText}>{errors.newPassword}</p>}
 
@@ -410,6 +412,7 @@ function UserInfo() {
                       value={tempNewPasswordConfirm}
                       className={`${styles.inputLarge} ${errors.newPasswordConfirm ? styles.inputErrorBorder : ''}`}
                       onChange={handleInputChange}
+                      maxLength={16}
                     />
                     {errors.newPasswordConfirm && <p className={styles.errorText}>{errors.newPasswordConfirm}</p>}
                     
