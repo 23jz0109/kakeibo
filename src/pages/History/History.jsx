@@ -53,7 +53,7 @@ const SwipeableItem = ({ children, onDelete, disabled, id, openSwipeId, setOpenS
 
     // 移動量(縦>横)はスクロールのみ
     if (Math.abs(diffY) > Math.abs(diffX)) {
-      return; 
+      return;
     }
 
     // 感度 (閾値15)
@@ -100,7 +100,7 @@ const SwipeableItem = ({ children, onDelete, disabled, id, openSwipeId, setOpenS
     <div className={styles.swipeContainer}>
       <div className={styles.deleteLayer} onClick={handleDeleteClick}>
         <div className={styles.deleteIcon}>
-          <Trash2 size={20}/>
+          <Trash2 size={20} />
         </div>
       </div>
 
@@ -144,9 +144,9 @@ const History = () => {
       const timer = setTimeout(() => {
         const element = document.getElementById(`record-${expandedRecordId}`);
         if (element) {
-          element.scrollIntoView({ 
-            behavior: "smooth", 
-            block: "start" 
+          element.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
           });
         }
       }, 500);
@@ -202,7 +202,7 @@ const History = () => {
       setLoadingDetailId(recordId);
       const detailData = await getRecordDetail(recordId);
       console.log(detailData);
-      
+
       setDetailsCache((prev) => ({
         ...prev,
         [recordId]: detailData
@@ -313,13 +313,13 @@ const History = () => {
           <div className={styles.tab}>
             <div className={styles.tabContainer}>
               <button
-                className={`${styles.tabButton} ${activeTab === 'graph' ? styles.active : ''}`} 
+                className={`${styles.tabButton} ${activeTab === 'graph' ? styles.active : ''}`}
                 onClick={() => handleTabChange('graph')}>
                 グラフ
               </button>
 
               <button
-                className={`${styles.tabButton} ${activeTab === 'calendar' ? styles.active : ''}`} 
+                className={`${styles.tabButton} ${activeTab === 'calendar' ? styles.active : ''}`}
                 onClick={() => handleTabChange('calendar')}>
                 カレンダー
               </button>
@@ -331,7 +331,7 @@ const History = () => {
               onMonthChange={handleMonthChange}
               onMonthSelect={handleMonthSelect}
               maxDate={new Date()}
-              isDisabled={isLoading}/>
+              isDisabled={isLoading} />
 
             {/* 収支サマリー */}
             <div className={styles.financeSummary}>
@@ -370,7 +370,7 @@ const History = () => {
               </div>
             </div>
           )}
-          
+
           <div className={styles.scroll}>
             {/* 条件分岐: エラー -> ローディング -> コンテンツ */}
             {error ? (
@@ -443,7 +443,7 @@ const History = () => {
                               const isDetailLoading = loadingDetailId === r.record_id;
 
                               return (
-                                <SwipeableItem 
+                                <SwipeableItem
                                   key={r.record_id || index}
                                   id={r.record_id || index}
                                   openSwipeId={openSwipeId}
@@ -460,11 +460,14 @@ const History = () => {
                                       <div className={styles.iconWrapper} style={{ color: iconColor }}>
                                         <IconComponent size={24} />
                                       </div>
-                                      
+
                                       {/* タイトルとサブテキスト */}
                                       <div className={styles.cardContent}>
                                         <p className={styles.cardTitle}>
-                                          {r.shop_name || (isIncome ? "臨時収入" : "店舗未登録")}
+                                          {isIncome
+                                            ? (r.category || r.category_name) // 収入の場合：カテゴリ名を表示 
+                                            : ((r.shop_name && r.shop_name !== "不明") ? r.shop_name : "店舗未登録") // 支出の場合：店名を表示
+                                          }
                                         </p>
                                         <div className={styles.infoText}>
                                           {r.product_names || "詳細なし"}
@@ -485,7 +488,7 @@ const History = () => {
                                         ) : (
                                           <>
                                             {detailData?.receipts?.map((receipt, rIdx) => (
-                                              <div key={rIdx} className={styles.receiptBlock}>                          
+                                              <div key={rIdx} className={styles.receiptBlock}>
                                                 <div className={styles.productList}>
                                                   {receipt.products.map((p, pIdx) => {
                                                     const subTotal = p.product_price * p.quantity - (p.discount || 0);
@@ -495,8 +498,8 @@ const History = () => {
                                                           <div className={styles.productName}>{p.product_name}</div>
                                                           <div className={styles.productMetaContainer}>
                                                             <span className={styles.productMeta}>
-                                                              {p.quantity > 1 
-                                                                ? `¥${Number(p.product_price).toLocaleString()} × ${p.quantity}` 
+                                                              {p.quantity > 1
+                                                                ? `¥${Number(p.product_price).toLocaleString()} × ${p.quantity}`
                                                                 : `¥${Number(p.product_price).toLocaleString()}`
                                                               }
                                                             </span>
@@ -510,7 +513,16 @@ const History = () => {
                                                     );
                                                   })}
                                                 </div>
-                                                {receipt.memo && <div className={styles.memoBox}>メモ:<br/>{receipt.memo}</div>}
+
+                                                {(Number(r.point_usage) > 0 || Number(r.POINT_USAGE) > 0) && (
+                                                  <div className={styles.pointInfo} style={{ textAlign: 'right', fontSize: '0.85rem', color: '#f97316', marginTop: '4px' }}>
+                                                    (内ポイント利用: {Number(r.point_usage || r.POINT_USAGE).toLocaleString()}円)
+                                                  </div>
+                                                )}
+
+                                                {receipt.memo && (
+                                                  <div className={styles.memoBox}>メモ:<br />{receipt.memo}</div>
+                                                )}
                                               </div>
                                             ))}
                                             {(!detailData || !detailData.receipts) && (

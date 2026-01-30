@@ -21,6 +21,7 @@ const ExpenseManualInput = () => {
       return incomingData.data.receipts.map(r => ({
         shop_name: r.shop_name,
         purchase_day: r.purchase_day ? new Date(r.purchase_day) : new Date(),
+        point_usage: r.point_usage ? Number(r.point_usage) : 0,
         memo: "",
         products: r.products.map(p => ({
             product_name: p.product_name,

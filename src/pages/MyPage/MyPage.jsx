@@ -18,7 +18,6 @@ const MyPage = () => {
   // 時間判定
   useEffect(() => {
     const hour = new Date().getHours();
-    console.log("ローカルタイム: " + hour + "時");
 
     // 0500 - 1100
     if (hour >= 5 && hour < 11) {
@@ -50,7 +49,6 @@ const MyPage = () => {
         // 成功時
         if (response.ok) {
           const data = await response.json();
-          console.log("ユーザー情報取得:", data.id, data.mail_address);
           setEmail(data.mail_address || "");
         }
         // 失敗時

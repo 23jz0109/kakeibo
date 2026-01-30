@@ -1,184 +1,240 @@
 .date-picker-container {
   position: relative;
   width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* メインの表示ボタン周り */
 .date-picker-display {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem; /* 丸みを少し大きく */
-  background-color: white;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  color: #1e293b;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
+.date-picker-display:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+/* Today: ニュートラルなグレー枠 */
+.date-picker-display[data-status="today"] {
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+/* Recent: 控えめなオレンジ枠 (背景は白のまま) */
+.date-picker-display[data-status="recent"] {
+  background-color: #ffffff;
+  border-color: #fdba74;
+  color: #9a3412;
+}
+
+/* Old: 控えめな赤枠 (背景は白のまま) */
+.date-picker-display[data-status="old"] {
+  background-color: #ffffff;
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+
+/* ボタン背景を少し濃くして視認性確保 */
 .date-nav-button {
-  padding: 0.25rem;
-  border: none;
-  background: none;
-  cursor: pointer;
   display: flex;
   align-items: center;
-  color: #6b7280;
-  border-radius: 4px;
-  transition: background-color 0.2s;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: rgba(0, 0, 0, 0.03);
+  cursor: pointer;
+  color: inherit;
+  border-radius: 6px;
+  opacity: 0.8;
+  transition: all 0.2s;
 }
 
-.date-nav-button:hover {
-  background-color: #f3f4f6;
+.date-nav-button:hover:not(:disabled) {
+  background-color: rgba(0, 0, 0, 0.08);
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.date-nav-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.date-nav-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .date-display-button {
   flex: 1;
-  padding: 0 0.5rem;
   border: none;
   background: none;
   cursor: pointer;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #374151;
-  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: inherit;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  padding: 0 0.5rem;
 }
 
-/* カレンダーポップアップ */
 .calendar-dropdown {
   position: absolute;
   top: calc(100% + 0.5rem);
   left: 0;
   right: 0;
   background-color: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
   z-index: 50;
-  padding: 1rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  /* opacity: 0; を削除しました */
+  padding: 1.25rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  min-width: 280px;
 }
 
-/* カレンダーヘッダー（年月） */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .month-nav-button {
-  padding: 0.25rem;
-  border: none;
+  padding: 0.35rem;
+  border: 1px solid transparent;
   background: none;
   cursor: pointer;
+  color: #64748b;
+  border-radius: 6px;
   display: flex;
   align-items: center;
-  color: #6b7280;
-  border-radius: 4px;
+  justify-content: center;
+  transition: all 0.2s;
 }
-
 .month-nav-button:hover {
-  background-color: #f3f4f6;
-  color: #1f2937;
+  background-color: #f1f5f9;
+  color: #0f172a;
 }
 
 .month-display {
   font-size: 1rem;
-  font-weight: 600;
-  color: #111827;
+  font-weight: 700;
+  color: #1e293b;
+  font-feature-settings: "pnum";
 }
 
-/* 曜日ヘッダー */
 .weekday-header {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .weekday {
   text-align: center;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #6b7280;
-  padding: 0.25rem 0;
+  color: #94a3b8;
+  text-transform: uppercase;
 }
+.weekday.sunday { color: #f87171; }
+.weekday.saturday { color: #60a5fa; }
 
-.weekday.sunday { color: #ef4444; }
-.weekday.saturday { color: #3b82f6; }
-
-/* 日付グリッド */
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  row-gap: 0.25rem;
-  column-gap: 0.25rem;
+  row-gap: 0.35rem;
+  column-gap: 0.35rem;
 }
 
-.calendar-day-empty {
-  height: 2rem;
-}
+.calendar-day-empty { height: 2.5rem; }
 
 .calendar-day {
-  height: 2.25rem;
+  height: 2.5rem;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 0.375rem;
+  border-radius: 0.5rem;
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   background-color: transparent;
-  color: #374151;
+  color: #334155;
   transition: all 0.2s;
+  position: relative;
 }
 
-.calendar-day:hover {
-  background-color: #f3f4f6;
+.calendar-day:hover:not(.disabled):not(.selected) {
+  background-color: #f1f5f9;
+  color: #0f172a;
 }
 
-/* 土日の色 */
 .calendar-day.sunday { color: #ef4444; }
 .calendar-day.saturday { color: #3b82f6; }
 
-/* 今日のスタイル（枠線など） */
 .calendar-day.today {
-  font-weight: bold;
-  background-color: #f3f4f6;
-  border: 1px solid #d1d5db;
+  color: #2563eb;
+  font-weight: 700;
 }
-
-/* 選択中のスタイル（最優先） */
-.calendar-day.selected {
-  background-color: #3b82f6;
-  color: white;
-  font-weight: 600;
-}
-
-.calendar-day.selected:hover {
+.calendar-day.today::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
   background-color: #2563eb;
+  border-radius: 50%;
+}
+.calendar-day.today.selected::after {
+  background-color: white;
 }
 
-/* 今日に戻るボタン */
-.today-button {
-  width: 100%;
-  margin-top: 1rem;
-  padding: 0.5rem;
-  background-color: transparent;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.375rem;
-  color: #4b5563;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.today-button:hover {
-  background-color: #f9fafb;
+.calendar-day.selected {
+  background-color: #2563eb;
+  color: white !important;
+  font-weight: 600;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
 }
 
 .calendar-day.disabled {
-  color: #d1d5db;
+  color: #cbd5e1;
   cursor: not-allowed;
-  pointer-events: none;
-  background-color: transparent;
+}
+
+.today-button {
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 0.6rem;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  color: #475569;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.today-button:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
 }

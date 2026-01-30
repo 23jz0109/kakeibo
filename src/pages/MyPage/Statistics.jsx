@@ -222,7 +222,7 @@ const Statistics = () => {
       mainContent={
         <div className={styles.container}>
           <div className={styles.card}>
-            <h2 className={styles.title}>CSVダウンロード</h2>
+            <h2 className={styles.title}>統計データダウンロード</h2>
             <div className={styles.divider} />
 
             <div className={styles.periodGrid}>
@@ -252,7 +252,7 @@ const Statistics = () => {
               text={
                 <>
                   <Download size={20} />
-                  {isLoading ? "ダウンロード中..." : "CSVをダウンロード"}
+                  {isLoading ? "ダウンロード中..." : "統計データダウンロード"}
                 </>
               }
             />

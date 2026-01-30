@@ -94,7 +94,7 @@ export const useFixedCostApi = () => {
     setError(null);
     try {
       const res = await authFetch(`${BASE_URL}/fixedcost`, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           "X-Fixed-Cost-ID": id,
