@@ -57,7 +57,7 @@ const CategorySettings = () => {
     if (name === "name") {
       if (!value || !value.trim()) {
         error = "カテゴリ名を入力してください";
-      } else if (value.length > VALIDATION_LIMITS.TEXT.PRODUCT_NAME) { 
+      } else if (value.length > VALIDATION_LIMITS.TEXT.PRODUCT_NAME) {
         // 便宜上 PRODUCT_NAME (40文字) の制限を使用、必要なら定数定義を変更してください
         error = `カテゴリ名は${VALIDATION_LIMITS.TEXT.PRODUCT_NAME}文字以内で入力してください`;
       }
@@ -101,7 +101,7 @@ const CategorySettings = () => {
   const handleSave = async () => {
     // [追加] 保存前バリデーション
     const isNameValid = validateField("name", formData.name);
-    
+
     if (!isNameValid) return;
 
     let success = false;
@@ -212,7 +212,6 @@ const CategorySettings = () => {
           {/* 保存ボタンエリア */}
           <div className={styles.modalFooter}>
             <button className={styles.saveButton} onClick={handleSave}>
-              <Save size={18} style={{ marginRight: 4 }} />
               保存
             </button>
           </div>
@@ -245,52 +244,55 @@ const CategorySettings = () => {
       headerContent={headerContent}
       mainContent={
         <div className={styles.container}>
-          {/* タブ切り替え */}
-          <div className={styles.tabContainer}>
-            <button 
-              className={`${styles.tab} ${activeTab === 2 ? styles.activeTab : ''}`}
-              onClick={() => setActiveTab(2)}
-            >
-              支出
-            </button>
-            <button 
-              className={`${styles.tab} ${activeTab === 1 ? styles.activeTab : ''}`}
-              onClick={() => setActiveTab(1)}
-            >
-              収入
-            </button>
+          <div className={styles.tabArea}>
+            {/* タブ切り替え */}
+            <div className={styles.tabContainer}>
+              <button
+                className={`${styles.tab} ${activeTab === 2 ? styles.activeTab : ''}`}
+                onClick={() => setActiveTab(2)}
+              >
+                支出
+              </button>
+              <button
+                className={`${styles.tab} ${activeTab === 1 ? styles.activeTab : ''}`}
+                onClick={() => setActiveTab(1)}
+              >
+                収入
+              </button>
+            </div>
           </div>
 
-          {/* リスト */}
-          <div className={styles.listContainer}>
-            {loading ? (
-              <div className={styles.loading}>読み込み中...</div>
-            ) : categories.length === 0 ? (
-              <div className={styles.emptyState}>カテゴリがありません</div>
-            ) : (
-              <div className={styles.categoryList}>
-                {categories.map((cat) => {
-                  const IconComp = getIcon(cat.icon_name);
-                  return (
-                    <div 
-                      key={cat.id} 
-                      className={styles.listItem}
-                      onClick={() => handleEditClick(cat)}
-                    >
-                      <div className={styles.itemLeft}>
-                        <span className={styles.listIcon} style={{ backgroundColor: cat.category_color }}>
-                          <IconComp size={20} color="#fff" />
-                        </span>
-                        <span className={styles.listName}>{cat.category_name}</span>
+          <div className={styles.scrollArea}>
+            {/* リスト */}
+            <div className={styles.listContainer}>
+              {loading ? (
+                <div className={styles.loading}>読み込み中...</div>
+              ) : categories.length === 0 ? (
+                <div className={styles.emptyState}>カテゴリがありません</div>
+              ) : (
+                <div className={styles.categoryList}>
+                  {categories.map((cat) => {
+                    const IconComp = getIcon(cat.icon_name);
+                    return (
+                      <div
+                        key={cat.id}
+                        className={styles.listItem}
+                        onClick={() => handleEditClick(cat)}
+                      >
+                        <div className={styles.itemLeft}>
+                          <span className={styles.listIcon} style={{ backgroundColor: cat.category_color }}>
+                            <IconComp size={20} color="#fff" />
+                          </span>
+                          <span className={styles.listName}>{cat.category_name}</span>
+                        </div>
+                        <Edit2 size={16} className={styles.editIcon} />
                       </div>
-                      <Edit2 size={16} className={styles.editIcon} />
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
-
           {/* モーダル表示 */}
           {isModalOpen && renderModal()}
         </div>
