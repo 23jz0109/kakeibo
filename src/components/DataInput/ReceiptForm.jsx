@@ -382,6 +382,12 @@ const ReceiptItemModal = ({ mode, item, index, categories, productList = [], pri
               <Trash2 size={16} />
             </button>
           }
+          <button
+            className={styles.closeButton}
+            onClick={() => closeModal()}
+          >
+            <X size={16}/>
+          </button>
         </div>
         <div className={styles.staticInputArea}>
           <div className={styles.modalFlexRow}>
