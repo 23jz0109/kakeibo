@@ -38,9 +38,33 @@
 }
 
 .mainContainer {
-  margin: 0 auto;
-  padding: 1rem;
+  /* ▼ 編集: スクロールエリア対応 ▼ */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  /* ▲ 編集: スクロールエリア対応 ▲ */
 }
+
+/* ▼ 追加: タブエリア（固定部分） ▼ */
+.tabArea {
+  flex-shrink: 0;
+  padding: 16px;
+  padding-bottom: 0;
+  background-color: #f9fafb;
+}
+
+/* ▲ 追加: タブエリア（固定部分） ▲ */
+
+/* ▼ 追加: スクロールエリア ▼ */
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 16px 16px;
+}
+
+/* ▲ 追加: スクロールエリア ▲ */
 
 /* タブ */
 .tabContainer {
@@ -48,7 +72,7 @@
   background-color: #f3f4f6;
   border-radius: 8px;
   padding: 4px;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .tabButton {
@@ -122,20 +146,23 @@
 
 .historyHeaderLine {
   display: flex;
-  align-items: center; /* 上下中央揃え */
-  gap: 8px;            /* 要素間の間隔 */
-  margin-bottom: 6px;  /* メッセージとの隙間 */
+  align-items: center;
+  /* 上下中央揃え */
+  gap: 8px;
+  /* 要素間の間隔 */
+  margin-bottom: 6px;
+  /* メッセージとの隙間 */
   width: 100%;
 }
 
-.iconUnread { 
-  color: #3b82f6; 
-  min-width: 18px; 
+.iconUnread {
+  color: #3b82f6;
+  min-width: 18px;
 }
 
-.iconRead { 
-  color: #9ca3af; 
-  min-width: 18px; 
+.iconRead {
+  color: #9ca3af;
+  min-width: 18px;
 }
 
 /* タイトル */
@@ -241,12 +268,12 @@
   transition: background-color 0.2s;
 }
 
-.toggleOn { 
-  background-color: #3b82f6; 
+.toggleOn {
+  background-color: #3b82f6;
 }
 
-.toggleOff { 
-  background-color: #d1d5db; 
+.toggleOff {
+  background-color: #d1d5db;
 }
 
 .settingButton {
@@ -261,8 +288,8 @@
   transition: color 0.2s;
 }
 
-.settingButton:hover { 
-  color: #ef4444; 
+.settingButton:hover {
+  color: #ef4444;
 }
 
 .cardFooter {
@@ -277,8 +304,8 @@
   gap: 10px;
 }
 
-.actionBtnBlue, 
-.actionBtnGray, 
+.actionBtnBlue,
+.actionBtnGray,
 .actionBtnRed {
   display: flex;
   align-items: center;
@@ -293,31 +320,34 @@
   transition: opacity 0.2s;
 }
 
-.actionBtnBlue { 
-  background-color: #e0f2fe; 
-  color: #0284c7; 
+.actionBtnBlue {
+  background-color: #e0f2fe;
+  color: #0284c7;
 }
 
-.actionBtnGray { 
-  background-color: #f3f4f6; 
-  color: #4b5563; 
+.actionBtnGray {
+  background-color: #f3f4f6;
+  color: #4b5563;
 }
 
-.actionBtnRed { 
-  background-color: #fee2e2; 
-  color: #ef4444; 
+.actionBtnRed {
+  background-color: #fee2e2;
+  color: #ef4444;
 }
 
-.actionBtnBlue:active, 
-.actionBtnGray:active, 
-.actionBtnRed:active { 
-  opacity: 0.7; 
+.actionBtnBlue:active,
+.actionBtnGray:active,
+.actionBtnRed:active {
+  opacity: 0.7;
 }
 
 /* モーダル関連 */
 .modalOverlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
@@ -420,19 +450,19 @@
   width: 4.5rem;
 }
 
-.dropdownDisplay:hover { 
-  border-color: #3b82f6; 
+.dropdownDisplay:hover {
+  border-color: #3b82f6;
 }
 
-.dropdownDisplay.open { 
-  border-color: #3b82f6; 
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); 
+.dropdownDisplay.open {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
-.arrow { 
-  font-size: 0.8rem; 
-  color: #6b7280; 
-  margin-left: 8px; 
+.arrow {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-left: 8px;
 }
 
 .dropdownList {
@@ -447,7 +477,7 @@
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
-  display: block; 
+  display: block;
   padding: 0;
 }
 
@@ -460,19 +490,19 @@
   border-bottom: 1px solid #f3f4f6;
 }
 
-.dropdownItem:last-child { 
-  border-bottom: none; 
+.dropdownItem:last-child {
+  border-bottom: none;
 }
 
-.dropdownItem:hover { 
-  background-color: #eff6ff; 
-  color: #2563eb; 
+.dropdownItem:hover {
+  background-color: #eff6ff;
+  color: #2563eb;
 }
 
-.dropdownItem.selected { 
-  background-color: #eff6ff; 
-  color: #2563eb; 
-  font-weight: bold; 
+.dropdownItem.selected {
+  background-color: #eff6ff;
+  color: #2563eb;
+  font-weight: bold;
 }
 
 .suggestionList {
@@ -489,7 +519,7 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .suggestionItem {
@@ -499,8 +529,8 @@
   font-size: 0.95rem;
 }
 
-.suggestionItem:hover { 
-  background-color: #eff6ff; 
+.suggestionItem:hover {
+  background-color: #eff6ff;
 }
 
 .submitButton {

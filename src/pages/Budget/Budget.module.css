@@ -41,10 +41,33 @@
 
 /* メインコンテンツ */
 .container {
-  padding: 16px;
-  position: relative;
-  min-height: 80vh;
+  /* ▼ 編集: スクロールエリア対応 ▼ */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  /* ▲ 編集: スクロールエリア対応 ▲ */
 }
+
+/* ▼ 追加: タブエリア（固定部分） ▼ */
+.tabArea {
+  flex-shrink: 0;
+  padding: 16px;
+  padding-bottom: 0;
+  background-color: #f9fafb;
+}
+
+/* ▲ 追加: タブエリア（固定部分） ▲ */
+
+/* ▼ 追加: スクロールエリア ▼ */
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 16px 16px;
+}
+
+/* ▲ 追加: スクロールエリア ▲ */
 
 /* タブ */
 .tabContainer {
@@ -52,7 +75,7 @@
   background-color: #f0f0f0;
   border-radius: 8px;
   padding: 4px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .tabButton {
@@ -79,7 +102,7 @@
   margin-bottom: 20px;
 }
 
-.loading, 
+.loading,
 .error {
   text-align: center;
   padding: 32px 20px;
@@ -232,7 +255,8 @@
   display: flex;
   align-items: center;
   font-weight: 600;
-  margin-left: auto; /* 右寄せ */
+  margin-left: auto;
+  /* 右寄せ */
 }
 
 /* モーダル */
@@ -457,7 +481,7 @@
 
 .flexItem {
   flex: 1;
-  min-width: 0; 
+  min-width: 0;
 }
 
 .flexItem7 {
@@ -491,26 +515,29 @@
   box-sizing: border-box;
   font-family: inherit;
   font-weight: 500;
-  min-width: 0; 
+  min-width: 0;
 }
 
-.dropdownValue:hover { 
-  border-color: #3b82f6; 
+.dropdownValue:hover {
+  border-color: #3b82f6;
 }
 
 /* ラベル部分 */
 .dropdownLabel {
-  white-space: nowrap;       /* 折り返しを禁止 */
-  overflow: hidden;          /* はみ出た部分を隠す */
-  text-overflow: ellipsis;   /* 万が一溢れたら ... にする */
+  white-space: nowrap;
+  /* 折り返しを禁止 */
+  overflow: hidden;
+  /* はみ出た部分を隠す */
+  text-overflow: ellipsis;
+  /* 万が一溢れたら ... にする */
   flex: 1;
   margin-right: 8px;
-  color: inherit;            
+  color: inherit;
 }
 
-.arrow { 
-  font-size: 0.8rem; 
-  color: #6b7280; 
+.arrow {
+  font-size: 0.8rem;
+  color: #6b7280;
   flex-shrink: 0;
 }
 
@@ -546,15 +573,15 @@
   border-bottom: 1px solid #f3f4f6;
 }
 
-.dropdownItem:hover { 
-  background-color: #eff6ff; 
-  color: #2563eb; 
+.dropdownItem:hover {
+  background-color: #eff6ff;
+  color: #2563eb;
 }
 
-.selected { 
-  background-color: #eff6ff; 
-  color: #2563eb; 
-  font-weight: bold; 
+.selected {
+  background-color: #eff6ff;
+  color: #2563eb;
+  font-weight: bold;
 }
 
 .helperText {
