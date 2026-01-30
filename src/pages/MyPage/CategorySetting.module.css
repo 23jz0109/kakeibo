@@ -1,11 +1,21 @@
 .container {
-  width: 100%;
-  height: 100%; 
-  background-color: #f9fafb;
-  position: relative;
   display: flex;
   flex-direction: column;
+  height: 100%;
   overflow: hidden;
+}
+
+.tabArea {
+  flex-shrink: 0;
+  padding: 16px;
+  padding-bottom: 8px;
+  background-color: #f9fafb;
+}
+
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .headerContainer {
@@ -62,9 +72,6 @@
 /* List View */
 .listContainer {
   padding: 16px;
-  flex-grow: 1;
-  overflow-y: auto;
-  min-height: 0;
 }
 
 .tabContainer {
@@ -72,8 +79,7 @@
   background-color: #e5e7eb;
   border-radius: 8px;
   padding: 4px;
-  margin: 16px;
-  margin-bottom: 8px;
+  margin: 0px;
 }
 
 .tab {
@@ -91,7 +97,7 @@
 .tab.activeTab {
   background-color: #fff;
   color: #1f2937;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .categoryList {
@@ -113,7 +119,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   cursor: pointer;
 }
 
@@ -174,7 +180,7 @@
   display: flex;
   flex-direction: column;
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   z-index: 101;
   overflow: hidden;
 }
