@@ -6,10 +6,10 @@ import { Trash2, Search, CheckCircle, Edit2, X } from 'lucide-react';
 import styles from './Notification.module.css';
 import { useNotification } from '../../hooks/notification/useNotification';
 import { useSuggestion } from '../../hooks/dataInput/useSuggestion';
-import { 
-  VALIDATION_LIMITS, 
-  validateTextLength, 
-  sanitizeNumericInput 
+import {
+  VALIDATION_LIMITS,
+  validateTextLength,
+  sanitizeNumericInput
 } from '../../constants/validationsLimits';
 import SubmitButton from '../../components/common/SubmitButton';
 import ErrorDisplay from '../../components/common/ErrorDisplay';
@@ -89,7 +89,7 @@ const Notification = () => {
   const [showModal, setShowModal] = useState(false);
   const [editTargetId, setEditTargetId] = useState(null);
   const [originalItem, setOriginalItem] = useState(null);
-  
+
   const [errors, setErrors] = useState({
     title: '',
     notification_period: ''
@@ -232,11 +232,11 @@ const Notification = () => {
     const isPeriodValid = validateField('notification_period', formData.notification_period);
 
     if (!formData.title) {
-        alert("商品名を入力してください");
-        return;
+      alert("商品名を入力してください");
+      return;
     }
     if (!isTitleValid || !isPeriodValid || Object.values(errors).some(e => e)) {
-        return; // エラーがあれば中断
+      return; // エラーがあれば中断
     }
 
     let periodVal = formData.notification_period;
@@ -244,7 +244,7 @@ const Notification = () => {
       periodVal = suggestedPeriod;
     }
     if (!periodVal) return alert("補充間隔を入力してください");
-    
+
     // 間隔の範囲チェック(手動入力で空だった場合など)
     const periodNum = parseInt(periodVal);
     if (periodNum < VALIDATION_LIMITS.DAYS.MIN || periodNum > VALIDATION_LIMITS.DAYS.MAX) {
@@ -296,7 +296,7 @@ const Notification = () => {
 
   const handleHistoryClick = (item) => {
     const targetId = item.id || item.ID || item._id;
-  
+
     if (Number(item.is_read) === 0) {
       markAsRead(targetId);
     }
@@ -430,53 +430,60 @@ const Notification = () => {
       mainContent={
         <div className={styles.mainContainer}>
 
-          {/* タブ切り替えエリア */}
-          <div className={styles.tabContainer}>
-            <button
-              className={`${styles.tabButton} ${activeTab === 'list' ? styles.active : ''}`}
-              onClick={() => setActiveTab('list')}>
-              通知一覧
-            </button>
-            <button
-              className={`${styles.tabButton} ${activeTab === 'settings' ? styles.active : ''}`}
-              onClick={() => setActiveTab('settings')}>
-              補充通知設定
-            </button>
-          </div>
-
-          {/* ローディング */}
-          {loading && <p className={styles.loadingText}>読み込み中...</p>}
-
-          {/* コンテンツ表示 */}
-          {!loading && (
-            <div className={styles.viewContainer}>
-              {apiError ? (
-                // エラー発生時の表示
-                <ErrorDisplay 
-                  message="データを読み込めませんでした"
-                  description={apiError}
-                  onRetry={handleRetry}
-                />
-              ) : (
-                // 正常時の表示
-                <>
-                  {/* 通知一覧 */}
-                  {activeTab === 'list' && (
-                    <div className={styles.contentWrapper}>
-                      {renderNotificationList()}
-                    </div>
-                  )}
-
-                  {/* 補充通知設定 */}
-                  {activeTab === 'settings' && (
-                    <div className={styles.contentWrapper}>
-                      {renderRefillNotificationSettingList()}
-                    </div>
-                  )}
-                </>
-              )}
+          {/* ▼ タブエリア（固定部分） ▼ */}
+          <div className={styles.tabArea}>
+            <div className={styles.tabContainer}>
+              <button
+                className={`${styles.tabButton} ${activeTab === 'list' ? styles.active : ''}`}
+                onClick={() => setActiveTab('list')}>
+                通知一覧
+              </button>
+              <button
+                className={`${styles.tabButton} ${activeTab === 'settings' ? styles.active : ''}`}
+                onClick={() => setActiveTab('settings')}>
+                補充通知設定
+              </button>
             </div>
-          )}
+          </div>
+          {/* ▲ タブエリア（固定部分） ▲ */}
+
+          {/* ▼ スクロールエリア ▼ */}
+          <div className={styles.scrollArea}>
+            {/* ローディング */}
+            {loading && <p className={styles.loadingText}>読み込み中...</p>}
+
+            {/* コンテンツ表示 */}
+            {!loading && (
+              <div className={styles.viewContainer}>
+                {apiError ? (
+                  // エラー発生時の表示
+                  <ErrorDisplay
+                    message="データを読み込めませんでした"
+                    description={apiError}
+                    onRetry={handleRetry}
+                  />
+                ) : (
+                  // 正常時の表示
+                  <>
+                    {/* 通知一覧 */}
+                    {activeTab === 'list' && (
+                      <div className={styles.contentWrapper}>
+                        {renderNotificationList()}
+                      </div>
+                    )}
+
+                    {/* 補充通知設定 */}
+                    {activeTab === 'settings' && (
+                      <div className={styles.contentWrapper}>
+                        {renderRefillNotificationSettingList()}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+          {/* ▲ スクロールエリア ▲ */}
 
           {/* モーダル (Portalを使用してbody直下に描画) */}
           {showModal && createPortal(
@@ -504,7 +511,7 @@ const Notification = () => {
                         onBlur={() => validateField('title', formData.title)}
                         onFocus={() => setShowSuggestions(true)}
                         placeholder="商品名を入力" />
-                      
+
                       {errors.title && <p className={styles.errorText}>{errors.title}</p>}
 
                       {showSuggestions && formData.title && filteredProducts.length > 0 && (
@@ -532,7 +539,7 @@ const Notification = () => {
                         onChange={handlePeriodChange}
                         onBlur={() => validateField('notification_period', formData.notification_period)}
                         placeholder={suggestedPeriod ? `${suggestedPeriod}` : ""} />
-                       {errors.notification_period && <p className={styles.errorText}>{errors.notification_period}</p>}
+                      {errors.notification_period && <p className={styles.errorText}>{errors.notification_period}</p>}
                     </div>
                   </div>
 

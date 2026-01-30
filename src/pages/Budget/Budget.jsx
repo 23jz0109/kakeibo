@@ -8,10 +8,10 @@ import { getIcon } from "../../constants/categories";
 import { useBudgetApi } from "../../hooks/budget/useBudget";
 import { useFixedCostApi } from "../../hooks/budget/useFixedCost";
 import { useCategories } from "../../hooks/common/useCategories";
-import { 
-  VALIDATION_LIMITS, 
-  validateAmount, 
-  sanitizeNumericInput 
+import {
+  VALIDATION_LIMITS,
+  validateAmount,
+  sanitizeNumericInput
 } from "../../constants/validationsLimits";
 import SubmitButton from "../../components/common/SubmitButton";
 import ErrorDisplay from "../../components/common/ErrorDisplay"; // ★追加
@@ -42,7 +42,7 @@ const CustomDropdown = ({ value, options, onChange, placeholder = "選択して�
 
       if (spaceBelow < estimatedMenuHeight) {
         newStyle.bottom = `${viewportHeight - rect.top + 4}px`;
-        newStyle.top = 'auto'; 
+        newStyle.top = 'auto';
         newStyle.maxHeight = `${Math.min(estimatedMenuHeight, rect.top - 20)}px`;
         newStyle.transformOrigin = 'bottom center';
       } else {
@@ -66,7 +66,7 @@ const CustomDropdown = ({ value, options, onChange, placeholder = "選択して�
     createPortal(
       <>
         <div className={styles.dropdownBackdrop} onClick={() => setIsOpen(false)} />
-        <div 
+        <div
           className={styles.dropdownMenu}
           style={menuStyle}
         >
@@ -90,20 +90,20 @@ const CustomDropdown = ({ value, options, onChange, placeholder = "選択して�
 
   return (
     <>
-      <div 
+      <div
         ref={triggerRef}
-        className={`${styles.dropdownValue} ${hasError ? styles.inputErrorBorder : ''}`} 
+        className={`${styles.dropdownValue} ${hasError ? styles.inputErrorBorder : ''}`}
         onClick={handleToggle}
       >
-        <span 
-          className={styles.dropdownLabel} 
+        <span
+          className={styles.dropdownLabel}
           style={{ color: selectedOption ? '#374151' : '#9ca3af' }}
         >
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         <span className={styles.arrow}>▾</span>
       </div>
-      
+
       {dropdownList}
     </>
   );
@@ -265,9 +265,9 @@ const Budget = () => {
 
         setFormData({
           categoryId: String(item.category_id || ""),
-          amount: String(item.budget_limit || ""),    
+          amount: String(item.budget_limit || ""),
           budgetRuleId: targetRuleId ? String(targetRuleId) : "",
-          notificationStatus: Number(item.notification_enable) === 1, 
+          notificationStatus: Number(item.notification_enable) === 1,
           customDays: item.custom_days || (item.rule_name === 'custom' ? item.rule_days : ""),
           fixedCostRuleId: "",
         });
@@ -286,8 +286,8 @@ const Budget = () => {
         }
 
         setFormData({
-          categoryId: String(item.category_id || ""), 
-          amount: String(item.cost || item.amount || ""), 
+          categoryId: String(item.category_id || ""),
+          amount: String(item.cost || item.amount || ""),
           fixedCostRuleId: currentRuleId ? String(currentRuleId) : "",
           budgetRuleId: "",
           notificationStatus: false,
@@ -330,7 +330,7 @@ const Budget = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     if (type === 'checkbox') {
       setFormData(prev => ({ ...prev, [name]: checked }));
       return;
@@ -340,7 +340,7 @@ const Budget = () => {
     if (name === 'amount' || name === 'customDays') {
       cleanValue = sanitizeNumericInput(value);
     }
-    
+
     setFormData(prev => ({ ...prev, [name]: cleanValue }));
     validateField(name, cleanValue);
   };
@@ -367,9 +367,9 @@ const Budget = () => {
       const rule = fixedCostRules.find(r => r.rule_name === 'last_day');
       newRuleId = rule ? rule.id : "";
     }
-    
+
     setFormData(prev => ({ ...prev, fixedCostRuleId: newRuleId }));
-    
+
     if (value === 'daily' || value === 'last_day') {
       setErrors(prev => ({ ...prev, fixedCostRuleId: "" }));
     }
@@ -388,20 +388,20 @@ const Budget = () => {
       alert("金額を入力してください");
       return;
     }
-    
+
     if (activeTab === 'budget') {
       isRuleValid = validateField('budgetRuleId', formData.budgetRuleId);
       const selectedRule = budgetRules.find(r => String(r.id) === String(formData.budgetRuleId));
       if (selectedRule && selectedRule.rule_name === 'custom') {
-         isDaysValid = validateField('customDays', formData.customDays);
-         if (!formData.customDays) {
-           setErrors(prev => ({ ...prev, customDays: "必須です" }));
-           isDaysValid = false;
-         }
+        isDaysValid = validateField('customDays', formData.customDays);
+        if (!formData.customDays) {
+          setErrors(prev => ({ ...prev, customDays: "必須です" }));
+          isDaysValid = false;
+        }
       }
     } else {
       if (fixedRuleType !== 'daily' && fixedRuleType !== 'last_day') {
-         isRuleValid = validateField('fixedCostRuleId', formData.fixedCostRuleId);
+        isRuleValid = validateField('fixedCostRuleId', formData.fixedCostRuleId);
       }
     }
 
@@ -587,11 +587,11 @@ const Budget = () => {
             <div className={styles.categoryCard}>
               <label className={styles.categoryLabel}>カテゴリ</label>
               <div className={styles.categoryScrollArea}>
-                <Categories 
-                  categories={categories} 
-                  selectedCategoryId={formData.categoryId} 
-                  onSelectedCategory={handleCategorySelect} 
-                  onAddCategory={handleAddCategory} 
+                <Categories
+                  categories={categories}
+                  selectedCategoryId={formData.categoryId}
+                  onSelectedCategory={handleCategorySelect}
+                  onAddCategory={handleAddCategory}
                 />
               </div>
             </div>
@@ -600,7 +600,7 @@ const Budget = () => {
               <label className={styles.label}>{activeTab === 'budget' ? '上限額' : '金額'}</label>
               <div className={`${styles.amountInputWrapper} ${errors.amount ? styles.inputErrorBorder : ''}`}>
                 <span className={styles.yenMark}>¥</span>
-                <input 
+                <input
                   type="text"
                   inputMode="numeric"
                   pattern="\d*"
@@ -648,7 +648,7 @@ const Budget = () => {
                     </div>
                   )}
                 </div>
-                 {errors.customDays && <p className={styles.errorText} style={{fontSize: '0.65rem'}}>{errors.customDays}</p>}
+                {errors.customDays && <p className={styles.errorText} style={{ fontSize: '0.65rem' }}>{errors.customDays}</p>}
 
                 <div className={styles.formGroup} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px' }}>
                   <label style={{ margin: 0 }}>通知設定</label>
@@ -723,23 +723,32 @@ const Budget = () => {
 
   const renderMainContent = () => (
     <div className={styles.container}>
-      <div className={styles.tabContainer}>
-        <button className={`${styles.tabButton} ${activeTab === 'budget' ? styles.active : ''}`} onClick={() => setActiveTab('budget')}>予算管理</button>
-        <button className={`${styles.tabButton} ${activeTab === 'fixed' ? styles.active : ''}`} onClick={() => setActiveTab('fixed')}>固定費</button>
+      {/* ▼ タブエリア（固定部分） ▼ */}
+      <div className={styles.tabArea}>
+        <div className={styles.tabContainer}>
+          <button className={`${styles.tabButton} ${activeTab === 'budget' ? styles.active : ''}`} onClick={() => setActiveTab('budget')}>予算管理</button>
+          <button className={`${styles.tabButton} ${activeTab === 'fixed' ? styles.active : ''}`} onClick={() => setActiveTab('fixed')}>固定費</button>
+        </div>
       </div>
-      <div className={styles.contentArea}>
-        {/* ★ ErrorDisplay 対応 (優先度: Error > Loading > Data) */}
-        {error ? (
-          <ErrorDisplay onRetry={loadData} />
-        ) : isLoading ? (
-          <div className={styles.loading}>読み込み中...</div>
-        ) : (
-          <div className={styles.listContainer}>
-            {data.length === 0 ? <div className={styles.placeholderBox}>データがありません</div> : (
-              data.map((item) => (activeTab === 'budget' ? renderBudgetItem(item) : renderFixedItem(item)))
-            )}
-          </div>
-        )}
+      {/* ▲ タブエリア（固定部分） ▲ */}
+
+      {/* ▼ スクロールエリア ▼ */}
+      <div className={styles.scrollArea}>
+        <div className={styles.contentArea}>
+          {/* ★ ErrorDisplay 対応 (優先度: Error > Loading > Data) */}
+          {error ? (
+            <ErrorDisplay onRetry={loadData} />
+          ) : isLoading ? (
+            <div className={styles.loading}>読み込み中...</div>
+          ) : (
+            <div className={styles.listContainer}>
+              {data.length === 0 ? <div className={styles.placeholderBox}>データがありません</div> : (
+                data.map((item) => (activeTab === 'budget' ? renderBudgetItem(item) : renderFixedItem(item)))
+              )}
+            </div>
+          )}
+        </div>
+        {/* ▲ スクロールエリア ▲ */}
       </div>
       {isModalOpen && renderModal()}
     </div>
