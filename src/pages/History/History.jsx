@@ -457,8 +457,8 @@ const History = () => {
                                     onClick={() => handleRecordClick(r.record_id)}>
                                     <div className={styles.cardHeader}>
                                       {/* アイコン */}
-                                      <div className={styles.iconWrapper} style={{ color: iconColor }}>
-                                        <IconComponent size={24} />
+                                      <div className={styles.iconWrapper} style={{ color: '#fff', backgroundColor: iconColor }}>
+                                        <IconComponent size={18} />
                                       </div>
 
                                       {/* タイトルとサブテキスト */}
