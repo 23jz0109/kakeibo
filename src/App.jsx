@@ -58,7 +58,7 @@ const PrivateRoute = ({ children }) => {
 
 function App() {
   return (
-    <Router basename="/combine_test/">
+    <Router basename="/ouchi-list/">
       <Routes>
         {/* ログインページ */}
         <Route path="/" element={<PublicRoute><Login /></PublicRoute>} />
