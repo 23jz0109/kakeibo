@@ -37,7 +37,13 @@ const DayPicker = ({ date, onChange }) => {
   const pickerRef = useRef(null);
 
   useEffect(() => {
-    setSelectedDate(normalizeDate(date));
+    // setSelectedDate(normalizeDate(date));
+    const d = normalizeDate(date);
+    setSelectedDate(d);
+
+    const newMonth = new Date(d);
+    newMonth.setDate(1);
+    setCurrentMonth(newMonth);
   }, [date]);
 
   useEffect(() => {
@@ -90,6 +96,10 @@ const DayPicker = ({ date, onChange }) => {
     setSelectedDate(d);
     setShowCalendar(false);
     emitChange(d);
+
+    const newMonth = new Date(d);
+    newMonth.setDate(1);
+    setCurrentMonth(newMonth);
   };
 
   const changeMonth = (diff) => {
