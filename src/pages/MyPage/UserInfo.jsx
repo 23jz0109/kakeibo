@@ -60,10 +60,10 @@ function UserInfo() {
   const navigate = useNavigate();
   // フックを使用
   const authFetch = useAuthFetch();
-  
+
   // APIのベースURL
   const API_BASE_URL = "https://t08.mydns.jp/kakeibo/public/api";
-  
+
   // データ表示用
   const [userData, setUserData] = useState({
     birthYear: null,
@@ -77,7 +77,7 @@ function UserInfo() {
   const [tempCurrentPassword, setTempCurrentPassword] = useState("");
   const [tempNewPassword, setTempNewPassword] = useState("");
   const [tempNewPasswordConfirm, setTempNewPasswordConfirm] = useState("");
-  
+
   // エラー状態管理
   const [errors, setErrors] = useState({
     currentPassword: "",
@@ -109,7 +109,7 @@ function UserInfo() {
             birthYear: data.year_of_born || data.YEAR_OF_BORN || null,
           });
           setTempBirthYear(data.year_of_born || data.YEAR_OF_BORN || "");
-        } 
+        }
         // 【失敗時】ここを強化します！
         else {
           console.error("ユーザー情報の取得に失敗:", response.status);
@@ -162,7 +162,7 @@ function UserInfo() {
   // 入力ハンドラ（バリデーション付き）
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name === "currentPassword") {
       setTempCurrentPassword(value);
       validateField(name, value);
@@ -177,7 +177,7 @@ function UserInfo() {
       setTempNewPasswordConfirm(value);
       validateField(name, value, tempNewPassword);
     }
-    
+
     setPasswordMessage("");
   };
 
@@ -189,7 +189,7 @@ function UserInfo() {
     setBirthYearMessage("");
     setErrors({}); // エラーリセット
     setTempCurrentPassword(""); setTempNewPassword(""); setTempNewPasswordConfirm("");
-    setTempBirthYear(userData.birthYear); 
+    setTempBirthYear(userData.birthYear);
   };
 
   // パスワード更新 
@@ -205,7 +205,7 @@ function UserInfo() {
       const res = await authFetch(`${API_BASE_URL}/user`, {
         method: "PATCH",
         // headers は自動付与されるので body だけでOK
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           password: tempCurrentPassword,
           new_password: tempNewPassword
         }),
@@ -224,8 +224,15 @@ function UserInfo() {
       }
       // 変更失敗
       else {
+        let errorMessage = data.message;
+
+        // サーバーからの英語メッセージを日本語に変換
+        if (errorMessage === "Wrong password" || errorMessage === "wrong password") {
+          errorMessage = "パスワードが間違っています。";
+        }
+
         // サーバーサイドエラーの表示
-        setErrors(prev => ({ ...prev, currentPassword: data.message || "更新に失敗しました" }));
+        setErrors(prev => ({ ...prev, currentPassword: errorMessage || "更新に失敗しました" }));
       }
     }
     catch (e) {
@@ -239,11 +246,11 @@ function UserInfo() {
     try {
       const res = await authFetch(`${API_BASE_URL}/user`, {
         method: "PATCH",
-        body: JSON.stringify({ 
-          year_of_born: tempBirthYear ? parseInt(tempBirthYear, 10) : null 
+        body: JSON.stringify({
+          year_of_born: tempBirthYear ? parseInt(tempBirthYear, 10) : null
         }),
       });
-      
+
       if (!res) return; // ログアウト判定時は終了
 
       const data = await res.json();
@@ -278,7 +285,7 @@ function UserInfo() {
       const res = await authFetch(`${API_BASE_URL}/user`, {
         method: "DELETE",
       });
-      
+
       if (!res) return; // 既にトークン切れ等の場合
 
       // 退会成功
@@ -297,7 +304,7 @@ function UserInfo() {
       alert("エラーが発生しました。");
     }
   };
-  
+
   // ヘッダー
   const headerContent = (
     <div className={styles.headerContainer}>
@@ -309,12 +316,12 @@ function UserInfo() {
   );
 
   // パスワード変更モーダルの保存ボタン有効無効判定
-  const isPasswordFormValid = 
-    tempCurrentPassword && 
-    tempNewPassword && 
-    tempNewPasswordConfirm && 
-    !errors.currentPassword && 
-    !errors.newPassword && 
+  const isPasswordFormValid =
+    tempCurrentPassword &&
+    tempNewPassword &&
+    tempNewPasswordConfirm &&
+    !errors.currentPassword &&
+    !errors.newPassword &&
     !errors.newPasswordConfirm;
 
   // メインコンテンツ
@@ -333,8 +340,8 @@ function UserInfo() {
               </div>
               <div className={styles.rightContent}>
                 <span className={styles.valueText}>********</span>
-                <button 
-                  className={styles.actionButton} 
+                <button
+                  className={styles.actionButton}
                   onClick={() => {
                     setErrors({});
                     setIsPasswordModalOpen(true);
@@ -354,11 +361,11 @@ function UserInfo() {
                 <span className={styles.valueText}>
                   {userData.birthYear ? `${userData.birthYear}年` : "未設定"}
                 </span>
-                <button 
-                  className={styles.actionButton} 
+                <button
+                  className={styles.actionButton}
                   onClick={() => {
-                      setTempBirthYear(userData.birthYear);
-                      setIsYearModalOpen(true);
+                    setTempBirthYear(userData.birthYear);
+                    setIsYearModalOpen(true);
                   }}>
                   変更
                 </button>
@@ -379,49 +386,49 @@ function UserInfo() {
             <div className={styles.modalOverlay} onClick={closeModals}>
               <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
                 <button className={styles.closeButton} onClick={closeModals}>
-                    <X size={24} />
+                  <X size={24} />
                 </button>
                 <p className={styles.modalTitle}>パスワード変更</p>
                 <div className={styles.modalBody}>
-                    <input
-                      type="password"
-                      name="currentPassword"
-                      placeholder="現在のパスワード"
-                      value={tempCurrentPassword}
-                      className={`${styles.inputLarge} ${errors.currentPassword ? styles.inputErrorBorder : ''}`}
-                      onChange={handleInputChange}
-                      maxLength={16}
-                    />
-                    {errors.currentPassword && <p className={styles.errorText}>{errors.currentPassword}</p>}
+                  <input
+                    type="password"
+                    name="currentPassword"
+                    placeholder="現在のパスワード"
+                    value={tempCurrentPassword}
+                    className={`${styles.inputLarge} ${errors.currentPassword ? styles.inputErrorBorder : ''}`}
+                    onChange={handleInputChange}
+                    maxLength={16}
+                  />
+                  {errors.currentPassword && <p className={styles.errorText}>{errors.currentPassword}</p>}
 
-                    <input
-                      type="password"
-                      name="newPassword"
-                      placeholder="新しいパスワード"
-                      value={tempNewPassword}
-                      className={`${styles.inputLarge} ${errors.newPassword ? styles.inputErrorBorder : ''}`}
-                      onChange={handleInputChange}
-                      maxLength={16}
-                    />
-                    {errors.newPassword && <p className={styles.errorText}>{errors.newPassword}</p>}
+                  <input
+                    type="password"
+                    name="newPassword"
+                    placeholder="新しいパスワード"
+                    value={tempNewPassword}
+                    className={`${styles.inputLarge} ${errors.newPassword ? styles.inputErrorBorder : ''}`}
+                    onChange={handleInputChange}
+                    maxLength={16}
+                  />
+                  {errors.newPassword && <p className={styles.errorText}>{errors.newPassword}</p>}
 
-                    <input
-                      type="password"
-                      name="newPasswordConfirm"
-                      placeholder="新しいパスワード（確認）"
-                      value={tempNewPasswordConfirm}
-                      className={`${styles.inputLarge} ${errors.newPasswordConfirm ? styles.inputErrorBorder : ''}`}
-                      onChange={handleInputChange}
-                      maxLength={16}
-                    />
-                    {errors.newPasswordConfirm && <p className={styles.errorText}>{errors.newPasswordConfirm}</p>}
-                    
-                    {passwordMessage && <p className={styles.successMessage}>{passwordMessage}</p>}
-                    
-                    <SubmitButton 
-                      onClick={updatePassword}
-                      text={'更新する'}
-                    />
+                  <input
+                    type="password"
+                    name="newPasswordConfirm"
+                    placeholder="新しいパスワード（確認）"
+                    value={tempNewPasswordConfirm}
+                    className={`${styles.inputLarge} ${errors.newPasswordConfirm ? styles.inputErrorBorder : ''}`}
+                    onChange={handleInputChange}
+                    maxLength={16}
+                  />
+                  {errors.newPasswordConfirm && <p className={styles.errorText}>{errors.newPasswordConfirm}</p>}
+
+                  {passwordMessage && <p className={styles.successMessage}>{passwordMessage}</p>}
+
+                  <SubmitButton
+                    onClick={updatePassword}
+                    text={'更新する'}
+                  />
                 </div>
               </div>
             </div>
@@ -432,18 +439,18 @@ function UserInfo() {
             <div className={styles.modalOverlay} onClick={closeModals}>
               <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
                 <button className={styles.closeButton} onClick={closeModals}>
-                    <X size={24} />
+                  <X size={24} />
                 </button>
                 <p className={styles.modalTitle}>生年月日を変更</p>
                 <div className={styles.modalBody}>
-                    <YearSelect selectedYear={tempBirthYear} setSelectedYear={setTempBirthYear} />
-                    
-                    {birthYearMessage && <div className={styles.successMessage}>{birthYearMessage}</div>}
+                  <YearSelect selectedYear={tempBirthYear} setSelectedYear={setTempBirthYear} />
 
-                    <SubmitButton 
-                      onClick={updateBirthYear}
-                      text={'更新する'}
-                    />
+                  {birthYearMessage && <div className={styles.successMessage}>{birthYearMessage}</div>}
+
+                  <SubmitButton
+                    onClick={updateBirthYear}
+                    text={'更新する'}
+                  />
                 </div>
               </div>
             </div>
