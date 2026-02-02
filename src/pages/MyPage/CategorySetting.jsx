@@ -171,7 +171,7 @@ const CategorySettings = () => {
               {errors.name && <p className={styles.errorMessage}>{errors.name}</p>}
             </div>
           </div>
-          <div className={styles.scrollArea}>
+          <div className={styles.scrollAreaInside}>
             {/* アイコン選択 */}
             <h3 className={styles.sectionTitle}>アイコン</h3>
             <div className={styles.iconGrid}>
