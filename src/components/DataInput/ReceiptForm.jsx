@@ -544,6 +544,16 @@ const ReceiptForm = forwardRef(({
     resetForm
   } = useReceiptForm(initialData, persistKey);
 
+  // フォームチェック(中身がある場合は日付を保存)
+  useEffect(() => {
+    const isFormEmpty = !receipt.shop_name && !receipt.memo && receipt.products.length === 0;
+    if (isFormEmpty) {
+      updateReceiptInfo("purchase_day", new Date());
+      setPriceMode("inclusive");
+      localStorage.removeItem(storageKey);
+    }
+  }, []);
+
   const [validationError, setValidationError] = useState(null);
 
   useEffect(() => {

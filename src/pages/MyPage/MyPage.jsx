@@ -78,9 +78,27 @@ const MyPage = () => {
 
   // ログアウト
   const handleLogout = () => {
+    // セッション・ローカルストレージ整理
     // アクセストークン
     localStorage.removeItem("authToken");
     sessionStorage.removeItem("authToken");
+
+    // 収入のフォームデータ
+    localStorage.removeItem("income_date");
+    localStorage.removeItem("income_amount");
+    localStorage.removeItem("income_memo");
+    localStorage.removeItem("income_category");
+
+    // 支出の税率・フォームのキー
+    localStorage.removeItem("expense_draft");
+    localStorage.removeItem("expense_form_data");
+    localStorage.removeItem("kakeibo_price_mode");
+
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith("manual_receipt_") || key.startsWith("progressBase_")) {
+        localStorage.removeItem(key);
+      }
+    });
 
     // ログインページに戻る
     navigate("/"); // 一般的にルートかログインページへ

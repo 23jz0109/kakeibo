@@ -92,6 +92,12 @@ const IncomeInput = () => {
     }
   }, [categories, categoryId, setCategoryId]);
 
+  useEffect(() => {
+    if (!amount && !memo && !categoryId) {
+      setDate(new Date());
+    }
+  }, []);
+
   const handleSubmit = async () => {
     // authFetchの準備確認
     if (!authFetch) return;
