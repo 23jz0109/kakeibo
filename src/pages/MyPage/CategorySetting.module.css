@@ -229,7 +229,7 @@
 
 /* Modal Body */
 .scrollArea {
-  padding: 1rem;
+  padding: 8px 1rem;
   overflow-y: auto;
   flex: 1;
 }

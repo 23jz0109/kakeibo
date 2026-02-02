@@ -649,19 +649,6 @@ const Budget = () => {
                   )}
                 </div>
                 {errors.customDays && <p className={styles.errorText} style={{ fontSize: '0.65rem' }}>{errors.customDays}</p>}
-
-                <div className={styles.formGroup} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px' }}>
-                  <label style={{ margin: 0 }}>通知設定</label>
-                  <label className={styles.toggleSwitch}>
-                    <input
-                      type="checkbox"
-                      name="notificationStatus"
-                      checked={formData.notificationStatus}
-                      onChange={handleInputChange}
-                    />
-                    <span className={styles.slider}></span>
-                  </label>
-                </div>
               </div>
             ) : (
               <div className={styles.formGroup}>
