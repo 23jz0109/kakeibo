@@ -152,26 +152,26 @@ const CategorySettings = () => {
             </button>
           </div>
 
-          <div className={styles.scrollArea}>
-            {/* プレビュー & 名前入力 */}
-            <div className={styles.previewSection}>
-              <div className={styles.iconPreviewCircle} style={{ backgroundColor: formData.color }}>
-                <IconPreview size={32} color="#fff" />
-              </div>
-              <div style={{ width: '100%' }}>
-                <input
-                  type="text"
-                  // エラー時に赤枠スタイルを適用
-                  className={`${styles.nameInput} ${errors.name ? styles.inputError : ''}`}
-                  value={formData.name}
-                  onChange={handleNameChange}
-                  placeholder="カテゴリ名"
-                />
-                {/* エラーメッセージ表示 */}
-                {errors.name && <p className={styles.errorMessage}>{errors.name}</p>}
-              </div>
+          
+          {/* プレビュー & 名前入力 */}
+          <div className={styles.previewSection}>
+            <div className={styles.iconPreviewCircle} style={{ backgroundColor: formData.color }}>
+              <IconPreview size={32} color="#fff" />
             </div>
-
+            <div style={{ width: '100%' }}>
+              <input
+                type="text"
+                // エラー時に赤枠スタイルを適用
+                className={`${styles.nameInput} ${errors.name ? styles.inputError : ''}`}
+                value={formData.name}
+                onChange={handleNameChange}
+                placeholder="カテゴリ名"
+              />
+              {/* エラーメッセージ表示 */}
+              {errors.name && <p className={styles.errorMessage}>{errors.name}</p>}
+            </div>
+          </div>
+          <div className={styles.scrollArea}>
             {/* アイコン選択 */}
             <h3 className={styles.sectionTitle}>アイコン</h3>
             <div className={styles.iconGrid}>
