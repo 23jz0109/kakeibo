@@ -71,7 +71,7 @@
 
 /* List View */
 .listContainer {
-  padding: 16px;
+  padding: 0;
 }
 
 .tabContainer {
@@ -229,7 +229,7 @@
 
 /* Modal Body */
 .scrollArea {
-  padding: 20px;
+  padding: 1rem;
   overflow-y: auto;
   flex: 1;
 }
