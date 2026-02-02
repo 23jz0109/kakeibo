@@ -7,8 +7,8 @@
 
 .tabArea {
   flex-shrink: 0;
-  padding: 16px;
-  padding-bottom: 8px;
+  padding: 0 16px 16px 16px;
+  padding-bottom: 0;
   background-color: #f9fafb;
 }
 
@@ -76,7 +76,7 @@
 
 .tabContainer {
   display: flex;
-  background-color: #e5e7eb;
+  background-color: #f3f4f6;
   border-radius: 8px;
   padding: 4px;
   margin: 0px;
@@ -84,14 +84,15 @@
 
 .tab {
   flex: 1;
-  padding: 8px 0;
+  padding: 8px 10px;
   border: none;
   background: transparent;
   color: #6b7280;
-  font-weight: 600;
+  font-weight: bold;
+  font-size: 0.9rem;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .tab.activeTab {
