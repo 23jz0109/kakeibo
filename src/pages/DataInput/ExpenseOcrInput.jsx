@@ -150,7 +150,11 @@ const ExpenseOcrInput = () => {
   };
 
   const handleUploadClick = () => {
-    if (fileInputRef.current) fileInputRef.current.click();
+
+    if (fileInputRef.current) {
+      fileInputRef.current.click()
+    };
+
   };
 
   const handleFileChange = (e) => {
