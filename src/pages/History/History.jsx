@@ -239,23 +239,14 @@ const History = () => {
 
   // グラフデータ
   const filteredGraphData = useMemo(() => {
-    if (!monthlyRecordList || !graphCategorySum) return [];
-
-    // monthlyRecordListから「カテゴリ名 -> type_id」のマップを作る
-    const categoryTypeMap = {};
-    monthlyRecordList.forEach(r => {
-      if (r.category) {
-        categoryTypeMap[r.category] = Number(r.type_id);
-      }
-    });
+    if (!graphCategorySum) return [];
 
     const targetTypeId = transactionType === "income" ? 1 : 2;
 
     return graphCategorySum.filter(item => {
-      const typeId = categoryTypeMap[item.category_name];
-      return typeId === targetTypeId;
+      return Number(item.type_id) === targetTypeId;
     });
-  }, [graphCategorySum, monthlyRecordList, transactionType]);
+  }, [graphCategorySum, transactionType]);
 
   // カレンダーの毎日詳細
   const groupedDailyRecords = useMemo(() => {
