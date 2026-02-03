@@ -243,12 +243,13 @@
   color: #9ca3af;
 }
 
-.productNames {
+.productName {
   font-size: 0.75rem;
   color: #9da5af;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin: 0;
 }
 
 .categoryPrice,
@@ -345,6 +346,7 @@
   flex-direction: column;
   flex: 1;
   margin-right: 12px;
+  margin-bottom: 0;
 }
 
 .productName {
@@ -588,4 +590,9 @@
 
 .swipeContent > div {
   margin-bottom: 0 !important;
+}
+
+.inlineCategory {
+  padding: 2px;
+  border-radius: 8px;
 }

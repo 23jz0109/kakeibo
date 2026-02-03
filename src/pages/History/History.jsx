@@ -486,7 +486,14 @@ const History = () => {
                                                     return (
                                                       <div key={pIdx} className={styles.productRow}>
                                                         <div className={styles.productInfoLeft}>
-                                                          <div className={styles.productName}>{p.product_name}</div>
+                                                          <div className={styles.productName}>
+                                                            {p.category_name && (
+                                                              <span className={styles.inlineCategory} style={{backgroundColor: p.category_color, color: '#fff'}}>
+                                                                {p.category_name}
+                                                              </span>
+                                                            )}
+                                                            {p.product_name}
+                                                          </div>
                                                           <div className={styles.productMetaContainer}>
                                                             <span className={styles.productMeta}>
                                                               {p.quantity > 1
