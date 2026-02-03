@@ -70,7 +70,7 @@ const ExpenseOcrInput = () => {
 
 
   // 写真圧縮 + 解析
-  const processImageFile = async (imageFile, shouldCompress = true) => {
+  const processImageFile = async (imageFile) => {
     // authFetchの準備ができていなければ実行しない
     if (!authFetch) return;
 
@@ -82,24 +82,15 @@ const ExpenseOcrInput = () => {
       // UI切り替え待ち
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // 圧縮処理分岐
-      let fileToUpload = imageFile;
-
-      // アップロードのみ圧縮を実行
-      if (shouldCompress) {
-        const options = {
-          maxSizeMB: 1,
-          maxWidthOrHeight: 1920,
-          useWebWorker: true
-        };
-        fileToUpload = await imageCompression(imageFile, options);
-      }
+      // 画像圧縮
+      const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true };
+      const compressedFile = await imageCompression(imageFile, options);
 
       // トークン確認
       const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
 
       const formData = new FormData();
-      formData.append("image", fileToUpload);
+      formData.append("image", compressedFile);
 
       // authFetchを使用
       const response = await fetch(`${API_BASE_URL}/analyze-receipt`, {
@@ -153,22 +144,22 @@ const ExpenseOcrInput = () => {
     canvas.toBlob((blob) => {
       if (blob) {
         const imageFile = new File([blob], "captured_receipt.jpg", { type: "image/jpeg" });
-        processImageFile(imageFile, false);
+        processImageFile(imageFile);
       }
     }, "image/jpeg", 0.9);
   };
 
   const handleUploadClick = () => {
+
     if (fileInputRef.current) {
       fileInputRef.current.click()
     };
+
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      processImageFile(file, true);
-    }
+    if (file) processImageFile(file);
     e.target.value = "";
   };
 
