@@ -644,18 +644,26 @@ const ReceiptForm = forwardRef(({
       setValidationError(`ポイント利用額が合計金額(¥${calculated.totalAmount.toLocaleString()})を超えています。`);
       return;
     }
-
-    const success = await onSubmit({
+    const formattedJson = {
       receipt,
       calculated,
-      priceMode
-    });
+      price_mode: priceMode
+    };
+  
+    console.log("送信データ(JSON):");
+    console.log(JSON.stringify(formattedJson, null, 2));
 
-    if (success) {
-      resetForm();
-      setErrors({});
-      setValidationError(null);
-    }
+    // const success = await onSubmit({
+    //   receipt,
+    //   calculated,
+    //   priceMode
+    // });
+
+    // if (success) {
+    //   resetForm();
+    //   setErrors({});
+    //   setValidationError(null);
+    // }
   };
 
   return (
