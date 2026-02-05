@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../../components/common/Layout";
-import DayPicker from "../../components/dataInput/DayPicker";
-import Categories from "../../components/dataInput/Categories";
+import DayPicker from "../../components/DataInput/DayPicker";
+import Categories from "../../components/DataInput/Categories";
 import SubmitButton from "../../components/common/SubmitButton";
 import CompleteModal from "../../components/common/CompleteModal";
 import styles from "./IncomeInput.module.css";

@@ -156,7 +156,7 @@ const CategorySettings = () => {
           {/* プレビュー & 名前入力 */}
           <div className={styles.previewSection}>
             <div className={styles.iconPreviewCircle} style={{ backgroundColor: formData.color }}>
-              <IconPreview size={32} color="#fff" />
+              <IconPreview size={24} color="#fff" />
             </div>
             <div style={{ width: '100%' }}>
               <input

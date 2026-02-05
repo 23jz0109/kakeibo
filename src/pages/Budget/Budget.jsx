@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { Edit2, Trash2, X, AlertCircle, Bell, BellOff } from "lucide-react";
 import Layout from "../../components/common/Layout";
 import styles from "./Budget.module.css";
-import Categories from "../../components/DataInput/Categories";
+import Categories from "../../components/dataInput/Categories";
 import { getIcon } from "../../constants/categories";
 import { useBudgetApi } from "../../hooks/budget/useBudget";
 import { useFixedCostApi } from "../../hooks/budget/useFixedCost";
@@ -14,7 +14,7 @@ import {
   sanitizeNumericInput
 } from "../../constants/validationsLimits";
 import SubmitButton from "../../components/common/SubmitButton";
-import ErrorDisplay from "../../components/common/ErrorDisplay"; // ★追加
+import ErrorDisplay from "../../components/common/ErrorDisplay";
 
 const CustomDropdown = ({ value, options, onChange, placeholder = "選択してください", hasError }) => {
   const [isOpen, setIsOpen] = useState(false);
