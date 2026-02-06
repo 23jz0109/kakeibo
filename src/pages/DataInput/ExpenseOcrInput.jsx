@@ -146,7 +146,7 @@ const ExpenseOcrInput = () => {
         const imageFile = new File([blob], "captured_receipt.jpg", { type: "image/jpeg" });
         processImageFile(imageFile);
       }
-    }, "image/jpeg", 0.9);
+    }, "image/jpeg", 1);
   };
 
   const handleUploadClick = () => {

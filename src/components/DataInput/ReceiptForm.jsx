@@ -650,20 +650,20 @@ const ReceiptForm = forwardRef(({
       price_mode: priceMode
     };
   
-    console.log("送信データ(JSON):");
-    console.log(JSON.stringify(formattedJson, null, 2));
+    // console.log("送信データ(JSON):");
+    // console.log(JSON.stringify(formattedJson, null, 2));
 
-    // const success = await onSubmit({
-    //   receipt,
-    //   calculated,
-    //   priceMode
-    // });
+    const success = await onSubmit({
+      receipt,
+      calculated,
+      priceMode
+    });
 
-    // if (success) {
-    //   resetForm();
-    //   setErrors({});
-    //   setValidationError(null);
-    // }
+    if (success) {
+      resetForm();
+      setErrors({});
+      setValidationError(null);
+    }
   };
 
   return (
