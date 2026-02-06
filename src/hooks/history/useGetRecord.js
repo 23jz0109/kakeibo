@@ -37,6 +37,65 @@ export const useGetRecord = (year, month) => {
   };
 
   /**
+   * 税抜の差額計算
+   */
+  const fixGraphDataWithTax = (responseData) => {
+    const { graph_category_sum, monthly_record_list } = responseData;
+    const graphData = graph_category_sum || [];
+    const recordList = monthly_record_list || [];
+
+    // --- 型の自動検出 ---
+    // グラフデータの中に既存のデータがあれば、その type_id の型(number/string)を調べる
+    const sampleItem = graphData.find(item => item.type_id !== undefined);
+    const isNumberType = sampleItem && typeof sampleItem.type_id === 'number';
+    
+    // 支出を表すIDを、既存データの型に合わせる（数値の2 か 文字列の"2" か）
+    const EXPENDITURE_ID = isNumberType ? 2 : "2";
+
+    // console.log("Check Tax Logic - Detected Type:", isNumberType ? "Number" : "String");
+
+    // 1. リスト上の本当の合計金額（支出のみ）
+    const actualTotal = recordList.reduce((sum, record) => {
+      // 緩い比較(==)で判定して合計
+      if (record.type_id == 2) {
+        return sum + Number(record.total_amount);
+      }
+      return sum;
+    }, 0);
+
+    // 2. 現在のグラフデータの合計（支出のみ）
+    const currentGraphTotal = graphData.reduce((sum, category) => {
+      if (category.type_id == 2) {
+        return sum + Number(category.total_amount);
+      }
+      return sum;
+    }, 0);
+
+    // 3. 差額算出
+    const taxAmount = actualTotal - currentGraphTotal;
+    // console.log(`Tax Logic: Actual=${actualTotal}, Graph=${currentGraphTotal}, Diff=${taxAmount}`);
+
+    // 4. 差額がある場合、消費税カテゴリを追加
+    if (taxAmount > 0) {
+      const newGraphData = [
+        ...graphData,
+        {
+          type_id: EXPENDITURE_ID, // ★ここで型を合わせる
+          category_id: 9999,       // 数値IDにしておく（安全策）
+          category_name: "消費税",
+          category_color: "#9ca3af",
+          icon_name: "Receipt",
+          total_amount: String(taxAmount) // 金額は文字列が無難
+        }
+      ];
+      // console.log("New Graph Data (Fixed):", newGraphData);
+      return newGraphData;
+    }
+
+    return graphData;
+  };
+
+  /**
    * グラフデータ取得
    */
   const fetchHistory = useCallback(async () => {
@@ -74,16 +133,19 @@ export const useGetRecord = (year, month) => {
         };
       });
 
+      const correctedGraphData = fixGraphDataWithTax(result);
+
       const formattedData = {
         calendarDailySum: result.calendar_daily_sum || [],
         monthlyRecordList: adjustedRecordList,
-        graphCategorySum: result.graph_category_sum || [],
+        // graphCategorySum: result.graph_category_sum || [],
+        graphCategorySum: correctedGraphData,
       };
 
       setData(formattedData);
     }
     catch (err) {
-      console.error("履歴取得エラー:", err);
+      // console.error("履歴取得エラー:", err);
       // リダイレクトのエラーでなければエラー表示
       if (err.message !== "Redirecting...") {
         setError(err.message);
@@ -119,7 +181,7 @@ export const useGetRecord = (year, month) => {
 
     }
     catch (err) {
-      console.error("詳細取得エラー:", err);
+      // console.error("詳細取得エラー:", err);
       throw err;
     }
   }, [authFetch]);
@@ -157,7 +219,7 @@ export const useGetRecord = (year, month) => {
 
     }
     catch (err) {
-      console.error("削除エラー:", err);
+      // console.error("削除エラー:", err);
       alert(err.message);
       return false;
     }
