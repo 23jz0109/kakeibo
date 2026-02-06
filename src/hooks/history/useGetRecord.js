@@ -158,95 +158,95 @@ export const useGetRecord = (year, month) => {
    */
   const getRecordDetail = useCallback(async (recordID) => {
     if (!authFetch) return null;
-
-    // 詳細データをフェッチ
     try {
       const response = await authFetch(`${BASE_URL}/receipt`, {
         method: "GET",
-        headers: {
-          "X-Record-ID": recordID,
-        },
+        headers: { "X-Record-ID": recordID },
       });
-
       if (!response) return null;
-      if (!response.ok) {
-        throw new Error(`Detail API Error: ${response.status}`);
-      }
-
-      const result = await response.json();      
+      if (!response.ok) throw new Error(`Detail API Error: ${response.status}`);
+      
+      const result = await response.json();
       const detailData = result.data;
 
-      // receipts配列が存在する場合、各レシートに対して消費税計算を行う
       if (detailData && detailData.receipts && Array.isArray(detailData.receipts)) {
+        
         detailData.receipts.forEach(receipt => {
-          // 合計金額 (税込)
           const totalAmount = Number(receipt.total_amount || 0);
           
-          // ポイント利用 (あれば引く、または計算に含めるか仕様によるが、通常は商品合計+税-ポイント=支払い)
-          
-          // 商品の合計金額(税抜)
+          let taxableBase8 = 0;
+          let taxableBase10 = 0
           let productsSum = 0;
+
           if (receipt.products && Array.isArray(receipt.products)) {
-            productsSum = receipt.products.reduce((sum, product) => {
+            receipt.products.forEach((product) => {
               const price = Number(product.product_price || 0);
               const qty = Number(product.quantity || 1);
-              return sum + (price * qty);
-            }, 0);
+              const discount = Number(product.discount || 0);
+              const rate = Number(product.tax_rate);
+
+              // 1行の小計 (単価 × 個数 - 割引)
+              const lineTotal = (price * qty) - discount;
+              productsSum += lineTotal;
+
+              // 税率ごとに振り分け (デフォルトは10%扱いとする)
+              if (rate === 8) {
+                taxableBase8 += lineTotal;
+              } else {
+                taxableBase10 += lineTotal;
+              }
+            });
           }
 
-          // 差額計算
+          // 差額計算(レシート合計 - 商品合計)
           const diff = totalAmount - productsSum;
 
-          // 税抜
-          if (diff > 0) {
-            const taxProduct = {
-              product_name: "消費税",
-              product_price: String(diff),
+          // ダミー商品を追加するヘルパー関数
+          const addTaxRow = (name, amount, isInternal = false) => {
+            if (!isInternal && amount <= 0) return;
+
+            if (!receipt.products) receipt.products = [];
+            receipt.products.push({
+              product_name: name,
+              product_price: String(amount),
               quantity: "1",
-              category_id: "tax_diff",
+              category_id: isInternal ? "tax_internal" : "tax_diff",
               category_name: "消費税",
               icon_name: "Receipt",
               category_color: "#9ca3af",
               tax_rate: "0",
               discount: "0"
-            };
-            if (!receipt.products) receipt.products = [];
-            receipt.products.push(taxProduct);
+            });
+          };
+
+          // 税抜
+          if (diff > 0) {
+            // それぞれの税額を計算 (切り捨て)
+            const tax8 = Math.floor(taxableBase8 * 0.08);
+            const tax10 = Math.floor(taxableBase10 * 0.10);
+            
+            addTaxRow("消費税(8%)", tax8);
+            addTaxRow("消費税(10%)", tax10);
+            
+            // 調整用
+            const calcTaxTotal = tax8 + tax10;
+            const remaining = diff - calcTaxTotal;
+            if (remaining > 0) {
+              addTaxRow("消費税(調整)", remaining);
+            }
           }
           // 税込
           else {
-            let totalInternalTax = 0;
-            if (receipt.products && Array.isArray(receipt.products)) {
-              totalInternalTax = receipt.products.reduce((sum, product) => {
-                const price = Number(product.product_price || 0);
-                const qty = Number(product.quantity || 1);
-                const rate = Number(product.tax_rate || 0);
-                
-                // 内税計算式: 税込価格 * 税率 / (100 + 税率)
-                if (rate > 0) {
-                   const tax = Math.floor((price * qty * rate) / (100 + rate));
-                   return sum + tax;
-                }
-                return sum;
-              }, 0);
+            // 内税計算式: 税込価格 - (税込価格 / (1 + 税率/100))
+            const tax8 = Math.floor(taxableBase8 - (taxableBase8 / 1.08));
+            const tax10 = Math.floor(taxableBase10 - (taxableBase10 / 1.10));
+
+            if (tax8 > 0) {
+              addTaxRow(`(内8%消費税 ¥${tax8.toLocaleString()})`, 0, true);
             }
-            
-            // 内税額が1円以上あれば表示
-            if (totalInternalTax > 0) {
-              const internalTaxProduct = {
-                 product_name: `(内消費税${totalInternalTax.toLocaleString()})`,
-                 product_price: "0", 
-                 quantity: "1",
-                 category_id: "tax_internal",
-                 category_name: "消費税",
-                 icon_name: "Receipt",
-                 category_color: "#9ca3af",
-                 tax_rate: "0",
-                 discount: "0"
-              };
-              if (!receipt.products) receipt.products = [];
-              receipt.products.push(internalTaxProduct);
-           }
+            if (tax10 > 0) {
+              addTaxRow(`(内10%消費税 ¥${tax10.toLocaleString()})`, 0, true);
+            }
           }
         });
       }
@@ -254,7 +254,7 @@ export const useGetRecord = (year, month) => {
       return detailData; 
     }
     catch (err) {
-      // console.error("詳細取得エラー:", err);
+      console.error("詳細取得エラー:", err);
       throw err;
     }
   }, [authFetch]);
