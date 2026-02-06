@@ -37,6 +37,61 @@ export const useGetRecord = (year, month) => {
   };
 
   /**
+   * 円グラフ
+   * 税抜レシートの差額計算
+   */
+  const fixGraphDataWithTax = (responseData) => {
+    const { graph_category_sum, monthly_record_list } = responseData;
+    const graphData = graph_category_sum || [];
+    const recordList = monthly_record_list || [];
+
+    const sampleItem = graphData.find(item => item.type_id !== undefined);
+    const isNumberType = sampleItem && typeof sampleItem.type_id === 'number';
+
+    const EXPENDITURE_ID = isNumberType ? 2 : "2";
+
+    // console.log("Check Tax Logic - Detected Type:", isNumberType ? "Number" : "String");
+
+    // リスト上の本当の合計金額
+    const actualTotal = recordList.reduce((sum, record) => {
+      if (record.type_id == 2) {
+        return sum + Number(record.total_amount);
+      }
+      return sum;
+    }, 0);
+
+    // グラフデータの合計
+    const currentGraphTotal = graphData.reduce((sum, category) => {
+      if (category.type_id == 2) {
+        return sum + Number(category.total_amount);
+      }
+      return sum;
+    }, 0);
+
+    // 差額算出
+    const taxAmount = actualTotal - currentGraphTotal;
+    // console.log(`Tax Logic: Actual=${actualTotal}, Graph=${currentGraphTotal}, Diff=${taxAmount}`);
+
+    // 消費税カテゴリを追加
+    if (taxAmount > 0) {
+      const newGraphData = [
+        ...graphData,
+        {
+          type_id: EXPENDITURE_ID,
+          category_id: 9999,
+          category_name: "消費税",
+          category_color: "#9ca3af",
+          icon_name: "Receipt",
+          total_amount: String(taxAmount)
+        }
+      ];
+      // console.log("New Graph Data (Fixed):", newGraphData);
+      return newGraphData;
+    }
+    return graphData;
+  };
+
+  /**
    * グラフデータ取得
    */
   const fetchHistory = useCallback(async () => {
@@ -74,16 +129,19 @@ export const useGetRecord = (year, month) => {
         };
       });
 
+      const correctedGraphData = fixGraphDataWithTax(result);
+
       const formattedData = {
         calendarDailySum: result.calendar_daily_sum || [],
         monthlyRecordList: adjustedRecordList,
-        graphCategorySum: result.graph_category_sum || [],
+        // graphCategorySum: result.graph_category_sum || [],
+        graphCategorySum: correctedGraphData,
       };
 
       setData(formattedData);
     }
     catch (err) {
-      console.error("履歴取得エラー:", err);
+      // console.error("履歴取得エラー:", err);
       // リダイレクトのエラーでなければエラー表示
       if (err.message !== "Redirecting...") {
         setError(err.message);
@@ -100,6 +158,7 @@ export const useGetRecord = (year, month) => {
   const getRecordDetail = useCallback(async (recordID) => {
     if (!authFetch) return null;
 
+    // 詳細データをフェッチ
     try {
       const response = await authFetch(`${BASE_URL}/receipt`, {
         method: "GET",
@@ -109,17 +168,61 @@ export const useGetRecord = (year, month) => {
       });
 
       if (!response) return null;
-
       if (!response.ok) {
         throw new Error(`Detail API Error: ${response.status}`);
       }
 
       const result = await response.json();
-      return result.data; 
+      
+      const detailData = result.data;
 
+      // receipts配列が存在する場合、各レシートに対して消費税計算を行う
+      if (detailData && detailData.receipts && Array.isArray(detailData.receipts)) {
+        
+        detailData.receipts.forEach(receipt => {
+          // 合計金額 (税込)
+          const totalAmount = Number(receipt.total_amount || 0);
+          
+          // ポイント利用 (あれば引く、または計算に含めるか仕様によるが、通常は商品合計+税-ポイント=支払い)
+          
+          // 商品の合計金額(税抜)
+          let productsSum = 0;
+          if (receipt.products && Array.isArray(receipt.products)) {
+            productsSum = receipt.products.reduce((sum, product) => {
+              const price = Number(product.product_price || 0);
+              const qty = Number(product.quantity || 1);
+              return sum + (price * qty);
+            }, 0);
+          }
+
+          // 差額計算
+          const diff = totalAmount - productsSum;
+
+          // 差額(消費税)があれば、products配列に追加
+          if (diff > 0) {
+            const taxProduct = {
+              product_name: "消費税",
+              product_price: String(diff),
+              quantity: "1",
+              category_id: "tax",
+              category_name: "消費税",
+              icon_name: "Receipt",
+              category_color: "#9ca3af",
+              tax_rate: "0",
+              discount: "0"
+            };
+            
+            // 配列の末尾に追加
+            if (!receipt.products) receipt.products = [];
+            receipt.products.push(taxProduct);
+          }
+        });
+      }
+
+      return detailData; 
     }
     catch (err) {
-      console.error("詳細取得エラー:", err);
+      // console.error("詳細取得エラー:", err);
       throw err;
     }
   }, [authFetch]);
@@ -157,7 +260,7 @@ export const useGetRecord = (year, month) => {
 
     }
     catch (err) {
-      console.error("削除エラー:", err);
+      // console.error("削除エラー:", err);
       alert(err.message);
       return false;
     }
