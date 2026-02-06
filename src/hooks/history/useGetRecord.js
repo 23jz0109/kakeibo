@@ -39,6 +39,7 @@ export const useGetRecord = (year, month) => {
   /**
    * 円グラフ
    * 税抜レシートの差額計算
+   * 合計表示の補正
    */
   const fixGraphDataWithTax = (responseData) => {
     const { graph_category_sum, monthly_record_list } = responseData;
@@ -172,13 +173,11 @@ export const useGetRecord = (year, month) => {
         throw new Error(`Detail API Error: ${response.status}`);
       }
 
-      const result = await response.json();
-      
+      const result = await response.json();      
       const detailData = result.data;
 
       // receipts配列が存在する場合、各レシートに対して消費税計算を行う
       if (detailData && detailData.receipts && Array.isArray(detailData.receipts)) {
-        
         detailData.receipts.forEach(receipt => {
           // 合計金額 (税込)
           const totalAmount = Number(receipt.total_amount || 0);
@@ -198,23 +197,56 @@ export const useGetRecord = (year, month) => {
           // 差額計算
           const diff = totalAmount - productsSum;
 
-          // 差額(消費税)があれば、products配列に追加
+          // 税抜
           if (diff > 0) {
             const taxProduct = {
               product_name: "消費税",
               product_price: String(diff),
               quantity: "1",
-              category_id: "tax",
+              category_id: "tax_diff",
               category_name: "消費税",
               icon_name: "Receipt",
               category_color: "#9ca3af",
               tax_rate: "0",
               discount: "0"
             };
-            
-            // 配列の末尾に追加
             if (!receipt.products) receipt.products = [];
             receipt.products.push(taxProduct);
+          }
+          // 税込
+          else {
+            let totalInternalTax = 0;
+            if (receipt.products && Array.isArray(receipt.products)) {
+              totalInternalTax = receipt.products.reduce((sum, product) => {
+                const price = Number(product.product_price || 0);
+                const qty = Number(product.quantity || 1);
+                const rate = Number(product.tax_rate || 0);
+                
+                // 内税計算式: 税込価格 * 税率 / (100 + 税率)
+                if (rate > 0) {
+                   const tax = Math.floor((price * qty * rate) / (100 + rate));
+                   return sum + tax;
+                }
+                return sum;
+              }, 0);
+            }
+            
+            // 内税額が1円以上あれば表示
+            if (totalInternalTax > 0) {
+              const internalTaxProduct = {
+                 product_name: `(内消費税${totalInternalTax.toLocaleString()})`,
+                 product_price: "0", 
+                 quantity: "1",
+                 category_id: "tax_internal",
+                 category_name: "消費税",
+                 icon_name: "Receipt",
+                 category_color: "#9ca3af",
+                 tax_rate: "0",
+                 discount: "0"
+              };
+              if (!receipt.products) receipt.products = [];
+              receipt.products.push(internalTaxProduct);
+           }
           }
         });
       }
