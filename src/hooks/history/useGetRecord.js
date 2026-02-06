@@ -242,10 +242,10 @@ export const useGetRecord = (year, month) => {
             const tax10 = Math.floor(taxableBase10 - (taxableBase10 / 1.10));
 
             if (tax8 > 0) {
-              addTaxRow(`(内8%消費税 ¥${tax8.toLocaleString()})`, 0, true);
+              addTaxRow(`(内消費税(8%) : ¥${tax8.toLocaleString()})`, 0, true);
             }
             if (tax10 > 0) {
-              addTaxRow(`(内10%消費税 ¥${tax10.toLocaleString()})`, 0, true);
+              addTaxRow(`(内消費税(10%) : ¥${tax10.toLocaleString()})`, 0, true);
             }
           }
         });
