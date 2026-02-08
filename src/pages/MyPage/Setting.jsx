@@ -103,8 +103,8 @@ function Setting() {
 
     try {
       // Service Worker登録 (Firebase周りはそのまま)
-      const registration = await navigator.serviceWorker.register("/combine_test/firebase-messaging-sw.js", {
-        scope: "/combine_test/"
+      const registration = await navigator.serviceWorker.register("/ouchi-list/firebase-messaging-sw.js", {
+        scope: "/ouchi-list/"
       }).catch(err => { throw new Error("Service Worker登録失敗: " + err.message); });
 
       const messaging = getMessaging(app);
