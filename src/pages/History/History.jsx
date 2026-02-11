@@ -278,14 +278,21 @@ const History = () => {
     const newDate = new Date(currentDate);
     newDate.setMonth(newDate.getMonth() + offset);
     setCurrentDate(newDate);
+
+    setExpandedCategoryId(null);
+    setExpandedRecordId(null);
+    setOpenSwipeId(null);
   };
 
   const handleMonthSelect = (year, monthIndex) => {
     const newDate = new Date(year, monthIndex, 1);
     const today = new Date();
     if (newDate > today) return;
-
     setCurrentDate(newDate);
+
+    setExpandedCategoryId(null);
+    setExpandedRecordId(null);
+    setOpenSwipeId(null);
   };
 
   const handleTabChange = (tab) => {
@@ -421,33 +428,42 @@ const History = () => {
 
                             {/* ランキング表示部分 */}
                             {isExpanded && (
-                              <div className={styles.rankingContainer}>
-                                {cat.ranking && cat.ranking.length > 0 ? (
-                                  <table className={styles.rankingTable}>
-                                    <tbody>
-                                      {cat.ranking.map((item, rIdx) => (
-                                        <tr key={rIdx} className={styles.rankingRow}>
-                                          <td className={styles.rankCell}>
-                                            {rIdx === 0 ? <Crown size={14} color="#fbbf24" fill="#fbbf24"/> : <span className={styles.rankNum}>{rIdx + 1}</span>}
-                                          </td>
-                                          <td className={styles.productNameCell}>
+                            <div className={styles.rankingContainer}>
+                              {cat.ranking && cat.ranking.length > 0 ? (
+                                <div className={styles.rankingList}>
+                                  {cat.ranking.map((item, rIdx) => (
+                                    <div key={rIdx} className={styles.rankingRow}>
+                                      
+                                      {/* 左側：順位・商品名・個数情報 */}
+                                      <div className={styles.rankingInfoLeft}>
+                                        <div className={styles.rankingNameLine}>
+                                          {/* 順位バッジ */}
+                                          <span className={`${styles.rankBadge} ${rIdx === 0 ? styles.rankTop : ''}`}>
+                                            {rIdx === 0 ? <Crown size={11} fill="currentColor" /> : rIdx + 1}
+                                          </span>
+                                          {/* 商品名 */}
+                                          <span className={styles.rankingProductName}>
                                             {item.product_name}
-                                          </td>
-                                          <td className={styles.countCell}>
-                                            {item.buy_count}回
-                                          </td>
-                                          <td className={styles.amountCell}>
-                                            ¥{Number(item.product_total).toLocaleString()}
-                                          </td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                ) : (
-                                  <div className={styles.noData}>詳細データなし</div>
-                                )}
-                              </div>
-                            )}
+                                          </span>
+                                        </div>
+                                        {/* サブ情報（回数・個数） */}
+                                        <div className={styles.rankingMeta}>
+                                          {item.buy_count}回購入 / 計{item.total_qty}個
+                                        </div>
+                                      </div>
+
+                                      {/* 右側：金額 */}
+                                      <div className={styles.rankingPrice}>
+                                        ¥{Number(item.product_total).toLocaleString()}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className={styles.noData}>詳細データなし</div>
+                              )}
+                            </div>
+                          )}
                           </div>
                         );
                       })}
@@ -524,6 +540,9 @@ const History = () => {
                                       {/* 金額 */}
                                       <span className={`${styles.amountBadge} ${isIncome ? styles.textIncome : styles.textExpense}`}>
                                         ¥{Number(r.total_amount).toLocaleString()}
+                                      </span>
+                                      <span style={{ marginLeft: '8px', color: '#999', display: 'flex', alignItems: 'center' }}>
+                                        {isExpanded ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
                                       </span>
                                     </div>
 

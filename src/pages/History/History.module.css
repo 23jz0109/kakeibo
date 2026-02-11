@@ -604,20 +604,25 @@
 }
 
 .rankingContainer {
-  background-color: #f8fafc; /* 薄いグレー */
-  padding: 8px 16px;
+  background-color: #f8fafc;
+  padding: 0 16px 16px 16px;
   animation: slideDown 0.2s ease-out;
   border-top: 1px solid #edf2f7;
+  border-radius: 0 0 12px 12px;
 }
 
-.rankingTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.85rem;
-  color: #475569;
+/* リスト全体 */
+.rankingList {
+  display: flex;
+  flex-direction: column;
 }
 
+/* 1行ごとのレイアウト */
 .rankingRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 10px 0;
   border-bottom: 1px dashed #e2e8f0;
 }
 
@@ -625,49 +630,75 @@
   border-bottom: none;
 }
 
-.rankCell {
-  width: 24px;
-  text-align: center;
-  font-weight: bold;
-  color: #64748b;
-  vertical-align: middle;
+/* 左側エリア (名前とメタ情報) */
+.rankingInfoLeft {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin-right: 12px;
+  overflow: hidden;
 }
 
-.rankNum {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  line-height: 16px;
-  background-color: #e2e8f0;
+/* 名前行 (バッジと商品名) */
+.rankingNameLine {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+/* 順位バッジ */
+.rankBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  font-size: 0.7rem;
+  background-color: #e2e8f0;
   color: #64748b;
+  font-size: 0.65rem;
+  font-weight: bold;
+  margin-right: 8px;
+  flex-shrink: 0;
 }
 
-.productNameCell {
-  padding: 6px 8px;
-  text-align: left;
-  vertical-align: middle;
+/* 1位の場合の特別色 */
+.rankTop {
+  background-color: #fef3c7;
+  color: #d97706;
 }
 
-.countCell {
-  width: 40px;
+/* 商品名 */
+.rankingProductName {
+  color: #374151;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* メタ情報(回数・個数) */
+.rankingMeta {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  padding-left: 26px;
+}
+
+/* 金額 */
+.rankingPrice {
   text-align: right;
-  color: #64748b;
-  font-size: 0.8rem;
-  vertical-align: middle;
-}
-
-.amountCell {
-  width: 70px;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-  vertical-align: middle;
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  margin-top: 2px;
 }
 
 .noData {
   text-align: center;
   color: #94a3b8;
-  padding: 8px;
+  padding: 16px;
   font-size: 0.85rem;
 }
