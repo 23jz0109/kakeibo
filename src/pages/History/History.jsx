@@ -5,7 +5,7 @@ import CalendarView from "../../components/common/CalendarView";
 import GraphView from "../../components/common/GraphView";
 import ErrorDisplay from "../../components/common/ErrorDisplay"; // 共通エラーコンポーネント
 import { getIcon } from "../../constants/categories";
-import { FileInput, FileOutput, Trash2 } from "lucide-react";
+import { FileInput, FileOutput, Trash2, ChevronDown, ChevronUp, Crown } from "lucide-react";
 import { useGetRecord } from "../../hooks/history/useGetRecord";
 import styles from "./History.module.css";
 
@@ -128,9 +128,11 @@ const History = () => {
 
   const [openSwipeId, setOpenSwipeId] = useState(null);
 
+  const [expandedCategoryId, setExpandedCategoryId] = useState(null);
+
   const {
     isLoading,
-    error, // エラーオブジェクトを取得
+    error,
     calendarDailySum,
     monthlyRecordList,
     graphCategorySum,
@@ -218,6 +220,14 @@ const History = () => {
     }
   };
 
+  // カテゴリクリック
+  const handleCategoryClick = (catId) => {
+    if (expandedCategoryId === catId) {
+      setExpandedCategoryId(null); // 閉じる
+    } else {
+      setExpandedCategoryId(catId); // 開く
+    }
+  };
 
   // 集計ロジック
   const { totalIncome, totalExpense } = useMemo(() => {
@@ -284,6 +294,7 @@ const History = () => {
     refetch(); // 最新のデータを再取得
     setExpandedRecordId(null);
     setOpenSwipeId(null);
+    setExpandedCategoryId(null);
   };
 
   // ヘッダー
@@ -380,22 +391,67 @@ const History = () => {
                     <div className={styles.detailList}>
                       {filteredGraphData.map((cat, idx) => {
                         const Icon = getIcon(cat.icon_name);
+                        const isExpanded = expandedCategoryId === cat.category_id;
+                        
                         return (
-                          <div key={idx} className={styles.listItem}>
-                            <div className={styles.listItemLeft}>
-                              <span
-                                className={styles.categoryIcon}
-                                style={{ backgroundColor: cat.category_color || "#ccc" }}>
-                                <Icon size={18} color="#fff" />
-                              </span>
-                              <span className={styles.categoryName}>{cat.category_name}</span>
+                          <div 
+                            key={cat.category_id || idx} 
+                            className={styles.listItemWrapper}
+                          >
+                            <div 
+                              className={styles.listItem}
+                              onClick={() => handleCategoryClick(cat.category_id)}
+                              style={{ cursor: 'pointer' }}
+                            >
+                              <div className={styles.listItemLeft}>
+                                <span
+                                  className={styles.categoryIcon}
+                                  style={{ backgroundColor: cat.category_color || "#ccc" }}>
+                                  <Icon size={18} color="#fff" />
+                                </span>
+                                <span className={styles.categoryName}>{cat.category_name}</span>
+                              </div>
+                              <div className={styles.listItemRight}>
+                                <span className={styles.categoryPrice}>¥{Number(cat.total_amount).toLocaleString()}</span>
+                                <span style={{ marginLeft: '8px', color: '#999', display: 'flex', alignItems: 'center' }}>
+                                  {isExpanded ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
+                                </span>
+                              </div>
                             </div>
-                            <span className={styles.categoryPrice}>¥{Number(cat.total_amount).toLocaleString()}</span>
+
+                            {/* ランキング表示部分 */}
+                            {isExpanded && (
+                              <div className={styles.rankingContainer}>
+                                {cat.ranking && cat.ranking.length > 0 ? (
+                                  <table className={styles.rankingTable}>
+                                    <tbody>
+                                      {cat.ranking.map((item, rIdx) => (
+                                        <tr key={rIdx} className={styles.rankingRow}>
+                                          <td className={styles.rankCell}>
+                                            {rIdx === 0 ? <Crown size={14} color="#fbbf24" fill="#fbbf24"/> : <span className={styles.rankNum}>{rIdx + 1}</span>}
+                                          </td>
+                                          <td className={styles.productNameCell}>
+                                            {item.product_name}
+                                          </td>
+                                          <td className={styles.countCell}>
+                                            {item.buy_count}回
+                                          </td>
+                                          <td className={styles.amountCell}>
+                                            ¥{Number(item.product_total).toLocaleString()}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                ) : (
+                                  <div className={styles.noData}>詳細データなし</div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         );
                       })}
                     </div>
-
                   </div>
                 )}
 

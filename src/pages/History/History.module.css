@@ -597,3 +597,77 @@
   margin-right: 0.2rem;
   border-radius: 8px;
 }
+
+.listItemRight {
+  display: flex;
+  align-items: center;
+}
+
+.rankingContainer {
+  background-color: #f8fafc; /* 薄いグレー */
+  padding: 8px 16px;
+  animation: slideDown 0.2s ease-out;
+  border-top: 1px solid #edf2f7;
+}
+
+.rankingTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.rankingRow {
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.rankingRow:last-child {
+  border-bottom: none;
+}
+
+.rankCell {
+  width: 24px;
+  text-align: center;
+  font-weight: bold;
+  color: #64748b;
+  vertical-align: middle;
+}
+
+.rankNum {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  background-color: #e2e8f0;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  color: #64748b;
+}
+
+.productNameCell {
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.countCell {
+  width: 40px;
+  text-align: right;
+  color: #64748b;
+  font-size: 0.8rem;
+  vertical-align: middle;
+}
+
+.amountCell {
+  width: 70px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  vertical-align: middle;
+}
+
+.noData {
+  text-align: center;
+  color: #94a3b8;
+  padding: 8px;
+  font-size: 0.85rem;
+}
